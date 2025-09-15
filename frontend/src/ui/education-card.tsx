@@ -1,8 +1,14 @@
-import { Card, Space, Typography, Progress, Tag, Flex } from 'antd';
-import { TrophyOutlined } from '@ant-design/icons';
+import {
+  Card,
+  CardContent,
+  Typography,
+  LinearProgress,
+  Chip,
+  Box,
+  Stack,
+} from '@mui/material';
+import { EmojiEvents } from '@mui/icons-material';
 import type { FC } from 'react';
-
-const { Title, Text } = Typography;
 
 interface EducationCardProps {
   module: {
@@ -22,77 +28,53 @@ export const EducationCard: FC<EducationCardProps> = ({
 }) => {
   return (
     <Card
-      hoverable
       onClick={() => handleModuleClick(module.id)}
-      style={{
-        borderRadius: 16,
-        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
-        border: '1px solid #e2e8f0',
-        transition: 'all 0.3s ease',
-        ':hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
-        },
+      sx={{
+        cursor: 'pointer',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-        <Title
-          level={4}
-          style={{
-            color: '#1e3a8a',
-            margin: 0,
-            fontSize: '1.1rem',
-          }}
-        >
-          {module.title}
-        </Title>
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Stack spacing={2} height="100%">
+          <Typography variant="h4" component="h3">
+            {module.title}
+          </Typography>
 
-        <Text
-          style={{
-            color: '#64748b',
-            fontSize: '0.9rem',
-            lineHeight: 1.5,
-          }}
-        >
-          {module.description}
-        </Text>
+          <Typography variant="body2" sx={{ flexGrow: 1 }}>
+            {module.description}
+          </Typography>
 
-        <Progress
-          percent={module.progress}
-          size="small"
-          strokeColor={{
-            '0%': '#3b82f6',
-            '100%': '#1d4ed8',
-          }}
-          trailColor="#e2e8f0"
-        />
+          <Box>
+            <LinearProgress
+              variant="determinate"
+              value={module.progress}
+              sx={{ mb: 1, height: 6 }}
+            />
+            <Typography variant="caption" color="text.secondary">
+              Прогресс: {module.progress}%
+            </Typography>
+          </Box>
 
-        <Flex justify="space-between" align="center">
-          <Text style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-            {module.lastStudied}
-          </Text>
-
-          <Tag
-            color={module.status === 'completed' ? 'success' : 'processing'}
-            style={{
-              borderRadius: 12,
-              padding: '4px 12px',
-              fontSize: '0.75rem',
-              fontWeight: 600,
-              border: 'none',
-            }}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
           >
-            {module.status === 'completed' ? (
-              <>
-                <TrophyOutlined style={{ marginRight: 4 }} />
-                Завершен
-              </>
-            ) : (
-              'В процессе'
-            )}
-          </Tag>
-        </Flex>
-      </Space>
+            <Typography variant="caption" color="text.secondary">
+              {module.lastStudied}
+            </Typography>
+
+            <Chip
+              icon={module.status === 'completed' ? <EmojiEvents /> : undefined}
+              label={module.status === 'completed' ? 'Завершен' : 'В процессе'}
+              color={module.status === 'completed' ? 'success' : 'info'}
+              size="small"
+            />
+          </Box>
+        </Stack>
+      </CardContent>
     </Card>
   );
 };

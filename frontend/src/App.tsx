@@ -1,25 +1,18 @@
 import {
-  Layout,
+  Container,
   Button,
   Card,
-  Tag,
-  ConfigProvider,
+  CardContent,
+  Chip,
   Typography,
-  Space,
-  Row,
-  Col,
-  Flex,
-} from 'antd';
-import {
-  PlusOutlined,
-  BookOutlined,
-  ClockCircleOutlined,
-} from '@ant-design/icons';
-import { customTheme } from './theme';
+  Box,
+  Grid,
+  Stack,
+  AppBar,
+  Toolbar,
+} from '@mui/material';
+import { Add, MenuBook, AccessTime } from '@mui/icons-material';
 import { EducationCard } from './ui';
-
-const { Header, Content } = Layout;
-const { Title, Text } = Typography;
 
 // Заглушки данных для демонстрации
 const recentModules = [
@@ -85,14 +78,16 @@ function App() {
     console.log('Клик по модуль:', moduleId);
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (
+    priority: string,
+  ): 'error' | 'warning' | 'info' | 'default' => {
     switch (priority) {
       case 'high':
-        return 'red';
+        return 'error';
       case 'medium':
-        return 'orange';
+        return 'warning';
       case 'low':
-        return 'blue';
+        return 'info';
       default:
         return 'default';
     }
@@ -112,206 +107,101 @@ function App() {
   };
 
   return (
-    <ConfigProvider theme={customTheme}>
-      <Layout
-        style={{
-          minHeight: '100vh',
-          background: 'linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%)',
-        }}
-      >
-        <Header
-          style={{
-            background: 'transparent',
-            textAlign: 'center',
-            padding: '48px 0',
-          }}
-        >
-          <Space direction="vertical" size="small">
-            <Title
-              level={1}
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                margin: 0,
-              }}
-            >
-              PathwiseAI
-            </Title>
-            <Text
-              style={{
-                fontSize: '1.1rem',
-                color: '#64748b',
-              }}
-            >
-              Персональная система обучения с искусственным интеллектом
-            </Text>
-          </Space>
-        </Header>
+    <Box sx={{ minHeight: '100vh' }}>
+      {/* Заголовок */}
+      <AppBar position="static" elevation={0}>
+        <Toolbar sx={{ flexDirection: 'column', py: 6 }}>
+          <Typography variant="h1" component="h1" gutterBottom>
+            PathwiseAI
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Персональная система обучения с искусственным интеллектом
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-        <Content style={{ padding: '0 24px' }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-            {/* Секция создания нового модуля */}
-            <Flex justify="center" style={{ marginBottom: 48 }}>
-              <Button
-                type="primary"
-                size="large"
-                icon={<PlusOutlined />}
-                onClick={handleNewModule}
-                style={{
-                  height: 56,
-                  fontSize: 16,
-                  fontWeight: 600,
-                  borderRadius: 28,
-                  paddingLeft: 32,
-                  paddingRight: 32,
-                  background:
-                    'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                  border: 'none',
-                  boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow =
-                    '0 12px 32px rgba(59, 130, 246, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow =
-                    '0 8px 24px rgba(59, 130, 246, 0.3)';
-                }}
-              >
-                Изучить новый модуль
-              </Button>
-            </Flex>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* Секция создания нового модуля */}
+        <Box display="flex" justifyContent="center" mb={6}>
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<Add />}
+            onClick={handleNewModule}
+            sx={{ py: 2, px: 4 }}
+          >
+            Изучить новый модуль
+          </Button>
+        </Box>
 
-            {/* Последние пройденные модули */}
-            <Space
-              direction="vertical"
-              size="large"
-              style={{ width: '100%', marginBottom: 48 }}
-            >
-              <Title
-                level={2}
-                style={{
-                  color: '#1e3a8a',
-                  fontSize: '1.5rem',
-                  fontWeight: 600,
-                }}
-              >
-                <BookOutlined style={{ marginRight: 8 }} />
-                Последние пройденные модули
-              </Title>
+        {/* Последние пройденные модули */}
+        <Stack spacing={3} mb={6}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <MenuBook color="primary" />
+            <Typography variant="h2">Последние пройденные модули</Typography>
+          </Box>
 
-              <Row gutter={[20, 20]}>
-                {recentModules.map((module) => (
-                  <Col xs={24} sm={12} lg={8} key={module.id}>
-                    <EducationCard
-                      // @ts-ignore
-                      module={module}
-                      handleModuleClick={handleModuleClick}
-                    />
-                  </Col>
-                ))}
-              </Row>
-            </Space>
+          <Grid container spacing={3}>
+            {recentModules.map((module) => (
+              <Grid key={module.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                <EducationCard
+                  // @ts-ignore
+                  module={module}
+                  handleModuleClick={handleModuleClick}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Stack>
 
-            {/* Модули для повторения */}
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <Title
-                level={2}
-                style={{
-                  color: '#1e3a8a',
-                  fontSize: '1.5rem',
-                  fontWeight: 600,
-                }}
-              >
-                <ClockCircleOutlined style={{ marginRight: 8 }} />
-                Требуют повторения
-              </Title>
+        {/* Модули для повторения */}
+        <Stack spacing={3}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <AccessTime color="primary" />
+            <Typography variant="h2">Требуют повторения</Typography>
+          </Box>
 
-              <Row gutter={[20, 20]}>
-                {reviewModules.map((module) => (
-                  <Col xs={24} sm={12} lg={8} key={module.id}>
-                    <Card
-                      hoverable
-                      onClick={() => handleModuleClick(module.id)}
-                      style={{
-                        borderRadius: 16,
-                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
-                        border: '1px solid #e2e8f0',
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                        e.currentTarget.style.boxShadow =
-                          '0 8px 24px rgba(0, 0, 0, 0.12)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow =
-                          '0 4px 16px rgba(0, 0, 0, 0.08)';
-                      }}
-                    >
-                      <Space
-                        direction="vertical"
-                        size="middle"
-                        style={{ width: '100%' }}
+          <Grid container spacing={3}>
+            {reviewModules.map((module) => (
+              <Grid key={module.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                <Card
+                  onClick={() => handleModuleClick(module.id.toString())}
+                  sx={{ cursor: 'pointer', height: '100%' }}
+                >
+                  <CardContent>
+                    <Stack spacing={2}>
+                      <Typography variant="h4" component="h3">
+                        {module.title}
+                      </Typography>
+
+                      <Typography variant="body2" color="text.secondary">
+                        {module.description}
+                      </Typography>
+
+                      <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
                       >
-                        <Title
-                          level={4}
-                          style={{
-                            color: '#1e3a8a',
-                            margin: 0,
-                            fontSize: '1.1rem',
-                          }}
-                        >
-                          {module.title}
-                        </Title>
+                        <Typography variant="caption" color="text.secondary">
+                          {module.dueDate}
+                        </Typography>
 
-                        <Text
-                          style={{
-                            color: '#64748b',
-                            fontSize: '0.9rem',
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {module.description}
-                        </Text>
-
-                        <Flex justify="space-between" align="center">
-                          <Text
-                            style={{ fontSize: '0.85rem', color: '#94a3b8' }}
-                          >
-                            {module.dueDate}
-                          </Text>
-
-                          <Tag
-                            color={getPriorityColor(module.priority)}
-                            style={{
-                              borderRadius: 12,
-                              padding: '4px 12px',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                              border: 'none',
-                            }}
-                          >
-                            {getPriorityText(module.priority)}
-                          </Tag>
-                        </Flex>
-                      </Space>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-            </Space>
-          </div>
-        </Content>
-      </Layout>
-    </ConfigProvider>
+                        <Chip
+                          label={getPriorityText(module.priority)}
+                          color={getPriorityColor(module.priority)}
+                          size="small"
+                        />
+                      </Box>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Stack>
+      </Container>
+    </Box>
   );
 }
 

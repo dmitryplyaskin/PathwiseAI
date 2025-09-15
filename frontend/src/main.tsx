@@ -4,12 +4,14 @@ import './index.css';
 import { RouterProvider } from 'react-router';
 import { router } from './router.ts';
 import { customTheme } from './theme.ts';
-import { ConfigProvider } from 'antd';
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ConfigProvider theme={customTheme}>
+    <ThemeProvider theme={customTheme}>
+      <CssBaseline />
       <RouterProvider router={router} />
-    </ConfigProvider>
+    </ThemeProvider>
   </StrictMode>,
 );
