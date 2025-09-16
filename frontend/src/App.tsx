@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Container,
   Button,
@@ -12,7 +13,7 @@ import {
   Toolbar,
 } from '@mui/material';
 import { Add, MenuBook, AccessTime } from '@mui/icons-material';
-import { EducationCard } from './features/education-module/ui';
+import { EducationCard, NewModuleModal } from './features/education-module/ui';
 
 // Заглушки данных для демонстрации
 const recentModules = [
@@ -70,8 +71,10 @@ const reviewModules = [
 ];
 
 function App() {
+  const [isNewModuleModalOpen, setIsNewModuleModalOpen] = useState(false);
+
   const handleNewModule = () => {
-    console.log('Создание нового модуля');
+    setIsNewModuleModalOpen(true);
   };
 
   const handleModuleClick = (moduleId: string) => {
@@ -201,6 +204,10 @@ function App() {
           </Grid>
         </Stack>
       </Container>
+      <NewModuleModal
+        open={isNewModuleModalOpen}
+        onClose={() => setIsNewModuleModalOpen(false)}
+      />
     </Box>
   );
 }
