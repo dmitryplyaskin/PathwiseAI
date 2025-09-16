@@ -23,7 +23,7 @@ export const Modal = ({ open, onClose, title, children }: ModalProps) => {
       onClose={onClose}
       PaperProps={{
         sx: {
-          borderRadius: 4,
+          borderRadius: 2,
           bgcolor: 'background.paper',
         },
       }}
@@ -32,7 +32,7 @@ export const Modal = ({ open, onClose, title, children }: ModalProps) => {
     >
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h3">{title}</Typography>
+          <Typography variant="h2">{title}</Typography>
           <IconButton onClick={onClose} aria-label="close">
             <Close />
           </IconButton>

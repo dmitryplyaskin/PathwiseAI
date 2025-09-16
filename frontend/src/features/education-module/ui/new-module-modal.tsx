@@ -97,10 +97,15 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
         )}
 
         <Box display="flex" justifyContent="flex-end" gap={2} sx={{ pt: 2 }}>
-          <Button onClick={onClose} variant="outlined">
+          <Button onClick={onClose} variant="outlined" size="small">
             Отмена
           </Button>
-          <Button onClick={handleSubmit} variant="contained" disabled={!topic}>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            disabled={!topic}
+            size="small"
+          >
             Создать
           </Button>
         </Box>

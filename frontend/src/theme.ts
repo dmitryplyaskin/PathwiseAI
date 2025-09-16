@@ -84,6 +84,12 @@ export const customTheme = createTheme({
       lineHeight: 1.3,
       color: '#1e3a8a',
     },
+    h3: {
+      fontSize: '1.25rem',
+      fontWeight: 600,
+      lineHeight: 1.4,
+      color: '#1e3a8a',
+    },
     h4: {
       fontSize: '1.1rem',
       fontWeight: 600,
@@ -190,11 +196,19 @@ export const customTheme = createTheme({
           padding: '16px 40px',
           fontSize: '1.1rem',
         },
+        sizeSmall: {
+          padding: '8px 24px',
+          fontSize: '0.9rem',
+        },
         containedPrimary: {
           background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
           boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
           '&:hover': {
             background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+          },
+          '&:disabled': {
+            color: '#94a3b8 ',
+            background: '#e2e8f0',
           },
         },
       },
