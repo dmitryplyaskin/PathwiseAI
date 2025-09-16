@@ -13,39 +13,55 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(
+    createUserDto: CreateUserDto,
+  ): Promise<Omit<User, 'password_hash'>> {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...dtoRest } = createUserDto;
+
     const user = this.usersRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
+      ...dtoRest,
+      password_hash: hashedPassword,
     });
 
     const savedUser = await this.usersRepository.save(user);
-    delete savedUser.password;
+    delete savedUser.password_hash;
     return savedUser;
   }
 
-  findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  async findAll(): Promise<Omit<User, 'password_hash'>[]> {
+    const users = await this.usersRepository.find();
+    users.forEach((user) => delete user.password_hash);
+    return users;
   }
 
-  async findOne(id: string): Promise<User> {
+  async findOne(id: string): Promise<Omit<User, 'password_hash'>> {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }
+    delete user.password_hash;
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
-    if (updateUserDto.password) {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<Omit<User, 'password_hash'>> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...dtoRest } = updateUserDto;
+    const updatePayload: Partial<User> = { ...dtoRest };
+
+    if (password) {
       const salt = await bcrypt.genSalt();
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+      updatePayload.password_hash = await bcrypt.hash(password, salt);
     }
 
-    await this.usersRepository.update(id, updateUserDto);
+    await this.usersRepository.update(id, updatePayload);
+
     return this.findOne(id);
   }
 
