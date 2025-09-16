@@ -12,7 +12,7 @@ import {
   Toolbar,
 } from '@mui/material';
 import { Add, MenuBook, AccessTime } from '@mui/icons-material';
-import { EducationCard } from './ui';
+import { EducationCard } from './features/education-module/ui';
 
 // Заглушки данных для демонстрации
 const recentModules = [
