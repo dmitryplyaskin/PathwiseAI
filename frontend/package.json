@@ -18,7 +18,9 @@
     "effector-react": "^23.3.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router": "^7.9.1"
+    "react-markdown": "^9.0.1",
+    "react-router": "^7.9.1",
+    "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

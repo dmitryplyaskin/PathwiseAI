@@ -3,6 +3,7 @@ import App from './App';
 import { LoginPage } from './pages/login';
 import { RegisterPage } from './pages/register';
 import { ProfilePage } from './pages/profile';
+import { Lesson } from './pages/lesson';
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,6 @@ export const router = createBrowserRouter([
   },
   {
     path: '/courses/:id/units/:unitId/lessons/:lessonId',
-    Component: () => <div>Lesson</div>,
+    Component: Lesson,
   },
 ]);
