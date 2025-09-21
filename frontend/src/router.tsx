@@ -4,6 +4,7 @@ import { LoginPage } from './pages/login';
 import { RegisterPage } from './pages/register';
 import { ProfilePage } from './pages/profile';
 import { Lesson } from './pages/lesson';
+import { Lessons } from './pages/lessons';
 
 export const router = createBrowserRouter([
   {
@@ -19,7 +20,7 @@ export const router = createBrowserRouter([
   { path: '/courses/:id/units/:unitId', Component: () => <div>Unit</div> },
   {
     path: '/courses/:id/units/:unitId/lessons',
-    Component: () => <div>Lessons</div>,
+    Component: Lessons,
   },
   {
     path: '/courses/:id/units/:unitId/lessons/:lessonId',
