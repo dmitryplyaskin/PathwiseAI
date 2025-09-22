@@ -1,15 +1,15 @@
 import { createBrowserRouter } from 'react-router';
-import App from './App';
-import { LoginPage } from './pages/login';
-import { RegisterPage } from './pages/register';
-import { ProfilePage } from './pages/profile';
-import { Lesson } from './pages/lesson';
-import { Lessons } from './pages/lessons';
+import { HomePage } from '../../pages/home';
+import { LoginPage } from '../../pages/login';
+import { RegisterPage } from '../../pages/register';
+import { ProfilePage } from '../../pages/profile';
+import { Lesson } from '../../pages/lesson';
+import { Lessons } from '../../pages/lessons';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    Component: App,
+    Component: HomePage,
   },
   { path: '/login', Component: LoginPage },
   { path: '/register', Component: RegisterPage },

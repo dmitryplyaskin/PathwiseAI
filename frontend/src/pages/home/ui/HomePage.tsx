@@ -13,12 +13,15 @@ import {
   Toolbar,
 } from '@mui/material';
 import { Add, MenuBook, AccessTime } from '@mui/icons-material';
-import { EducationCard, NewModuleModal } from './features/education-module/ui';
+import {
+  EducationCard,
+  NewModuleModal,
+} from '../../../features/education-module/ui';
 
 // Заглушки данных для демонстрации
 const recentModules = [
   {
-    id: 1,
+    id: '1',
     title: 'Основы JavaScript',
     description:
       'Изучение базовых концепций JavaScript: переменные, функции, циклы',
@@ -27,7 +30,7 @@ const recentModules = [
     status: 'completed',
   },
   {
-    id: 2,
+    id: '2',
     title: 'React Hooks',
     description:
       'Глубокое погружение в хуки React: useState, useEffect, useContext',
@@ -36,7 +39,7 @@ const recentModules = [
     status: 'in-progress',
   },
   {
-    id: 3,
+    id: '3',
     title: 'TypeScript Fundamentals',
     description: 'Основы TypeScript: типы, интерфейсы, дженерики',
     progress: 100,
@@ -70,7 +73,7 @@ const reviewModules = [
   },
 ];
 
-function App() {
+export const HomePage = () => {
   const [isNewModuleModalOpen, setIsNewModuleModalOpen] = useState(false);
 
   const handleNewModule = () => {
@@ -148,7 +151,6 @@ function App() {
             {recentModules.map((module) => (
               <Grid key={module.id} size={{ xs: 12, sm: 6, lg: 4 }}>
                 <EducationCard
-                  // @ts-ignore
                   module={module}
                   handleModuleClick={handleModuleClick}
                 />
@@ -210,6 +212,4 @@ function App() {
       />
     </Box>
   );
-}
-
-export default App;
+};

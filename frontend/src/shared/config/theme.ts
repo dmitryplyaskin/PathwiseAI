@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
 // Создаем светло бело-голубую тему с закруглениями и плавными анимациями
-export const customTheme = createTheme({
+export const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
@@ -141,7 +141,6 @@ export const customTheme = createTheme({
     '0 76px 160px rgba(0, 0, 0, 0.80)',
     '0 80px 168px rgba(0, 0, 0, 0.84)',
     '0 84px 176px rgba(0, 0, 0, 0.88)',
-    '0 88px 184px rgba(0, 0, 0, 0.92)',
   ],
 
   transitions: {
