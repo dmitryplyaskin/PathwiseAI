@@ -6,8 +6,12 @@ import {
   Paper,
   TextField,
   Typography,
+  AppBar,
+  Toolbar,
+  Stack,
 } from '@mui/material';
 import { useState } from 'react';
+import { QuestionAnswer, Send } from '@mui/icons-material';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { mockLessonContent } from '../model/mock';
@@ -49,75 +53,183 @@ export const LessonPage = () => {
       const botResponse: Message = {
         id: Date.now() + 2,
         type: 'bot',
-        content: `This is a simulated response to: "${inputValue}"`,
+        content: `Это симулированный ответ на ваш вопрос: "${inputValue}". PathwiseAI анализирует контекст урока и предоставляет персонализированные объяснения.`,
       };
       setMessages((prev) => [...prev.slice(0, -1), botResponse]);
     }, 2000);
   };
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ display: 'flex', gap: 3, p: 3, alignItems: 'flex-start' }}>
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {messages.map((msg) => (
-            <Paper
-              key={msg.id}
-              elevation={1}
-              sx={{
-                p: 2,
-                bgcolor:
-                  msg.type === 'user' ? 'primary.light' : 'background.paper',
-              }}
-            >
-              {msg.type === 'preloader' ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                  <CircularProgress />
-                </Box>
-              ) : msg.type === 'bot' ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {msg.content}
-                </ReactMarkdown>
-              ) : (
-                <Typography>{msg.content}</Typography>
-              )}
-            </Paper>
-          ))}
+    <Box sx={{ minHeight: '100vh' }}>
+      {/* Заголовок */}
+      <AppBar position="static" elevation={0}>
+        <Toolbar sx={{ flexDirection: 'column', py: 4 }}>
+          <Typography variant="h1" component="h1" gutterBottom>
+            Введение в машинное обучение
+          </Typography>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            textAlign="center"
+            maxWidth="600px"
+          >
+            Интерактивный урок с поддержкой ИИ-помощника для
+            персонализированного обучения
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-          <Box sx={{ mt: 2 }}>
-            {showInput ? (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask your question..."
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
+          <Box sx={{ flex: 1 }}>
+            <Stack spacing={3}>
+              {messages.map((msg) => (
+                <Paper
+                  key={msg.id}
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    bgcolor:
+                      msg.type === 'user' ? 'primary.50' : 'background.paper',
+                    border: '1px solid',
+                    borderColor:
+                      msg.type === 'user' ? 'primary.200' : 'divider',
+                    borderRadius: 2,
+                    transition: 'all 0.2s ease',
                   }}
-                />
-                <Button
-                  variant="contained"
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim()}
                 >
-                  Send
-                </Button>
+                  {msg.type === 'preloader' ? (
+                    <Box
+                      sx={{ display: 'flex', justifyContent: 'center', py: 2 }}
+                    >
+                      <CircularProgress size={24} />
+                    </Box>
+                  ) : msg.type === 'bot' ? (
+                    <Box
+                      sx={{
+                        '& h1, & h2, & h3': {
+                          color: 'primary.main',
+                          fontWeight: 500,
+                        },
+                        '& p': {
+                          lineHeight: 1.7,
+                          color: 'text.primary',
+                        },
+                        '& code': {
+                          backgroundColor: 'action.hover',
+                          padding: '2px 6px',
+                          borderRadius: 1,
+                          fontSize: '0.875rem',
+                        },
+                        '& pre': {
+                          backgroundColor: 'grey.50',
+                          padding: 2,
+                          borderRadius: 1,
+                          overflow: 'auto',
+                        },
+                        '& table': {
+                          borderCollapse: 'collapse',
+                          width: '100%',
+                          '& th, & td': {
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            padding: 1,
+                            textAlign: 'left',
+                          },
+                          '& th': {
+                            backgroundColor: 'action.hover',
+                            fontWeight: 500,
+                          },
+                        },
+                      }}
+                    >
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.content}
+                      </ReactMarkdown>
+                    </Box>
+                  ) : (
+                    <Typography sx={{ fontWeight: 500 }}>
+                      {msg.content}
+                    </Typography>
+                  )}
+                </Paper>
+              ))}
+
+              <Box sx={{ mt: 3 }}>
+                {showInput ? (
+                  <Paper
+                    elevation={0}
+                    sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}
+                  >
+                    <Stack spacing={2}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
+                        <QuestionAnswer fontSize="small" />
+                        Задайте вопрос ИИ-помощнику
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          value={inputValue}
+                          onChange={(e) => setInputValue(e.target.value)}
+                          placeholder="Например: Объясни разницу между обучением с учителем и без учителя..."
+                          multiline
+                          maxRows={3}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              handleSendMessage();
+                            }
+                          }}
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                            },
+                          }}
+                        />
+                        <Button
+                          variant="contained"
+                          onClick={handleSendMessage}
+                          disabled={!inputValue.trim()}
+                          startIcon={<Send />}
+                          sx={{
+                            minWidth: 100,
+                            borderRadius: 2,
+                          }}
+                        >
+                          Отправить
+                        </Button>
+                      </Box>
+                    </Stack>
+                  </Paper>
+                ) : (
+                  <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      onClick={() => setShowInput(true)}
+                      startIcon={<QuestionAnswer />}
+                      size="large"
+                      sx={{
+                        py: 1.5,
+                        px: 3,
+                        borderRadius: 2,
+                        fontWeight: 500,
+                      }}
+                    >
+                      Задать вопрос ИИ-помощнику
+                    </Button>
+                  </Box>
+                )}
               </Box>
-            ) : (
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="contained" onClick={() => setShowInput(true)}>
-                  Ask a question
-                </Button>
-              </Box>
-            )}
+            </Stack>
           </Box>
+          <StickyInfoBlock />
         </Box>
-        <StickyInfoBlock />
-      </Box>
-    </Container>
+      </Container>
+    </Box>
   );
 };

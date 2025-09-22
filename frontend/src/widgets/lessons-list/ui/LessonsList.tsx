@@ -1,5 +1,15 @@
-import { Box, Button, Container, Grid, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  Stack,
+  Typography,
+  AppBar,
+  Toolbar,
+} from '@mui/material';
 import { useNavigate, useParams } from 'react-router';
+import { MenuBook, AccessTime } from '@mui/icons-material';
 import { LessonCard } from '../../../features/lesson-card/ui/LessonCard';
 import { mockLessons } from '../model/mock';
 
@@ -16,58 +26,77 @@ export const LessonsList = () => {
   const lastStudiedLessons = mockLessons.slice(0, 3);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack spacing={4}>
-        <Box>
-          <Typography variant="h2" component="h1" gutterBottom>
-            Lessons in Machine Learning
+    <Box sx={{ minHeight: '100vh' }}>
+      {/* Заголовок */}
+      <AppBar position="static" elevation={0}>
+        <Toolbar sx={{ flexDirection: 'column', py: 6 }}>
+          <Typography variant="h1" component="h1" gutterBottom>
+            Уроки по машинному обучению
           </Typography>
-          <Typography variant="h6" color="text.secondary">
-            This unit covers the fundamental concepts of Machine Learning, from
-            basic algorithms to neural networks. Each lesson is designed to
-            build upon the last, providing a comprehensive learning path.
-          </Typography>
-        </Box>
-
-        <Box>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={2}
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            textAlign="center"
+            maxWidth="800px"
           >
-            <Typography variant="h4" component="h2">
-              Last Studied
-            </Typography>
-            <Button variant="text">View all studied lessons</Button>
-          </Box>
-          <Grid container spacing={3}>
-            {lastStudiedLessons.map((lesson) => (
-              <Grid item xs={12} sm={6} md={4} key={lesson.id}>
-                <LessonCard
-                  lesson={lesson}
-                  handleLessonClick={handleLessonClick}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-
-        <Box>
-          <Typography variant="h4" component="h2" mb={2}>
-            All Lessons
+            Этот раздел охватывает фундаментальные концепции машинного обучения,
+            от базовых алгоритмов до нейронных сетей. Каждый урок создан для
+            последовательного изучения материала.
           </Typography>
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Stack spacing={6}>
+          {/* Последние изученные уроки */}
           <Stack spacing={3}>
-            {mockLessons.map((lesson) => (
-              <LessonCard
-                key={lesson.id}
-                lesson={lesson}
-                handleLessonClick={handleLessonClick}
-              />
-            ))}
+            <Box display="flex" alignItems="center" gap={1}>
+              <AccessTime color="primary" />
+              <Typography variant="h2">Недавно изученные</Typography>
+            </Box>
+
+            <Grid container spacing={3}>
+              {lastStudiedLessons.map((lesson) => (
+                <Grid key={lesson.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <LessonCard
+                    lesson={lesson}
+                    handleLessonClick={handleLessonClick}
+                  />
+                </Grid>
+              ))}
+            </Grid>
           </Stack>
-        </Box>
-      </Stack>
-    </Container>
+
+          {/* Все уроки */}
+          <Stack spacing={3}>
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={1}
+              justifyContent="space-between"
+            >
+              <Box display="flex" alignItems="center" gap={1}>
+                <MenuBook color="primary" />
+                <Typography variant="h2">Все уроки</Typography>
+              </Box>
+              <Button variant="text" color="primary">
+                Показать изученные
+              </Button>
+            </Box>
+
+            <Grid container spacing={3}>
+              {mockLessons.map((lesson) => (
+                <Grid key={lesson.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <LessonCard
+                    lesson={lesson}
+                    handleLessonClick={handleLessonClick}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </Stack>
+        </Stack>
+      </Container>
+    </Box>
   );
 };
