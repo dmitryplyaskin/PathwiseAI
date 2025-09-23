@@ -12,8 +12,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { QuestionAnswer, Send } from '@mui/icons-material';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import { MarkdownRenderer } from '../../../shared/ui';
 import { mockLessonContent } from '../model/mock';
 import { StickyInfoBlock } from './StickyInfoBlock';
 
@@ -105,48 +104,12 @@ export const LessonPage = () => {
                       <CircularProgress size={24} />
                     </Box>
                   ) : msg.type === 'bot' ? (
-                    <Box
-                      sx={{
-                        '& h1, & h2, & h3': {
-                          color: 'primary.main',
-                          fontWeight: 500,
-                        },
-                        '& p': {
-                          lineHeight: 1.7,
-                          color: 'text.primary',
-                        },
-                        '& code': {
-                          backgroundColor: 'action.hover',
-                          padding: '2px 6px',
-                          borderRadius: 1,
-                          fontSize: '0.875rem',
-                        },
-                        '& pre': {
-                          backgroundColor: 'grey.50',
-                          padding: 2,
-                          borderRadius: 1,
-                          overflow: 'auto',
-                        },
-                        '& table': {
-                          borderCollapse: 'collapse',
-                          width: '100%',
-                          '& th, & td': {
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            padding: 1,
-                            textAlign: 'left',
-                          },
-                          '& th': {
-                            backgroundColor: 'action.hover',
-                            fontWeight: 500,
-                          },
-                        },
-                      }}
+                    <MarkdownRenderer
+                      showLineNumbers={true}
+                      maxCodeHeight="500px"
                     >
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {msg.content}
-                      </ReactMarkdown>
-                    </Box>
+                      {msg.content}
+                    </MarkdownRenderer>
                   ) : (
                     <Typography sx={{ fontWeight: 500 }}>
                       {msg.content}
