@@ -136,7 +136,7 @@ export const HomePage = () => {
             onClick={handleNewModule}
             sx={{ py: 2, px: 4 }}
           >
-            Изучить новый модуль
+            Начать изучать
           </Button>
         </Box>
 
@@ -144,7 +144,7 @@ export const HomePage = () => {
         <Stack spacing={3} mb={6}>
           <Box display="flex" alignItems="center" gap={1}>
             <MenuBook color="primary" />
-            <Typography variant="h2">Последние пройденные модули</Typography>
+            <Typography variant="h2">Последние пройденные уроки</Typography>
           </Box>
 
           <Grid container spacing={3}>

@@ -50,7 +50,6 @@ export const ProfilePage = () => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        minHeight: '100vh',
         py: 6,
       }}
     >
