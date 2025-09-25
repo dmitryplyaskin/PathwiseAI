@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PGliteDriver } from 'typeorm-pglite';
+import { uuid_ossp } from '@electric-sql/pglite/contrib/uuid_ossp';
 import { CoursesModule } from './modules/courses/courses.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { ExamsModule } from './modules/exams/exams.module';
@@ -13,7 +14,7 @@ import { ChatModule } from './modules/chat/chat.module';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      driver: new PGliteDriver().driver,
+      driver: new PGliteDriver({ extensions: { uuid_ossp } }).driver,
       database: 'pathwiseai',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,

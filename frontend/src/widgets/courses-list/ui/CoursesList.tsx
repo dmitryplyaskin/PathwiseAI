@@ -26,9 +26,10 @@ import {
   Search,
   Star,
 } from '@mui/icons-material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CourseCard } from '../../../features/course-card/ui/CourseCard';
 import { mockCourses } from '../model/mock';
+import { getCoursesFx } from '../model';
 
 type FilterType = 'all' | 'completed' | 'in_progress' | 'not_started';
 type ViewMode = 'grid' | 'list';
@@ -54,6 +55,10 @@ export const CoursesList = () => {
   const handleCourseClick = (courseId: string) => {
     navigate(`/courses/${courseId}`);
   };
+
+  useEffect(() => {
+    getCoursesFx();
+  }, []);
 
   // Фильтрация и сортировка
   let filteredCourses = mockCourses.filter((course) => {
