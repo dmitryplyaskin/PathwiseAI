@@ -3,44 +3,53 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
   Delete,
+  Param,
   ParseUUIDPipe,
+  Query,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ChatService } from '../services/chat.service';
-import { CreateClarificationMessageDto } from '../dto/create-clarification-message.dto';
-import { UpdateClarificationMessageDto } from '../dto/update-clarification-message.dto';
+import { CreateChatMessageDto } from '../dto/create-chat-message.dto';
+import { GetChatMessagesDto } from '../dto/get-chat-messages.dto';
 
 @Controller('chat')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
-  @Post()
-  create(@Body() createClarificationMessageDto: CreateClarificationMessageDto) {
-    return this.chatService.create(createClarificationMessageDto);
+  @Post('message')
+  async sendMessage(@Body() createChatMessageDto: CreateChatMessageDto) {
+    return this.chatService.sendMessage(createChatMessageDto);
   }
 
-  @Get()
-  findAll() {
-    return this.chatService.findAll();
+  @Get('messages')
+  async getChatMessages(@Query() getChatMessagesDto: GetChatMessagesDto) {
+    return this.chatService.getChatMessages(getChatMessagesDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.chatService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateClarificationMessageDto: UpdateClarificationMessageDto,
+  @Get('messages/:lessonId')
+  async getChatMessagesByLessonId(
+    @Param('lessonId', ParseUUIDPipe) lessonId: string,
   ) {
-    return this.chatService.update(id, updateClarificationMessageDto);
+    return this.chatService.getChatMessages({ lessonId });
   }
 
-  @Delete(':id')
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.chatService.remove(id);
+  @Delete(':lessonId')
+  async deleteChat(@Param('lessonId', ParseUUIDPipe) lessonId: string) {
+    return this.chatService.deleteChat(lessonId);
+  }
+
+  @Delete(':lessonId/messages')
+  async clearChatHistory(@Param('lessonId', ParseUUIDPipe) lessonId: string) {
+    return this.chatService.clearChatHistory(lessonId);
+  }
+
+  @Post('message/stream')
+  async sendMessageStream(
+    @Body() createChatMessageDto: CreateChatMessageDto,
+    @Res() res: Response,
+  ) {
+    return this.chatService.sendMessageStream(createChatMessageDto, res);
   }
 }

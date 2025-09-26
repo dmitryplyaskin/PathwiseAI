@@ -9,9 +9,14 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { ExamsModule } from './modules/exams/exams.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: ['.env', '.env.development'],
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       driver: new PGliteDriver({ extensions: { uuid_ossp } }).driver,
