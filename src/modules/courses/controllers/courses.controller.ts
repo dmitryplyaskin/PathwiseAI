@@ -15,6 +15,8 @@ import { CreateUnitDto } from '../dto/create-unit.dto';
 import { UpdateUnitDto } from '../dto/update-unit.dto';
 import { CreateLessonDto } from '../dto/create-lesson.dto';
 import { UpdateLessonDto } from '../dto/update-lesson.dto';
+import { CreateModuleDto } from '../dto/create-module.dto';
+import { CourseListItemDto } from '../dto/course-list.dto';
 
 @Controller('courses')
 export class CoursesController {
@@ -29,6 +31,11 @@ export class CoursesController {
   @Get()
   findAllCourses() {
     return this.coursesService.findAllCourses();
+  }
+
+  @Get('list')
+  findCoursesForList(): Promise<CourseListItemDto[]> {
+    return this.coursesService.findCoursesForList();
   }
 
   @Get(':id')
@@ -105,5 +112,11 @@ export class CoursesController {
   @Delete('lessons/:id')
   removeLesson(@Param('id', ParseUUIDPipe) id: string) {
     return this.coursesService.removeLesson(id);
+  }
+
+  // Module endpoint (создание урока с возможностью создания нового курса)
+  @Post('modules')
+  createModule(@Body() createModuleDto: CreateModuleDto) {
+    return this.coursesService.createModule(createModuleDto);
   }
 }

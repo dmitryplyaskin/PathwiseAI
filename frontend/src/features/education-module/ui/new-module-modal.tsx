@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   TextField,
   Button,
@@ -11,20 +11,34 @@ import {
   Stack,
   type SelectChangeEvent,
   Divider,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
+import { useStore } from 'effector-react';
 import { Modal } from '../../../shared/ui';
+import {
+  $coursesList,
+  $coursesListLoading,
+  $coursesListError,
+  $moduleCreating,
+  $moduleCreationError,
+  $createdModule,
+  loadCoursesList,
+  createModule,
+  resetCreationState,
+} from '../../../shared/model/courses';
+import type {
+  ModuleComplexity,
+  CourseListItem,
+  CreateModuleResponse,
+} from '../../../shared/api/courses/types';
 
 interface NewModuleModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-type Complexity = 'simple' | 'normal' | 'professional' | '';
-
-type CourseOption = {
-  id: string;
-  title: string;
-};
+type Complexity = ModuleComplexity | '';
 
 const complexityDescriptions: Record<string, string> = {
   simple:
@@ -37,14 +51,13 @@ const complexityDescriptions: Record<string, string> = {
 };
 
 export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
-  const mockCourses = useMemo<CourseOption[]>(
-    () => [
-      { id: 'intro-to-ai', title: 'Введение в AI' },
-      { id: 'prompt-engineering', title: 'Промпт-инжиниринг' },
-      { id: 'data-ethics', title: 'Этика данных' },
-    ],
-    [],
-  );
+  // Effector stores
+  const coursesList = useStore($coursesList) as CourseListItem[];
+  const coursesListLoading = useStore($coursesListLoading) as boolean;
+  const coursesListError = useStore($coursesListError) as string | null;
+  const moduleCreating = useStore($moduleCreating) as boolean;
+  const moduleCreationError = useStore($moduleCreationError) as string | null;
+  const createdModule = useStore($createdModule) as CreateModuleResponse | null;
 
   const [topic, setTopic] = useState('');
   const [details, setDetails] = useState('');
@@ -52,12 +65,43 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
   const [courseId, setCourseId] = useState('');
   const [newCourseName, setNewCourseName] = useState('');
 
+  // Load courses list when modal opens
+  useEffect(() => {
+    if (open && coursesList.length === 0) {
+      loadCoursesList();
+    }
+  }, [open, coursesList.length]);
+
+  // Handle successful module creation
+  useEffect(() => {
+    if (createdModule) {
+      // Reset form
+      setTopic('');
+      setDetails('');
+      setComplexity('normal');
+      setCourseId('');
+      setNewCourseName('');
+      // Close modal
+      onClose();
+      // Reset creation state
+      resetCreationState();
+    }
+  }, [createdModule, onClose]);
+
+  // Reset creation state when modal closes
+  useEffect(() => {
+    if (!open) {
+      resetCreationState();
+    }
+  }, [open]);
+
   const handleComplexityChange = (event: SelectChangeEvent) => {
     setComplexity(event.target.value as Complexity);
   };
 
   const handleCourseChange = (event: SelectChangeEvent) => {
     const value = event.target.value;
+    console.log('value', value);
     setCourseId(value);
     if (value !== 'new') {
       setNewCourseName('');
@@ -65,16 +109,16 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
   };
 
   const handleSubmit = () => {
-    console.log({
+    if (!topic || !courseId || !complexity) return;
+
+    createModule({
       topic,
-      details,
-      complexity,
-      course:
-        courseId === 'new'
-          ? { type: 'new', title: newCourseName }
-          : { type: 'existing', id: courseId },
+      details: details || undefined,
+      complexity: complexity as ModuleComplexity,
+      courseId: courseId === 'new' ? undefined : courseId,
+      newCourseName: courseId === 'new' ? newCourseName : undefined,
+      userId: 'temp-user-id', // TODO: получать из контекста пользователя
     });
-    onClose();
   };
 
   return (
@@ -102,22 +146,32 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
             value={courseId}
             label="Курс"
             onChange={handleCourseChange}
+            disabled={coursesListLoading}
           >
-            {mockCourses.map((course) => (
-              <MenuItem key={course.id} value={course.id}>
-                {course.title}
+            {coursesListLoading ? (
+              <MenuItem disabled>
+                <CircularProgress size={20} sx={{ mr: 1 }} />
+                Загрузка курсов...
               </MenuItem>
-            ))}
-            <Divider />
-            <MenuItem
-              value="new"
-              sx={{
-                color: 'primary.main',
-                fontWeight: 600,
-              }}
-            >
-              Создать новый курс
-            </MenuItem>
+            ) : (
+              <>
+                {coursesList.map((course) => (
+                  <MenuItem key={course.id} value={course.id}>
+                    {course.title}
+                  </MenuItem>
+                ))}
+                {coursesList.length > 0 && <Divider />}
+                <MenuItem
+                  value="new"
+                  sx={{
+                    color: 'primary.main',
+                    fontWeight: 600,
+                  }}
+                >
+                  Создать новый курс
+                </MenuItem>
+              </>
+            )}
           </Select>
         </FormControl>
 
@@ -161,6 +215,12 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
           </Box>
         )}
 
+        {(coursesListError || moduleCreationError) && (
+          <Alert severity="error">
+            {coursesListError || moduleCreationError}
+          </Alert>
+        )}
+
         <Box display="flex" justifyContent="flex-end" gap={2} sx={{ pt: 2 }}>
           <Button onClick={onClose} variant="outlined" size="small">
             Отмена
@@ -169,13 +229,17 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
             onClick={handleSubmit}
             variant="contained"
             disabled={
+              moduleCreating ||
               !topic ||
               !courseId ||
               (courseId === 'new' && !newCourseName.trim())
             }
             size="small"
+            startIcon={
+              moduleCreating ? <CircularProgress size={16} /> : undefined
+            }
           >
-            Создать
+            {moduleCreating ? 'Создание...' : 'Создать'}
           </Button>
         </Box>
       </Stack>
