@@ -10,6 +10,7 @@ import { QuestionsModule } from './modules/questions/questions.module';
 import { ExamsModule } from './modules/exams/exams.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { ConfigModule } from '@nestjs/config';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ConfigModule } from '@nestjs/config';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
+    SharedModule,
     UsersModule,
     CoursesModule,
     QuestionsModule,
