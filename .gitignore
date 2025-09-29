@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# PGlite database
+/pglite-data
+
 # Logs
 logs
 *.log

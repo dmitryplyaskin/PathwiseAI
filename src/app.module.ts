@@ -20,7 +20,10 @@ import { SharedModule } from './shared/shared.module';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      driver: new PGliteDriver({ extensions: { uuid_ossp } }).driver,
+      driver: new PGliteDriver({
+        dataDir: './pglite-data',
+        extensions: { uuid_ossp },
+      }).driver,
       database: 'pathwiseai',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,

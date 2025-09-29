@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   TextField,
   Button,
@@ -14,7 +14,7 @@ import {
   CircularProgress,
   Alert,
 } from '@mui/material';
-import { useStore } from 'effector-react';
+import { useUnit } from 'effector-react';
 import { Modal } from '../../../shared/ui';
 import {
   $coursesList,
@@ -27,11 +27,8 @@ import {
   createModule,
   resetCreationState,
 } from '../../../shared/model/courses';
-import type {
-  ModuleComplexity,
-  CourseListItem,
-  CreateModuleResponse,
-} from '../../../shared/api/courses/types';
+import type { ModuleComplexity } from '../../../shared/api/courses/types';
+import { useCurrentUser } from '../../../shared/model/users';
 
 interface NewModuleModalProps {
   open: boolean;
@@ -40,53 +37,79 @@ interface NewModuleModalProps {
 
 type Complexity = ModuleComplexity | '';
 
-const complexityDescriptions: Record<string, string> = {
-  simple:
-    'Объяснение будет максимально простым, с использованием аналогии и базовых терминов. Отлично подходит для новичков.',
-  normal:
-    'Стандартное объяснение с использованием правильной терминологии, но без излишнего углубления в детали. Подходит для большинства.',
-  professional:
-    'Углубленное объяснение для специалистов, с использованием сложной терминологии, деталей реализации и пограничных случаев.',
-  '': '',
-};
+const COMPLEXITY_OPTIONS = [
+  {
+    value: 'simple' as const,
+    label: 'Простой',
+    description:
+      'Объяснение будет максимально простым, с использованием аналогии и базовых терминов. Отлично подходит для новичков.',
+  },
+  {
+    value: 'normal' as const,
+    label: 'Обычный',
+    description:
+      'Стандартное объяснение с использованием правильной терминологии, но без излишнего углубления в детали. Подходит для большинства.',
+  },
+  {
+    value: 'professional' as const,
+    label: 'Профессиональный',
+    description:
+      'Углубленное объяснение для специалистов, с использованием сложной терминологии, деталей реализации и пограничных случаев.',
+  },
+] as const;
 
 export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
-  // Effector stores
-  const coursesList = useStore($coursesList) as CourseListItem[];
-  const coursesListLoading = useStore($coursesListLoading) as boolean;
-  const coursesListError = useStore($coursesListError) as string | null;
-  const moduleCreating = useStore($moduleCreating) as boolean;
-  const moduleCreationError = useStore($moduleCreationError) as string | null;
-  const createdModule = useStore($createdModule) as CreateModuleResponse | null;
+  // Effector stores with useUnit
+  const {
+    coursesList,
+    coursesListLoading,
+    coursesListError,
+    moduleCreating,
+    moduleCreationError,
+    createdModule,
+  } = useUnit({
+    coursesList: $coursesList,
+    coursesListLoading: $coursesListLoading,
+    coursesListError: $coursesListError,
+    moduleCreating: $moduleCreating,
+    moduleCreationError: $moduleCreationError,
+    createdModule: $createdModule,
+  });
 
+  // Current user
+  const { userId, loading: userLoading, error: userError } = useCurrentUser();
+
+  // Form state
   const [topic, setTopic] = useState('');
   const [details, setDetails] = useState('');
   const [complexity, setComplexity] = useState<Complexity>('normal');
   const [courseId, setCourseId] = useState('');
   const [newCourseName, setNewCourseName] = useState('');
 
-  // Load courses list when modal opens
+  // Reset form to initial state
+  const resetForm = useCallback(() => {
+    setTopic('');
+    setDetails('');
+    setComplexity('normal');
+    setCourseId('');
+    setNewCourseName('');
+  }, []);
+
+  // Load courses list every time modal opens
   useEffect(() => {
-    if (open && coursesList.length === 0) {
+    if (open) {
       loadCoursesList();
     }
-  }, [open, coursesList.length]);
+  }, [open]);
 
   // Handle successful module creation
   useEffect(() => {
     if (createdModule) {
-      // Reset form
-      setTopic('');
-      setDetails('');
-      setComplexity('normal');
-      setCourseId('');
-      setNewCourseName('');
-      // Close modal
+      resetForm();
       onClose();
-      // Reset creation state
       resetCreationState();
     }
-  }, [createdModule, onClose]);
+  }, [createdModule, onClose, resetForm]);
 
   // Reset creation state when modal closes
   useEffect(() => {
@@ -95,21 +118,21 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
     }
   }, [open]);
 
-  const handleComplexityChange = (event: SelectChangeEvent) => {
+  // Handlers
+  const handleComplexityChange = useCallback((event: SelectChangeEvent) => {
     setComplexity(event.target.value as Complexity);
-  };
+  }, []);
 
-  const handleCourseChange = (event: SelectChangeEvent) => {
+  const handleCourseChange = useCallback((event: SelectChangeEvent) => {
     const value = event.target.value;
-    console.log('value', value);
     setCourseId(value);
     if (value !== 'new') {
       setNewCourseName('');
     }
-  };
+  }, []);
 
-  const handleSubmit = () => {
-    if (!topic || !courseId || !complexity) return;
+  const handleSubmit = useCallback(() => {
+    if (!topic || !courseId || !complexity || !userId) return;
 
     createModule({
       topic,
@@ -117,9 +140,20 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
       complexity: complexity as ModuleComplexity,
       courseId: courseId === 'new' ? undefined : courseId,
       newCourseName: courseId === 'new' ? newCourseName : undefined,
-      userId: 'temp-user-id', // TODO: получать из контекста пользователя
+      userId,
     });
-  };
+  }, [topic, courseId, complexity, userId, details, newCourseName]);
+
+  // Validation
+  const isSubmitDisabled =
+    moduleCreating ||
+    userLoading ||
+    !userId ||
+    !topic.trim() ||
+    !courseId ||
+    (courseId === 'new' && !newCourseName.trim());
+
+  const errorMessage = coursesListError || moduleCreationError || userError;
 
   return (
     <Modal open={open} onClose={onClose} title="Создать новый урок">
@@ -154,14 +188,15 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
                 Загрузка курсов...
               </MenuItem>
             ) : (
-              <>
-                {coursesList.map((course) => (
+              [
+                ...coursesList.map((course) => (
                   <MenuItem key={course.id} value={course.id}>
                     {course.title}
                   </MenuItem>
-                ))}
-                {coursesList.length > 0 && <Divider />}
+                )),
+                coursesList.length > 0 && <Divider key="divider" />,
                 <MenuItem
+                  key="new"
                   value="new"
                   sx={{
                     color: 'primary.main',
@@ -169,8 +204,8 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
                   }}
                 >
                   Создать новый курс
-                </MenuItem>
-              </>
+                </MenuItem>,
+              ]
             )}
           </Select>
         </FormControl>
@@ -195,9 +230,11 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
             label="Сложность объяснения"
             onChange={handleComplexityChange}
           >
-            <MenuItem value="simple">Простой</MenuItem>
-            <MenuItem value="normal">Обычный</MenuItem>
-            <MenuItem value="professional">Профессиональный</MenuItem>
+            {COMPLEXITY_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
@@ -210,16 +247,15 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
             }}
           >
             <Typography variant="body2" color="text.secondary">
-              {complexityDescriptions[complexity]}
+              {
+                COMPLEXITY_OPTIONS.find((opt) => opt.value === complexity)
+                  ?.description
+              }
             </Typography>
           </Box>
         )}
 
-        {(coursesListError || moduleCreationError) && (
-          <Alert severity="error">
-            {coursesListError || moduleCreationError}
-          </Alert>
-        )}
+        {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
         <Box display="flex" justifyContent="flex-end" gap={2} sx={{ pt: 2 }}>
           <Button onClick={onClose} variant="outlined" size="small">
@@ -228,12 +264,7 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
           <Button
             onClick={handleSubmit}
             variant="contained"
-            disabled={
-              moduleCreating ||
-              !topic ||
-              !courseId ||
-              (courseId === 'new' && !newCourseName.trim())
-            }
+            disabled={isSubmitDisabled}
             size="small"
             startIcon={
               moduleCreating ? <CircularProgress size={16} /> : undefined

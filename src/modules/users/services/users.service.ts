@@ -67,6 +67,15 @@ export class UsersService {
     return user;
   }
 
+  async findByUsername(username: string): Promise<Omit<User, 'password_hash'>> {
+    const user = await this.usersRepository.findOne({ where: { username } });
+    if (!user) {
+      throw new NotFoundException(`User with username "${username}" not found`);
+    }
+    delete user.password_hash;
+    return user;
+  }
+
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
