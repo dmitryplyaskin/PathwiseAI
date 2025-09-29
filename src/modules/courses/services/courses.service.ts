@@ -12,6 +12,7 @@ import { CreateLessonDto } from '../dto/create-lesson.dto';
 import { UpdateLessonDto } from '../dto/update-lesson.dto';
 import { CourseListItemDto } from '../dto/course-list.dto';
 import { CreateModuleDto } from '../dto/create-module.dto';
+import { OpenRouterService } from '../../chat/services/openrouter.service';
 
 @Injectable()
 export class CoursesService {
@@ -22,6 +23,7 @@ export class CoursesService {
     private readonly unitRepository: Repository<Unit>,
     @InjectRepository(Lesson)
     private readonly lessonRepository: Repository<Lesson>,
+    private readonly openRouterService: OpenRouterService,
   ) {}
 
   // ... Course methods
@@ -147,17 +149,111 @@ export class CoursesService {
       throw new Error('Course ID is required');
     }
 
-    // Создаем урок (пока что как заглушку)
-    // В будущем здесь будет интеграция с AI для генерации контента
-    const lesson = {
-      topic: createModuleDto.topic,
-      details: createModuleDto.details,
-      complexity: createModuleDto.complexity,
+    // Находим или создаем Unit для курса
+    let unit = await this.unitRepository.findOne({
+      where: { course: { id: courseId } },
+      order: { order: 'DESC' },
+    });
+
+    if (!unit) {
+      unit = this.unitRepository.create({
+        course: { id: courseId },
+        title: 'Раздел 1',
+        order: 1,
+      });
+      unit = await this.unitRepository.save(unit);
+    }
+
+    // Генерируем контент урока через AI
+    const lessonContent = await this.generateLessonContent(
+      createModuleDto.topic,
+      createModuleDto.details,
+      createModuleDto.complexity,
+    );
+
+    // Получаем порядковый номер для нового урока
+    const lessonsCount = await this.lessonRepository.count({
+      where: { unit: { id: unit.id } },
+    });
+
+    // Создаем урок
+    const lesson = this.lessonRepository.create({
+      unit: { id: unit.id },
+      title: createModuleDto.topic,
+      content: lessonContent,
+      order: lessonsCount + 1,
+    });
+
+    const savedLesson = await this.lessonRepository.save(lesson);
+
+    return {
       courseId,
-      status: 'generated', // заглушка
-      content: `Урок по теме "${createModuleDto.topic}" будет сгенерирован с уровнем сложности "${createModuleDto.complexity}".`,
+      lessonId: savedLesson.id,
+      unitId: unit.id,
+      title: savedLesson.title,
+      content: savedLesson.content,
+    };
+  }
+
+  private async generateLessonContent(
+    topic: string,
+    details: string | undefined,
+    complexity: string,
+  ): Promise<string> {
+    const complexityDescriptions = {
+      simple: 'очень простым, с аналогиями и базовыми терминами',
+      normal: 'средним, с правильной терминологией',
+      professional:
+        'профессиональным, с использованием сложной терминологии и деталей',
     };
 
-    return lesson;
+    const complexityLevel =
+      complexityDescriptions[complexity] || complexityDescriptions.normal;
+
+    const systemPrompt = `Ты - эксперт-преподаватель, создающий образовательный контент для платформы PathwiseAI.
+Твоя задача - создать структурированный урок в формате JSON.
+
+Требования к уроку:
+1. Уровень сложности: ${complexityLevel}
+2. Контент должен быть понятным и структурированным
+3. Используй markdown для форматирования
+4. Включи примеры и пояснения
+
+Верни ТОЛЬКО валидный JSON в следующем формате:
+{
+  "title": "Название урока",
+  "content": "Полный текст урока в markdown формате с разделами, примерами и объяснениями"
+}`;
+
+    const userPrompt = `Создай урок на тему: "${topic}"
+${details ? `Дополнительные детали: ${details}` : ''}
+
+Урок должен быть ${complexityLevel} и включать:
+- Введение и объяснение концепции
+- Основной материал с примерами
+- Практические советы
+- Краткое резюме в конце`;
+
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ];
+
+    try {
+      const response = await this.openRouterService.generateResponse(messages);
+
+      // Парсим JSON из ответа
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const lessonData = JSON.parse(jsonMatch[0]);
+        return lessonData.content || response;
+      }
+
+      // Если не удалось распарсить JSON, возвращаем весь ответ
+      return response;
+    } catch (error) {
+      console.error('Error generating lesson content:', error);
+      throw new Error('Не удалось сгенерировать содержимое урока');
+    }
   }
 }

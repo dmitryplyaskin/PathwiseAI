@@ -15,10 +15,9 @@ export interface CreateModuleRequest {
 }
 
 export interface CreateModuleResponse {
-  topic: string;
-  details?: string;
-  complexity: ModuleComplexity;
   courseId: string;
-  status: string;
+  lessonId: string;
+  unitId: string;
+  title: string;
   content: string;
 }

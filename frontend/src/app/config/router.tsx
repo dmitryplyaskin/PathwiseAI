@@ -35,6 +35,10 @@ export const router = createBrowserRouter([
         path: 'courses/:id/units/:unitId/lessons/:lessonId',
         Component: Lesson,
       },
+      {
+        path: 'courses/:id/lessons/:lessonId',
+        Component: Lesson,
+      },
     ],
   },
 ]);

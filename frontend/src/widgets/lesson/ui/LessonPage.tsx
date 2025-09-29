@@ -9,12 +9,15 @@ import {
   AppBar,
   Toolbar,
   Stack,
+  Alert,
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router';
 import { QuestionAnswer, Send } from '@mui/icons-material';
 import { MarkdownRenderer } from '../../../shared/ui';
 import { mockLessonContent } from '../model/mock';
 import { StickyInfoBlock } from './StickyInfoBlock';
+import { useLesson } from '../../../shared/model/lessons';
 
 interface Message {
   id: number;
@@ -23,11 +26,23 @@ interface Message {
 }
 
 export const LessonPage = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 1, type: 'bot', content: mockLessonContent },
-  ]);
+  const { lessonId } = useParams<{ lessonId: string }>();
+  const { lesson, loading, notFound } = useLesson(lessonId);
+
+  // Определяем контент урока: реальный или мок
+  const lessonContent = lesson?.content || mockLessonContent;
+  const lessonTitle = lesson?.title || 'Введение в машинное обучение';
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState('');
+
+  // Инициализируем сообщения при загрузке контента урока
+  useEffect(() => {
+    if (lessonContent) {
+      setMessages([{ id: 1, type: 'bot', content: lessonContent }]);
+    }
+  }, [lessonContent]);
 
   const handleSendMessage = () => {
     if (inputValue.trim() === '') return;
@@ -44,6 +59,7 @@ export const LessonPage = () => {
     };
 
     setMessages((prev) => [...prev, newUserMessage, preloaderMessage]);
+    const questionText = inputValue;
     setInputValue('');
     setShowInput(false);
 
@@ -52,11 +68,32 @@ export const LessonPage = () => {
       const botResponse: Message = {
         id: Date.now() + 2,
         type: 'bot',
-        content: `Это симулированный ответ на ваш вопрос: "${inputValue}". PathwiseAI анализирует контекст урока и предоставляет персонализированные объяснения.`,
+        content: `Это симулированный ответ на ваш вопрос: "${questionText}". PathwiseAI анализирует контекст урока и предоставляет персонализированные объяснения.`,
       };
       setMessages((prev) => [...prev.slice(0, -1), botResponse]);
     }, 2000);
   };
+
+  // Показываем прелоадер при загрузке
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Stack spacing={2} alignItems="center">
+          <CircularProgress size={60} />
+          <Typography variant="h6" color="text.secondary">
+            Загрузка урока...
+          </Typography>
+        </Stack>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: '100vh' }}>
@@ -64,7 +101,7 @@ export const LessonPage = () => {
       <AppBar position="static" elevation={0}>
         <Toolbar sx={{ flexDirection: 'column', py: 4 }}>
           <Typography variant="h1" component="h1" gutterBottom>
-            Введение в машинное обучение
+            {lessonTitle}
           </Typography>
           <Typography
             variant="body1"
@@ -72,9 +109,15 @@ export const LessonPage = () => {
             textAlign="center"
             maxWidth="600px"
           >
-            Интерактивный урок с поддержкой ИИ-помощника для
-            персонализированного обучения
+            {lesson
+              ? 'Интерактивный урок с поддержкой ИИ-помощника для персонализированного обучения'
+              : 'Демо-версия урока (урок не найден в базе данных)'}
           </Typography>
+          {notFound && (
+            <Alert severity="info" sx={{ mt: 2, maxWidth: '600px' }}>
+              Урок не найден. Показываем демо-контент.
+            </Alert>
+          )}
         </Toolbar>
       </AppBar>
 
