@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -16,6 +20,22 @@ export class UsersService {
   async create(
     createUserDto: CreateUserDto,
   ): Promise<Omit<User, 'password_hash'>> {
+    // Проверка на существование email
+    const existingEmail = await this.usersRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+    if (existingEmail) {
+      throw new ConflictException('Email already exists');
+    }
+
+    // Проверка на существование username
+    const existingUsername = await this.usersRepository.findOne({
+      where: { username: createUserDto.username },
+    });
+    if (existingUsername) {
+      throw new ConflictException('Username already exists');
+    }
+
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
 
@@ -51,7 +71,32 @@ export class UsersService {
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<Omit<User, 'password_hash'>> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // Проверяем существование пользователя
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`User with ID "${id}" not found`);
+    }
+
+    // Проверка на дубликаты email, если он обновляется
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existingEmail = await this.usersRepository.findOne({
+        where: { email: updateUserDto.email },
+      });
+      if (existingEmail) {
+        throw new ConflictException('Email already exists');
+      }
+    }
+
+    // Проверка на дубликаты username, если он обновляется
+    if (updateUserDto.username && updateUserDto.username !== user.username) {
+      const existingUsername = await this.usersRepository.findOne({
+        where: { username: updateUserDto.username },
+      });
+      if (existingUsername) {
+        throw new ConflictException('Username already exists');
+      }
+    }
+
     const { password, ...dtoRest } = updateUserDto;
     const updatePayload: Partial<User> = { ...dtoRest };
 
@@ -66,6 +111,10 @@ export class UsersService {
   }
 
   async remove(id: string): Promise<void> {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`User with ID "${id}" not found`);
+    }
     await this.usersRepository.delete(id);
   }
 }

@@ -1,12 +1,4 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsEnum,
-  IsOptional,
-  IsNumber,
-  IsUUID,
-} from 'class-validator';
-import { CourseStatus } from '../entities/course.entity';
+import { IsString, IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateCourseDto {
   @IsUUID()

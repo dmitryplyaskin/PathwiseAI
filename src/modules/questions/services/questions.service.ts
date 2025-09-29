@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Question } from '../entities/question.entity';
@@ -30,15 +30,22 @@ export class QuestionsService {
     return this.questionRepository.find();
   }
 
-  findOneQuestion(id: string) {
-    return this.questionRepository.findOneBy({ id });
+  async findOneQuestion(id: string) {
+    const question = await this.questionRepository.findOneBy({ id });
+    if (!question) {
+      throw new NotFoundException(`Question with ID "${id}" not found`);
+    }
+    return question;
   }
 
-  updateQuestion(id: string, updateQuestionDto: UpdateQuestionDto) {
-    return this.questionRepository.update(id, updateQuestionDto);
+  async updateQuestion(id: string, updateQuestionDto: UpdateQuestionDto) {
+    await this.findOneQuestion(id); // Проверка существования
+    await this.questionRepository.update(id, updateQuestionDto);
+    return this.findOneQuestion(id);
   }
 
-  removeQuestion(id: string) {
+  async removeQuestion(id: string) {
+    await this.findOneQuestion(id); // Проверка существования
     return this.questionRepository.delete(id);
   }
 
@@ -56,15 +63,22 @@ export class QuestionsService {
     return this.userAnswerRepository.find();
   }
 
-  findOneUserAnswer(id: string) {
-    return this.userAnswerRepository.findOneBy({ id });
+  async findOneUserAnswer(id: string) {
+    const userAnswer = await this.userAnswerRepository.findOneBy({ id });
+    if (!userAnswer) {
+      throw new NotFoundException(`UserAnswer with ID "${id}" not found`);
+    }
+    return userAnswer;
   }
 
-  updateUserAnswer(id: string, updateUserAnswerDto: UpdateUserAnswerDto) {
-    return this.userAnswerRepository.update(id, updateUserAnswerDto);
+  async updateUserAnswer(id: string, updateUserAnswerDto: UpdateUserAnswerDto) {
+    await this.findOneUserAnswer(id); // Проверка существования
+    await this.userAnswerRepository.update(id, updateUserAnswerDto);
+    return this.findOneUserAnswer(id);
   }
 
-  removeUserAnswer(id: string) {
+  async removeUserAnswer(id: string) {
+    await this.findOneUserAnswer(id); // Проверка существования
     return this.userAnswerRepository.delete(id);
   }
 }

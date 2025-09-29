@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 import { User } from './modules/users/entities/user.entity';
 import { Course } from './modules/courses/entities/course.entity';
 
@@ -18,14 +19,19 @@ async function seed() {
     where: { username: 'testuser' },
   });
   if (!testUser) {
+    // Хешируем пароль
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash('Test123456!', salt);
+
     testUser = userRepository.create({
       username: 'testuser',
       email: 'test@example.com',
-      password_hash: 'test_hash',
+      password_hash: hashedPassword,
       settings: {},
     });
     await userRepository.save(testUser);
     console.log('Создан тестовый пользователь:', testUser.id);
+    console.log('Email: test@example.com, Password: Test123456!');
   } else {
     console.log('Тестовый пользователь уже существует:', testUser.id);
   }

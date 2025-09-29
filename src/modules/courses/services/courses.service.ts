@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from '../entities/course.entity';
@@ -47,15 +47,22 @@ export class CoursesService {
     }));
   }
 
-  findOneCourse(id: string) {
-    return this.courseRepository.findOneBy({ id });
+  async findOneCourse(id: string) {
+    const course = await this.courseRepository.findOneBy({ id });
+    if (!course) {
+      throw new NotFoundException(`Course with ID "${id}" not found`);
+    }
+    return course;
   }
 
-  updateCourse(id: string, updateCourseDto: UpdateCourseDto) {
-    return this.courseRepository.update(id, updateCourseDto);
+  async updateCourse(id: string, updateCourseDto: UpdateCourseDto) {
+    await this.findOneCourse(id); // Проверка существования
+    await this.courseRepository.update(id, updateCourseDto);
+    return this.findOneCourse(id);
   }
 
-  removeCourse(id: string) {
+  async removeCourse(id: string) {
+    await this.findOneCourse(id); // Проверка существования
     return this.courseRepository.delete(id);
   }
 
@@ -72,15 +79,22 @@ export class CoursesService {
     return this.unitRepository.find();
   }
 
-  findOneUnit(id: string) {
-    return this.unitRepository.findOneBy({ id });
+  async findOneUnit(id: string) {
+    const unit = await this.unitRepository.findOneBy({ id });
+    if (!unit) {
+      throw new NotFoundException(`Unit with ID "${id}" not found`);
+    }
+    return unit;
   }
 
-  updateUnit(id: string, updateUnitDto: UpdateUnitDto) {
-    return this.unitRepository.update(id, updateUnitDto);
+  async updateUnit(id: string, updateUnitDto: UpdateUnitDto) {
+    await this.findOneUnit(id); // Проверка существования
+    await this.unitRepository.update(id, updateUnitDto);
+    return this.findOneUnit(id);
   }
 
-  removeUnit(id: string) {
+  async removeUnit(id: string) {
+    await this.findOneUnit(id); // Проверка существования
     return this.unitRepository.delete(id);
   }
 
@@ -97,15 +111,22 @@ export class CoursesService {
     return this.lessonRepository.find();
   }
 
-  findOneLesson(id: string) {
-    return this.lessonRepository.findOneBy({ id });
+  async findOneLesson(id: string) {
+    const lesson = await this.lessonRepository.findOneBy({ id });
+    if (!lesson) {
+      throw new NotFoundException(`Lesson with ID "${id}" not found`);
+    }
+    return lesson;
   }
 
-  updateLesson(id: string, updateLessonDto: UpdateLessonDto) {
-    return this.lessonRepository.update(id, updateLessonDto);
+  async updateLesson(id: string, updateLessonDto: UpdateLessonDto) {
+    await this.findOneLesson(id); // Проверка существования
+    await this.lessonRepository.update(id, updateLessonDto);
+    return this.findOneLesson(id);
   }
 
-  removeLesson(id: string) {
+  async removeLesson(id: string) {
+    await this.findOneLesson(id); // Проверка существования
     return this.lessonRepository.delete(id);
   }
 

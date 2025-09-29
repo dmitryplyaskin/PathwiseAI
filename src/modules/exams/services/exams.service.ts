@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Exam } from '../entities/exam.entity';
@@ -31,15 +31,22 @@ export class ExamsService {
     return this.examRepository.find();
   }
 
-  findOneExam(id: string) {
-    return this.examRepository.findOneBy({ id });
+  async findOneExam(id: string) {
+    const exam = await this.examRepository.findOneBy({ id });
+    if (!exam) {
+      throw new NotFoundException(`Exam with ID "${id}" not found`);
+    }
+    return exam;
   }
 
-  updateExam(id: string, updateExamDto: UpdateExamDto) {
-    return this.examRepository.update(id, updateExamDto);
+  async updateExam(id: string, updateExamDto: UpdateExamDto) {
+    await this.findOneExam(id); // Проверка существования
+    await this.examRepository.update(id, updateExamDto);
+    return this.findOneExam(id);
   }
 
-  removeExam(id: string) {
+  async removeExam(id: string) {
+    await this.findOneExam(id); // Проверка существования
     return this.examRepository.delete(id);
   }
 
@@ -57,15 +64,22 @@ export class ExamsService {
     return this.examResultRepository.find();
   }
 
-  findOneExamResult(id: string) {
-    return this.examResultRepository.findOneBy({ id });
+  async findOneExamResult(id: string) {
+    const examResult = await this.examResultRepository.findOneBy({ id });
+    if (!examResult) {
+      throw new NotFoundException(`ExamResult with ID "${id}" not found`);
+    }
+    return examResult;
   }
 
-  updateExamResult(id: string, updateExamResultDto: UpdateExamResultDto) {
-    return this.examResultRepository.update(id, updateExamResultDto);
+  async updateExamResult(id: string, updateExamResultDto: UpdateExamResultDto) {
+    await this.findOneExamResult(id); // Проверка существования
+    await this.examResultRepository.update(id, updateExamResultDto);
+    return this.findOneExamResult(id);
   }
 
-  removeExamResult(id: string) {
+  async removeExamResult(id: string) {
+    await this.findOneExamResult(id); // Проверка существования
     return this.examResultRepository.delete(id);
   }
 }
