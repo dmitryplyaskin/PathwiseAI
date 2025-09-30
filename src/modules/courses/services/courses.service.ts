@@ -13,6 +13,8 @@ import { UpdateLessonDto } from '../dto/update-lesson.dto';
 import { CourseListItemDto } from '../dto/course-list.dto';
 import { CreateModuleDto } from '../dto/create-module.dto';
 import { OpenRouterService } from '../../chat/services/openrouter.service';
+import { ChatService } from '../../chat/services/chat.service';
+import { AskLessonQuestionDto } from '../dto/ask-lesson-question.dto';
 
 @Injectable()
 export class CoursesService {
@@ -24,6 +26,7 @@ export class CoursesService {
     @InjectRepository(Lesson)
     private readonly lessonRepository: Repository<Lesson>,
     private readonly openRouterService: OpenRouterService,
+    private readonly chatService: ChatService,
   ) {}
 
   // ... Course methods
@@ -200,14 +203,14 @@ export class CoursesService {
     details: string | undefined,
     complexity: string,
   ): Promise<string> {
-    const complexityDescriptions = {
+    const complexityDescriptions: Record<string, string> = {
       simple: 'очень простым, с аналогиями и базовыми терминами',
       normal: 'средним, с правильной терминологией',
       professional:
         'профессиональным, с использованием сложной терминологии и деталей',
     };
 
-    const complexityLevel =
+    const complexityLevel: string =
       complexityDescriptions[complexity] || complexityDescriptions.normal;
 
     const systemPrompt = `Ты - эксперт-преподаватель, создающий образовательный контент для платформы PathwiseAI.
@@ -245,7 +248,10 @@ ${details ? `Дополнительные детали: ${details}` : ''}
       // Парсим JSON из ответа
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const lessonData = JSON.parse(jsonMatch[0]);
+        const lessonData = JSON.parse(jsonMatch[0]) as {
+          content?: string;
+          title?: string;
+        };
         return lessonData.content || response;
       }
 
@@ -255,5 +261,26 @@ ${details ? `Дополнительные детали: ${details}` : ''}
       console.error('Error generating lesson content:', error);
       throw new Error('Не удалось сгенерировать содержимое урока');
     }
+  }
+
+  async askLessonQuestion(askLessonQuestionDto: AskLessonQuestionDto) {
+    const { lessonId, userId, question } = askLessonQuestionDto;
+
+    // Проверяем, что урок существует
+    const lesson = await this.findOneLesson(lessonId);
+
+    // Используем ChatService для обработки вопроса
+    const result = await this.chatService.sendMessage({
+      lessonId,
+      userId,
+      content: question,
+    });
+
+    return {
+      question,
+      answer: result.aiMessage.content,
+      lessonTitle: lesson.title,
+      messageId: result.aiMessage.id,
+    };
   }
 }

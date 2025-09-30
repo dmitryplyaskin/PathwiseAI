@@ -17,6 +17,7 @@ import { CreateLessonDto } from '../dto/create-lesson.dto';
 import { UpdateLessonDto } from '../dto/update-lesson.dto';
 import { CreateModuleDto } from '../dto/create-module.dto';
 import { CourseListItemDto } from '../dto/course-list.dto';
+import { AskLessonQuestionDto } from '../dto/ask-lesson-question.dto';
 
 @Controller('courses')
 export class CoursesController {
@@ -118,5 +119,23 @@ export class CoursesController {
   @Post('modules')
   createModule(@Body() createModuleDto: CreateModuleDto) {
     return this.coursesService.createModule(createModuleDto);
+  }
+
+  // AI Assistant endpoint (вопросы к ИИ-помощнику по уроку)
+  @Post('lessons/:id/ask')
+  async askLessonQuestion(
+    @Param('id', ParseUUIDPipe) lessonId: string,
+    @Body() askLessonQuestionDto: AskLessonQuestionDto,
+  ): Promise<{
+    question: string;
+    answer: string;
+    lessonTitle: string;
+    messageId: string;
+  }> {
+    // Используем lessonId из параметра URL
+    return this.coursesService.askLessonQuestion({
+      ...askLessonQuestionDto,
+      lessonId,
+    });
   }
 }

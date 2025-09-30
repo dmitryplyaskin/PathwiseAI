@@ -25,6 +25,7 @@ import { MarkdownRenderer } from '../../../shared/ui';
 import { mockLessonContent } from '../model/mock';
 import { StickyInfoBlock } from './StickyInfoBlock';
 import { useLesson } from '../../../shared/model/lessons';
+import { lessonsApi } from '../../../shared/api/lessons';
 
 interface Message {
   id: number;
@@ -43,6 +44,7 @@ export const LessonPage = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Инициализируем сообщения при загрузке контента урока
   useEffect(() => {
@@ -51,8 +53,8 @@ export const LessonPage = () => {
     }
   }, [lessonContent]);
 
-  const handleSendMessage = () => {
-    if (inputValue.trim() === '') return;
+  const handleSendMessage = async () => {
+    if (inputValue.trim() === '' || !lessonId) return;
 
     const newUserMessage: Message = {
       id: Date.now(),
@@ -69,16 +71,30 @@ export const LessonPage = () => {
     const questionText = inputValue;
     setInputValue('');
     setShowInput(false);
+    setIsLoading(true);
 
-    // Simulate bot response
-    setTimeout(() => {
+    try {
+      // Отправляем вопрос на бекенд
+      const response = await lessonsApi.askQuestion(lessonId, questionText);
+
       const botResponse: Message = {
         id: Date.now() + 2,
         type: 'bot',
-        content: `Это симулированный ответ на ваш вопрос: "${questionText}". PathwiseAI анализирует контекст урока и предоставляет персонализированные объяснения.`,
+        content: response.answer,
       };
       setMessages((prev) => [...prev.slice(0, -1), botResponse]);
-    }, 2000);
+    } catch (error) {
+      console.error('Error sending question:', error);
+      const errorMessage: Message = {
+        id: Date.now() + 2,
+        type: 'bot',
+        content:
+          'Извините, произошла ошибка при обработке вашего вопроса. Пожалуйста, попробуйте еще раз.',
+      };
+      setMessages((prev) => [...prev.slice(0, -1), errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Показываем прелоадер при загрузке
@@ -402,14 +418,14 @@ export const LessonPage = () => {
                           <Button
                             variant="contained"
                             onClick={handleSendMessage}
-                            disabled={!inputValue.trim()}
+                            disabled={!inputValue.trim() || isLoading}
                             startIcon={<Send />}
                             sx={{
                               borderRadius: 2,
                               px: 3,
                             }}
                           >
-                            Отправить
+                            {isLoading ? 'Отправка...' : 'Отправить'}
                           </Button>
                         </Box>
                       </Stack>
