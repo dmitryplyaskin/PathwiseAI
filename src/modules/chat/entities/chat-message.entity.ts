@@ -44,6 +44,9 @@ export class ChatMessage {
   @Column('text')
   content: string;
 
+  @Column({ name: 'thread_id', type: 'varchar', default: 'main' })
+  threadId: string;
+
   @CreateDateColumn()
   created_at: Date;
 }

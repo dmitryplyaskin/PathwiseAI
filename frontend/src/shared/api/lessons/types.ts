@@ -23,4 +23,21 @@ export interface LessonQuestionResponse {
   answer: string;
   lessonTitle: string;
   messageId: string;
+  threadId: string;
+}
+
+export interface Thread {
+  threadId: string;
+  messageCount: number;
+  firstMessage: string;
+  createdAt: string;
+  lastActivity: string;
+}
+
+export interface ThreadMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
+  threadId: string;
+  created_at: string;
 }

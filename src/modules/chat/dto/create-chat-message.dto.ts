@@ -12,4 +12,12 @@ export class CreateChatMessageDto {
   @IsString()
   @IsNotEmpty()
   content: string;
+
+  @IsString()
+  @IsOptional()
+  threadId?: string;
+
+  @IsString()
+  @IsOptional()
+  lessonContent?: string;
 }

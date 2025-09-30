@@ -263,8 +263,15 @@ ${details ? `Дополнительные детали: ${details}` : ''}
     }
   }
 
-  async askLessonQuestion(askLessonQuestionDto: AskLessonQuestionDto) {
-    const { lessonId, userId, question } = askLessonQuestionDto;
+  async askLessonQuestion(askLessonQuestionDto: AskLessonQuestionDto): Promise<{
+    question: string;
+    answer: string;
+    lessonTitle: string;
+    messageId: string;
+    threadId: string;
+  }> {
+    const { lessonId, userId, question, threadId, lessonContent } =
+      askLessonQuestionDto;
 
     // Проверяем, что урок существует
     const lesson = await this.findOneLesson(lessonId);
@@ -274,6 +281,8 @@ ${details ? `Дополнительные детали: ${details}` : ''}
       lessonId,
       userId,
       content: question,
+      threadId,
+      lessonContent: lessonContent || lesson.content,
     });
 
     return {
@@ -281,6 +290,43 @@ ${details ? `Дополнительные детали: ${details}` : ''}
       answer: result.aiMessage.content,
       lessonTitle: lesson.title,
       messageId: result.aiMessage.id,
+      threadId: result.threadId,
     };
+  }
+
+  async deleteThread(
+    lessonId: string,
+    threadId: string,
+  ): Promise<{
+    message: string;
+    threadId: string;
+  }> {
+    await this.findOneLesson(lessonId);
+    return this.chatService.deleteThread(lessonId, threadId);
+  }
+
+  async regenerateMessage(
+    lessonId: string,
+    messageId: string,
+  ): Promise<{
+    message: string;
+    newMessage: any;
+  }> {
+    const lesson = await this.findOneLesson(lessonId);
+    return this.chatService.regenerateMessage(
+      lessonId,
+      messageId,
+      lesson.content,
+    );
+  }
+
+  async getThreads(lessonId: string): Promise<any[]> {
+    await this.findOneLesson(lessonId);
+    return this.chatService.getThreads(lessonId);
+  }
+
+  async getThreadMessages(lessonId: string, threadId: string): Promise<any[]> {
+    await this.findOneLesson(lessonId);
+    return this.chatService.getThreadMessages(lessonId, threadId);
   }
 }

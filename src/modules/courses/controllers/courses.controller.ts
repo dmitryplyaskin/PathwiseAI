@@ -131,11 +131,45 @@ export class CoursesController {
     answer: string;
     lessonTitle: string;
     messageId: string;
+    threadId: string;
   }> {
     // Используем lessonId из параметра URL
     return this.coursesService.askLessonQuestion({
       ...askLessonQuestionDto,
       lessonId,
     });
+  }
+
+  // Получить список веток разговоров
+  @Get('lessons/:id/threads')
+  getThreads(@Param('id', ParseUUIDPipe) lessonId: string) {
+    return this.coursesService.getThreads(lessonId);
+  }
+
+  // Получить сообщения конкретной ветки
+  @Get('lessons/:id/threads/:threadId')
+  getThreadMessages(
+    @Param('id', ParseUUIDPipe) lessonId: string,
+    @Param('threadId') threadId: string,
+  ) {
+    return this.coursesService.getThreadMessages(lessonId, threadId);
+  }
+
+  // Удалить ветку разговора
+  @Delete('lessons/:id/threads/:threadId')
+  deleteThread(
+    @Param('id', ParseUUIDPipe) lessonId: string,
+    @Param('threadId') threadId: string,
+  ) {
+    return this.coursesService.deleteThread(lessonId, threadId);
+  }
+
+  // Перегенерировать ответ
+  @Post('lessons/:id/regenerate/:messageId')
+  regenerateMessage(
+    @Param('id', ParseUUIDPipe) lessonId: string,
+    @Param('messageId', ParseUUIDPipe) messageId: string,
+  ) {
+    return this.coursesService.regenerateMessage(lessonId, messageId);
   }
 }

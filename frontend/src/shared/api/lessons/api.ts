@@ -1,4 +1,9 @@
-import { type Lesson, type LessonQuestionResponse } from './types';
+import {
+  type Lesson,
+  type LessonQuestionResponse,
+  type Thread,
+  type ThreadMessage,
+} from './types';
 
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -17,6 +22,8 @@ export const lessonsApi = {
   askQuestion: async (
     lessonId: string,
     question: string,
+    threadId?: string,
+    lessonContent?: string,
     userId?: string,
   ): Promise<LessonQuestionResponse> => {
     const response = await fetch(
@@ -26,11 +33,68 @@ export const lessonsApi = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ lessonId, question, userId }),
+        body: JSON.stringify({
+          lessonId,
+          question,
+          threadId,
+          lessonContent,
+          userId,
+        }),
       },
     );
     if (!response.ok) {
       throw new Error('Failed to send question');
+    }
+    return response.json();
+  },
+
+  getThreads: async (lessonId: string): Promise<Thread[]> => {
+    const response = await fetch(
+      `${API_BASE_URL}/courses/lessons/${lessonId}/threads`,
+    );
+    if (!response.ok) {
+      throw new Error('Failed to fetch threads');
+    }
+    return response.json();
+  },
+
+  getThreadMessages: async (
+    lessonId: string,
+    threadId: string,
+  ): Promise<ThreadMessage[]> => {
+    const response = await fetch(
+      `${API_BASE_URL}/courses/lessons/${lessonId}/threads/${threadId}`,
+    );
+    if (!response.ok) {
+      throw new Error('Failed to fetch thread messages');
+    }
+    return response.json();
+  },
+
+  deleteThread: async (
+    lessonId: string,
+    threadId: string,
+  ): Promise<{ message: string; threadId: string }> => {
+    const response = await fetch(
+      `${API_BASE_URL}/courses/lessons/${lessonId}/threads/${threadId}`,
+      { method: 'DELETE' },
+    );
+    if (!response.ok) {
+      throw new Error('Failed to delete thread');
+    }
+    return response.json();
+  },
+
+  regenerateMessage: async (
+    lessonId: string,
+    messageId: string,
+  ): Promise<{ message: string; newMessage: ThreadMessage }> => {
+    const response = await fetch(
+      `${API_BASE_URL}/courses/lessons/${lessonId}/regenerate/${messageId}`,
+      { method: 'POST' },
+    );
+    if (!response.ok) {
+      throw new Error('Failed to regenerate message');
     }
     return response.json();
   },

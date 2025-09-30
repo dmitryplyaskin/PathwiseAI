@@ -33,7 +33,13 @@ export class ChatService {
   }
 
   async sendMessage(createChatMessageDto: CreateChatMessageDto) {
-    const { lessonId, userId, content } = createChatMessageDto;
+    const {
+      lessonId,
+      userId,
+      content,
+      threadId = 'main',
+      lessonContent,
+    } = createChatMessageDto;
 
     // Получить или создать чат для урока
     const chat = await this.getOrCreateChat(lessonId);
@@ -44,18 +50,32 @@ export class ChatService {
       userId,
       role: MessageRole.USER,
       content,
+      threadId,
     });
     await this.chatMessageRepository.save(userMessage);
 
-    // Получить историю сообщений для контекста
-    const messages = await this.getChatHistory(chat.id);
+    // Получить историю сообщений для контекста (только текущая ветка)
+    const messages = await this.getChatHistory(chat.id, threadId);
+
+    // Подготовить системный промпт с контекстом урока
+    const systemPrompt = lessonContent
+      ? `Ты - AI-помощник в образовательной платформе PathwiseAI. Студент изучает урок и задает вопросы, чтобы лучше понять материал.
+
+КОНТЕКСТ УРОКА:
+${lessonContent}
+
+Твоя задача:
+- Отвечай на вопросы студента, основываясь на контексте урока
+- Объясняй понятно и с примерами
+- Помогай углубить понимание темы
+- Если вопрос выходит за рамки урока, мягко верни к теме`
+      : 'Ты - AI-помощник в образовательной платформе PathwiseAI. Помогай студентам понять материал урока, отвечай на их вопросы четко и понятно.';
 
     // Подготовить сообщения для OpenRouter
     const openRouterMessages = [
       {
         role: 'system',
-        content:
-          'Ты - AI-помощник в образовательной платформе PathwiseAI. Помогай студентам понять материал урока, отвечай на их вопросы четко и понятно. Если вопрос не связан с учебой, вежливо переведи разговор на образовательную тему.',
+        content: systemPrompt,
       },
       ...messages.map((msg) => ({
         role: msg.role === MessageRole.ASSISTANT ? 'assistant' : 'user',
@@ -72,6 +92,7 @@ export class ChatService {
       chatId: chat.id,
       role: MessageRole.ASSISTANT,
       content: aiResponse,
+      threadId,
     });
     await this.chatMessageRepository.save(aiMessage);
 
@@ -79,6 +100,7 @@ export class ChatService {
       userMessage,
       aiMessage,
       chat,
+      threadId,
     };
   }
 
@@ -100,9 +122,16 @@ export class ChatService {
     );
   }
 
-  private async getChatHistory(chatId: string): Promise<ChatMessage[]> {
+  private async getChatHistory(
+    chatId: string,
+    threadId?: string,
+  ): Promise<ChatMessage[]> {
+    const where: any = { chatId };
+    if (threadId) {
+      where.threadId = threadId;
+    }
     return this.chatMessageRepository.find({
-      where: { chatId },
+      where,
       order: { created_at: 'ASC' },
     });
   }
@@ -127,6 +156,132 @@ export class ChatService {
 
     await this.chatMessageRepository.delete({ chatId: chat.id });
     return { message: 'История чата очищена' };
+  }
+
+  async deleteThread(lessonId: string, threadId: string) {
+    const chat = await this.chatRepository.findOne({ where: { lessonId } });
+
+    if (!chat) {
+      throw new NotFoundException('Чат не найден');
+    }
+
+    await this.chatMessageRepository.delete({ chatId: chat.id, threadId });
+    return { message: 'Ветка разговора удалена', threadId };
+  }
+
+  async regenerateMessage(
+    lessonId: string,
+    messageId: string,
+    lessonContent?: string,
+  ) {
+    const chat = await this.chatRepository.findOne({ where: { lessonId } });
+
+    if (!chat) {
+      throw new NotFoundException('Чат не найден');
+    }
+
+    // Найти сообщение для регенерации
+    const messageToRegenerate = await this.chatMessageRepository.findOne({
+      where: { id: messageId, chatId: chat.id, role: MessageRole.ASSISTANT },
+    });
+
+    if (!messageToRegenerate) {
+      throw new NotFoundException('Сообщение не найдено');
+    }
+
+    const threadId = messageToRegenerate.threadId;
+
+    // Получить все сообщения до этого в ветке
+    const allMessages = await this.getChatHistory(chat.id, threadId);
+    const messageIndex = allMessages.findIndex((msg) => msg.id === messageId);
+    const messagesBeforeRegeneration = allMessages.slice(0, messageIndex);
+
+    // Подготовить системный промпт
+    const systemPrompt = lessonContent
+      ? `Ты - AI-помощник в образовательной платформе PathwiseAI. Студент изучает урок и задает вопросы, чтобы лучше понять материал.
+
+КОНТЕКСТ УРОКА:
+${lessonContent}
+
+Твоя задача:
+- Отвечай на вопросы студента, основываясь на контексте урока
+- Объясняй понятно и с примерами
+- Помогай углубить понимание темы
+- Если вопрос выходит за рамки урока, мягко верни к теме`
+      : 'Ты - AI-помощник в образовательной платформе PathwiseAI. Помогай студентам понять материал урока, отвечай на их вопросы четко и понятно.';
+
+    const openRouterMessages = [
+      {
+        role: 'system',
+        content: systemPrompt,
+      },
+      ...messagesBeforeRegeneration.map((msg) => ({
+        role: msg.role === MessageRole.ASSISTANT ? 'assistant' : 'user',
+        content: msg.content,
+      })),
+    ];
+
+    // Получить новый ответ от AI
+    const newResponse =
+      await this.openRouterService.generateResponse(openRouterMessages);
+
+    // Обновить сообщение
+    messageToRegenerate.content = newResponse;
+    await this.chatMessageRepository.save(messageToRegenerate);
+
+    return {
+      message: 'Ответ перегенерирован',
+      newMessage: messageToRegenerate,
+    };
+  }
+
+  async getThreads(lessonId: string) {
+    const chat = await this.chatRepository.findOne({ where: { lessonId } });
+
+    if (!chat) {
+      return [];
+    }
+
+    // Получить все уникальные threadId
+    const messages = await this.chatMessageRepository.find({
+      where: { chatId: chat.id },
+      order: { created_at: 'ASC' },
+    });
+
+    const threadsMap = new Map<string, any>();
+
+    messages.forEach((msg) => {
+      if (!threadsMap.has(msg.threadId)) {
+        threadsMap.set(msg.threadId, {
+          threadId: msg.threadId,
+          messageCount: 0,
+          firstMessage: msg.content.substring(0, 50) + '...',
+          createdAt: msg.created_at,
+          lastActivity: msg.created_at,
+        });
+      }
+      const thread = threadsMap.get(msg.threadId);
+      thread.messageCount++;
+      thread.lastActivity = msg.created_at;
+    });
+
+    return Array.from(threadsMap.values()).sort(
+      (a, b) =>
+        new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime(),
+    );
+  }
+
+  async getThreadMessages(lessonId: string, threadId: string) {
+    const chat = await this.chatRepository.findOne({ where: { lessonId } });
+
+    if (!chat) {
+      return [];
+    }
+
+    return this.chatMessageRepository.find({
+      where: { chatId: chat.id, threadId },
+      order: { created_at: 'ASC' },
+    });
   }
 
   async sendMessageStream(
