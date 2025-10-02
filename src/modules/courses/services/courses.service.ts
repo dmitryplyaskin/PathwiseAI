@@ -15,6 +15,26 @@ import { CreateModuleDto } from '../dto/create-module.dto';
 import { OpenRouterService } from '../../chat/services/openrouter.service';
 import { ChatService } from '../../chat/services/chat.service';
 import { AskLessonQuestionDto } from '../dto/ask-lesson-question.dto';
+import * as promptsData from './prompts.json';
+
+interface PromptsConfig {
+  systemPrompt: string;
+  userPromptTemplate: string;
+  complexityLevels: {
+    simple: string;
+    normal: string;
+    professional: string;
+  };
+}
+
+interface LessonGenerationResponse {
+  title?: string;
+  content?: string;
+  readingTime?: number;
+  difficulty?: number;
+}
+
+const prompts = promptsData as PromptsConfig;
 
 @Injectable()
 export class CoursesService {
@@ -203,63 +223,54 @@ export class CoursesService {
     details: string | undefined,
     complexity: string,
   ): Promise<string> {
-    const complexityDescriptions: Record<string, string> = {
-      simple: 'очень простым, с аналогиями и базовыми терминами',
-      normal: 'средним, с правильной терминологией',
-      professional:
-        'профессиональным, с использованием сложной терминологии и деталей',
-    };
+    // Get complexity description from prompts.json
+    const validComplexity = ['simple', 'normal', 'professional'].includes(
+      complexity,
+    )
+      ? (complexity as keyof PromptsConfig['complexityLevels'])
+      : 'normal';
+    const complexityDescription = prompts.complexityLevels[validComplexity];
 
-    const complexityLevel: string =
-      complexityDescriptions[complexity] || complexityDescriptions.normal;
+    // Build user prompt from template
+    const detailsSection = details ? `Additional details: ${details}\n` : '';
 
-    const systemPrompt = `Ты - эксперт-преподаватель, создающий образовательный контент для платформы PathwiseAI.
-Твоя задача - создать структурированный урок в формате JSON.
+    const userPrompt = prompts.userPromptTemplate
+      .replace('${topic}', topic)
+      .replace('${details}', detailsSection)
+      .replace('${complexityDescription}', complexityDescription);
 
-Требования к уроку:
-1. Уровень сложности: ${complexityLevel}
-2. Контент должен быть понятным и структурированным
-3. Используй markdown для форматирования
-4. Включи примеры и пояснения
-
-Верни ТОЛЬКО валидный JSON в следующем формате:
-{
-  "title": "Название урока",
-  "content": "Полный текст урока в markdown формате с разделами, примерами и объяснениями"
-}`;
-
-    const userPrompt = `Создай урок на тему: "${topic}"
-${details ? `Дополнительные детали: ${details}` : ''}
-
-Урок должен быть ${complexityLevel} и включать:
-- Введение и объяснение концепции
-- Основной материал с примерами
-- Практические советы
-- Краткое резюме в конце`;
-
+    console.log('userPrompt', userPrompt);
+    console.log('prompts.systemPrompt', prompts.systemPrompt);
     const messages = [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: prompts.systemPrompt },
       { role: 'user', content: userPrompt },
     ];
 
     try {
       const response = await this.openRouterService.generateResponse(messages);
+      console.log('AI response received:', response);
 
-      // Парсим JSON из ответа
+      // Parse JSON from response
       const jsonMatch = response.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
-        const lessonData = JSON.parse(jsonMatch[0]) as {
-          content?: string;
-          title?: string;
-        };
+        const lessonData = JSON.parse(jsonMatch[0]) as LessonGenerationResponse;
+
+        // Log the parsed lesson data
+        console.log('Parsed lesson data:', {
+          title: lessonData.title,
+          readingTime: lessonData.readingTime,
+          difficulty: lessonData.difficulty,
+          contentLength: lessonData.content?.length || 0,
+        });
+
         return lessonData.content || response;
       }
 
-      // Если не удалось распарсить JSON, возвращаем весь ответ
+      // If JSON parsing failed, return the whole response
       return response;
     } catch (error) {
       console.error('Error generating lesson content:', error);
-      throw new Error('Не удалось сгенерировать содержимое урока');
+      throw new Error('Failed to generate lesson content');
     }
   }
 
