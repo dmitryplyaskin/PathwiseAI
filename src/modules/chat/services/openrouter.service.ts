@@ -21,19 +21,38 @@ export class OpenRouterService {
     });
   }
 
-  async generateResponse(messages: Array<{ role: string; content: string }>) {
+  async generateResponse(
+    messages: Array<{ role: string; content: string }>,
+    options?: {
+      temperature?: number;
+      max_tokens?: number;
+      response_format?: Record<string, unknown>;
+    },
+  ) {
     try {
-      const completion = await this.client.chat.completions.create({
+      const completionParams = {
         model: this.config.model,
         messages:
           messages as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
-        temperature: 0.7,
-        max_tokens: 1000,
-      });
+        temperature: options?.temperature ?? undefined,
+        max_tokens: options?.max_tokens ?? undefined,
+        ...(options?.response_format && {
+          response_format: options.response_format,
+        }),
+      };
+
+      const completion = await this.client.chat.completions.create(
+        completionParams as OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
+      );
 
       return completion.choices[0]?.message?.content || '';
     } catch (error) {
       console.error('OpenRouter API Error:', error);
+      if (error instanceof Error) {
+        throw new Error(
+          `Не удалось получить ответ от AI модели: ${error.message}`,
+        );
+      }
       throw new Error('Не удалось получить ответ от AI модели');
     }
   }

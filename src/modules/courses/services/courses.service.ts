@@ -16,6 +16,8 @@ import { OpenRouterService } from '../../chat/services/openrouter.service';
 import { ChatService } from '../../chat/services/chat.service';
 import { AskLessonQuestionDto } from '../dto/ask-lesson-question.dto';
 import * as promptsData from './prompts.json';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface PromptsConfig {
   systemPrompt: string;
@@ -28,10 +30,10 @@ interface PromptsConfig {
 }
 
 interface LessonGenerationResponse {
-  title?: string;
-  content?: string;
-  readingTime?: number;
-  difficulty?: number;
+  title: string;
+  content: string;
+  readingTime: number;
+  difficulty: number;
 }
 
 const prompts = promptsData as PromptsConfig;
@@ -239,38 +241,103 @@ export class CoursesService {
       .replace('${details}', detailsSection)
       .replace('${complexityDescription}', complexityDescription);
 
-    console.log('userPrompt', userPrompt);
-    console.log('prompts.systemPrompt', prompts.systemPrompt);
     const messages = [
       { role: 'system', content: prompts.systemPrompt },
       { role: 'user', content: userPrompt },
     ];
 
+    // Define JSON Schema for structured output
+    const lessonSchema = {
+      type: 'json_schema',
+      json_schema: {
+        name: 'lesson_generation',
+        strict: true,
+        schema: {
+          type: 'object',
+          properties: {
+            title: {
+              type: 'string',
+              description: 'Заголовок урока',
+            },
+            content: {
+              type: 'string',
+              description:
+                'Основной контент урока в формате HTML с подробным объяснением темы',
+            },
+            readingTime: {
+              type: 'number',
+              description: 'Примерное время чтения урока в минутах',
+            },
+            difficulty: {
+              type: 'number',
+              description: 'Уровень сложности урока от 1 до 5',
+            },
+          },
+          required: ['title', 'content', 'readingTime', 'difficulty'],
+          additionalProperties: false,
+        },
+      },
+    } as const;
+
     try {
-      const response = await this.openRouterService.generateResponse(messages);
-      console.log('AI response received:', response);
+      const response = await this.openRouterService.generateResponse(messages, {
+        response_format: lessonSchema,
+      });
 
-      // Parse JSON from response
-      const jsonMatch = response.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const lessonData = JSON.parse(jsonMatch[0]) as LessonGenerationResponse;
+      // Сохраняем response в JSON файл для отладки
+      this.saveDebugResponse(response, topic);
 
-        // Log the parsed lesson data
-        console.log('Parsed lesson data:', {
-          title: lessonData.title,
-          readingTime: lessonData.readingTime,
-          difficulty: lessonData.difficulty,
-          contentLength: lessonData.content?.length || 0,
-        });
+      console.log('response:\n', response);
+      // Parse the structured JSON response
+      const lessonData = JSON.parse(response) as LessonGenerationResponse;
 
-        return lessonData.content || response;
-      }
+      // Log the parsed lesson data
+      console.log('Parsed lesson data:', {
+        title: lessonData.title,
+        readingTime: lessonData.readingTime,
+        difficulty: lessonData.difficulty,
+        contentLength: lessonData.content.length,
+      });
 
-      // If JSON parsing failed, return the whole response
-      return response;
+      return lessonData.content;
     } catch (error) {
       console.error('Error generating lesson content:', error);
       throw new Error('Failed to generate lesson content');
+    }
+  }
+
+  private saveDebugResponse(response: string, topic: string): void {
+    try {
+      // Создаем папку debug, если её нет
+      const debugDir = path.join(process.cwd(), 'debug-responses');
+      if (!fs.existsSync(debugDir)) {
+        fs.mkdirSync(debugDir, { recursive: true });
+      }
+
+      // Создаем имя файла с timestamp и безопасным названием темы
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const safeTopic = topic
+        .replace(/[^a-zA-Z0-9а-яА-Я]/g, '_')
+        .substring(0, 50);
+      const fileName = `${timestamp}_${safeTopic}.json`;
+      const filePath = path.join(debugDir, fileName);
+
+      // Пытаемся распарсить JSON для красивого форматирования
+      let formattedContent: string;
+      try {
+        const parsed: unknown = JSON.parse(response);
+        formattedContent = JSON.stringify(parsed, null, 2);
+      } catch {
+        // Если не JSON, сохраняем как есть
+        formattedContent = response;
+      }
+
+      // Сохраняем файл
+      fs.writeFileSync(filePath, formattedContent, 'utf-8');
+      console.log(`Debug response saved to: ${filePath}`);
+    } catch (error) {
+      // Не бросаем ошибку, чтобы не прерывать основной процесс
+      console.error('Failed to save debug response:', error);
     }
   }
 

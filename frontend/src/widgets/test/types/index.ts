@@ -42,3 +42,4 @@ export interface TestResult {
   timeSpent: number; // в секундах
   answers: QuestionAnswer[];
 }
+

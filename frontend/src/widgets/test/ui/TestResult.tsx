@@ -130,3 +130,4 @@ export const TestResult = ({ result, onClose }: TestResultProps) => {
     </Box>
   );
 };
+
