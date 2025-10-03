@@ -179,8 +179,15 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     ),
 
     // Инлайн код
-    code: ({ inline, children, className, ...props }) => {
-      if (inline) {
+    code: ({ children, className, node, ...props }) => {
+      console.log('children', children);
+      console.log('className', className);
+      console.log('props', props);
+
+      const isInline =
+        node?.position?.start?.line === node?.position?.end?.line;
+
+      if (isInline) {
         return (
           <Chip
             label={children}
