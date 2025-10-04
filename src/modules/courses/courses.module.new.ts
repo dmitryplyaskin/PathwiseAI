@@ -16,4 +16,3 @@ import { ChatModule } from '../chat/chat.module';
   exports: [CoursesService, UnitsService, LessonsService],
 })
 export class CoursesModule {}
-
