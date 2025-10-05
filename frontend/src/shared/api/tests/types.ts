@@ -35,3 +35,17 @@ export interface SubmitTestResultResponse {
   timeSpent: number;
   completedAt: string;
 }
+
+export interface CheckTextAnswerRequest {
+  questionId: string;
+  userAnswer: string;
+  expectedAnswer: string;
+  questionText: string;
+}
+
+export interface CheckTextAnswerResponse {
+  isCorrect: boolean;
+  score: number;
+  explanation: string;
+  feedback: string;
+}

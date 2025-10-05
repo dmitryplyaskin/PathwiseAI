@@ -7,8 +7,9 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { CheckCircle } from '@mui/icons-material';
+import { CheckCircle, Error } from '@mui/icons-material';
 import type { TextQuestion as TextQuestionType } from '../types';
+import { testsApi } from '../../../shared/api/tests';
 
 interface TextQuestionProps {
   question: TextQuestionType;
@@ -25,23 +26,49 @@ export const TextQuestion = ({
   const [showResult, setShowResult] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [llmExplanation, setLlmExplanation] = useState('');
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [score, setScore] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (!answer.trim()) return;
 
     setIsLoading(true);
+    setError(null);
 
-    // Заглушка для проверки LLM - всегда возвращает правильный ответ
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const result = await testsApi.checkTextAnswer({
+        questionId: question.id,
+        userAnswer: answer,
+        expectedAnswer: question.expectedAnswer || '',
+        questionText: question.question,
+      });
 
-    const mockExplanation =
-      'Отличный ответ! Вы правильно описали ключевые концепции. Ваше понимание темы демонстрирует глубокое знание материала.';
+      setIsCorrect(result.isCorrect);
+      setScore(result.score);
+      setLlmExplanation(result.explanation);
+      setFeedback(result.feedback);
+      setShowResult(true);
 
-    setLlmExplanation(mockExplanation);
-    setShowResult(true);
-    setIsLoading(false);
+      onAnswer(result.isCorrect, answer, result.explanation);
+    } catch (err: unknown) {
+      console.error('Failed to check text answer:', err);
+      setError(
+        err instanceof Error ? err.message : 'Не удалось проверить ответ',
+      );
 
-    onAnswer(true, answer, mockExplanation);
+      // Fallback: считаем ответ правильным при ошибке
+      setIsCorrect(true);
+      setScore(70);
+      setLlmExplanation('Ответ принят. Произошла ошибка при проверке.');
+      setFeedback('Ваш ответ был принят.');
+      setShowResult(true);
+
+      onAnswer(true, answer, 'Ответ принят. Произошла ошибка при проверке.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -66,16 +93,34 @@ export const TextQuestion = ({
         }}
       />
 
+      {error && (
+        <Alert
+          severity="warning"
+          icon={<Error />}
+          sx={{ mb: 2, borderRadius: 2 }}
+        >
+          <Typography variant="body2">{error}</Typography>
+        </Alert>
+      )}
+
       {showResult && llmExplanation && (
         <Alert
-          severity="success"
-          icon={<CheckCircle />}
+          severity={isCorrect ? 'success' : 'info'}
+          icon={isCorrect ? <CheckCircle /> : undefined}
           sx={{ mb: 2, borderRadius: 2 }}
         >
           <Typography variant="body2" fontWeight={600} mb={1}>
-            Оценка вашего ответа:
+            Оценка: {score}%{' '}
+            {isCorrect ? '(Правильно)' : '(Частично правильно)'}
           </Typography>
-          <Typography variant="body2">{llmExplanation}</Typography>
+          <Typography variant="body2" mb={1}>
+            <strong>Объяснение:</strong> {llmExplanation}
+          </Typography>
+          {feedback && (
+            <Typography variant="body2">
+              <strong>Обратная связь:</strong> {feedback}
+            </Typography>
+          )}
         </Alert>
       )}
 
@@ -93,4 +138,3 @@ export const TextQuestion = ({
     </Box>
   );
 };
-

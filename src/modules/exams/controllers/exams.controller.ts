@@ -15,6 +15,7 @@ import { CreateExamResultDto } from '../dto/create-exam-result.dto';
 import { UpdateExamResultDto } from '../dto/update-exam-result.dto';
 import { GenerateTestDto } from '../dto/generate-test.dto';
 import { SubmitTestResultDto } from '../dto/submit-test-result.dto';
+import { CheckTextAnswerDto } from '../dto/check-text-answer.dto';
 
 @Controller('exams')
 export class ExamsController {
@@ -85,5 +86,10 @@ export class ExamsController {
   @Post('submit-result')
   submitTestResult(@Body() submitTestResultDto: SubmitTestResultDto) {
     return this.examsService.submitTestResult(submitTestResultDto);
+  }
+
+  @Post('check-text-answer')
+  checkTextAnswer(@Body() checkTextAnswerDto: CheckTextAnswerDto) {
+    return this.examsService.checkTextAnswer(checkTextAnswerDto);
   }
 }

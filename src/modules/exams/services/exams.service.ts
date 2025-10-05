@@ -9,6 +9,7 @@ import { CreateExamResultDto } from '../dto/create-exam-result.dto';
 import { UpdateExamResultDto } from '../dto/update-exam-result.dto';
 import { GenerateTestDto } from '../dto/generate-test.dto';
 import { SubmitTestResultDto } from '../dto/submit-test-result.dto';
+import { CheckTextAnswerDto } from '../dto/check-text-answer.dto';
 import { Lesson } from '../../courses/entities/lesson.entity';
 import { Question } from '../../questions/entities/question.entity';
 import { QuestionType } from '../../questions/entities/question.entity';
@@ -16,6 +17,11 @@ import { OpenRouterService } from '../../chat/services/openrouter.service';
 import { testGenerationPrompts } from '../config/test-generation.prompts';
 import { testGenerationSchema } from '../config/test-generation.schema';
 import { TestGenerationResponse } from '../config/test-generation.schema';
+import { textCheckingPrompts } from '../config/text-checking.prompts';
+import {
+  textCheckingSchema,
+  TextCheckingResponse,
+} from '../config/text-checking.schema';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -292,5 +298,78 @@ export class ExamsService {
       timeSpent: parseInt(timeSpent),
       completedAt: exam.completed_at,
     };
+  }
+
+  async checkTextAnswer(
+    checkTextAnswerDto: CheckTextAnswerDto,
+  ): Promise<TextCheckingResponse> {
+    const { userAnswer, expectedAnswer, questionText } = checkTextAnswerDto;
+
+    const userPrompt = textCheckingPrompts.userPromptTemplate
+      .replace('${questionText}', questionText)
+      .replace('${expectedAnswer}', expectedAnswer)
+      .replace('${userAnswer}', userAnswer);
+
+    const messages = [
+      { role: 'system', content: textCheckingPrompts.systemPrompt },
+      { role: 'user', content: userPrompt },
+    ];
+
+    try {
+      const response = await this.openRouterService.generateResponse(messages, {
+        response_format: textCheckingSchema,
+      });
+
+      const checkingResult = JSON.parse(response) as TextCheckingResponse;
+
+      // Валидация результата
+      if (typeof checkingResult.isCorrect !== 'boolean') {
+        checkingResult.isCorrect = checkingResult.score >= 70;
+      }
+
+      if (
+        typeof checkingResult.score !== 'number' ||
+        checkingResult.score < 0 ||
+        checkingResult.score > 100
+      ) {
+        checkingResult.score = checkingResult.isCorrect ? 85 : 30;
+      }
+
+      return checkingResult;
+    } catch (error) {
+      console.error('Error checking text answer:', error);
+
+      // Fallback: простая проверка на основе длины и ключевых слов
+      const isCorrect = this.simpleTextCheck(userAnswer, expectedAnswer);
+
+      return {
+        isCorrect,
+        score: isCorrect ? 85 : 30,
+        explanation: isCorrect
+          ? 'Ответ соответствует ожидаемому содержанию.'
+          : 'Ответ не полностью соответствует ожидаемому содержанию.',
+        feedback: isCorrect
+          ? 'Хороший ответ! Вы правильно поняли вопрос.'
+          : 'Попробуйте более подробно раскрыть тему вопроса.',
+      };
+    }
+  }
+
+  private simpleTextCheck(userAnswer: string, expectedAnswer: string): boolean {
+    // Простая проверка на основе длины и ключевых слов
+    const userWords = userAnswer.toLowerCase().split(/\s+/);
+    const expectedWords = expectedAnswer.toLowerCase().split(/\s+/);
+
+    // Если ответ слишком короткий, считаем неправильным
+    if (userAnswer.length < 10) return false;
+
+    // Подсчитываем совпадения ключевых слов
+    const commonWords = userWords.filter(
+      (word) => word.length > 3 && expectedWords.includes(word),
+    );
+
+    // Если есть хотя бы 30% совпадений ключевых слов, считаем правильным
+    const matchRatio = commonWords.length / Math.max(expectedWords.length, 1);
+    return matchRatio >= 0.3;
   }
 }

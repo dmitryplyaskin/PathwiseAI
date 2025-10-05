@@ -24,6 +24,7 @@ import { QuizQuestion } from './QuizQuestion';
 import { TextQuestion } from './TextQuestion';
 import { TestResult } from './TestResult';
 import { testsApi } from '../../../shared/api/tests';
+import { useCurrentUser } from '../../../shared/model';
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {
@@ -56,6 +57,7 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
   const [testResult, setTestResult] = useState<TestResultType | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const { userId } = useCurrentUser();
 
   const currentQuestion = testData.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === testData.questions.length - 1;
@@ -151,7 +153,7 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
     try {
       await testsApi.submitTestResult({
         examId: testData.id,
-        userId: 'default-user', // TODO: получить из контекста пользователя
+        userId: userId ?? '',
         answers: answersToUse.map((answer) => ({
           questionId: answer.questionId,
           answer: answer.answer || '',

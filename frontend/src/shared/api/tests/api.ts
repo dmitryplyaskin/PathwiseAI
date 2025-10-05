@@ -3,6 +3,8 @@ import {
   type GenerateTestRequest,
   type SubmitTestResultRequest,
   type SubmitTestResultResponse,
+  type CheckTextAnswerRequest,
+  type CheckTextAnswerResponse,
 } from './types';
 
 const API_BASE_URL = 'http://localhost:3000';
@@ -42,6 +44,24 @@ export const testsApi = {
 
     if (!response.ok) {
       throw new Error('Failed to submit test result');
+    }
+
+    return response.json();
+  },
+
+  checkTextAnswer: async (
+    request: CheckTextAnswerRequest,
+  ): Promise<CheckTextAnswerResponse> => {
+    const response = await fetch(`${API_BASE_URL}/exams/check-text-answer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to check text answer');
     }
 
     return response.json();

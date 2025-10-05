@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -26,6 +26,13 @@ export const QuizQuestion = ({
   const [selectedOption, setSelectedOption] = useState<string>('');
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+
+  // Сброс состояния при смене вопроса
+  useEffect(() => {
+    setSelectedOption('');
+    setShowResult(false);
+    setIsCorrect(false);
+  }, [question.id]);
 
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!isAnswered) {
@@ -151,4 +158,3 @@ export const QuizQuestion = ({
     </Box>
   );
 };
-

@@ -9,4 +9,6 @@ export type {
   SubmitTestResultRequest,
   SubmitTestResultResponse,
   QuestionAnswerDto,
+  CheckTextAnswerRequest,
+  CheckTextAnswerResponse,
 } from './types';
