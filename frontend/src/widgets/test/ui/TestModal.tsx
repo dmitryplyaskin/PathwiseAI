@@ -10,6 +10,7 @@ import {
   Alert,
   Slide,
   LinearProgress,
+  CircularProgress,
 } from '@mui/material';
 import { Close, NavigateNext, SkipNext } from '@mui/icons-material';
 import type { TransitionProps } from '@mui/material/transitions';
@@ -22,6 +23,7 @@ import type {
 import { QuizQuestion } from './QuizQuestion';
 import { TextQuestion } from './TextQuestion';
 import { TestResult } from './TestResult';
+import { testsApi } from '../../../shared/api/tests';
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {
@@ -52,6 +54,8 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
   const [timeSpent, setTimeSpent] = useState(0);
   const [testCompleted, setTestCompleted] = useState(false);
   const [testResult, setTestResult] = useState<TestResultType | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const currentQuestion = testData.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === testData.questions.length - 1;
@@ -79,6 +83,8 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
       setTimeSpent(0);
       setTestCompleted(false);
       setTestResult(null);
+      setIsSubmitting(false);
+      setSubmitError(null);
     }
   }, [open]);
 
@@ -124,7 +130,7 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
     }
   };
 
-  const finishTest = (finalAnswers?: QuestionAnswer[]) => {
+  const finishTest = async (finalAnswers?: QuestionAnswer[]) => {
     const answersToUse = finalAnswers || answers;
     const correctCount = answersToUse.filter((a) => a.isCorrect).length;
 
@@ -137,6 +143,35 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
 
     setTestResult(result);
     setTestCompleted(true);
+
+    // Отправляем результаты на сервер
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      await testsApi.submitTestResult({
+        examId: testData.id,
+        userId: 'default-user', // TODO: получить из контекста пользователя
+        answers: answersToUse.map((answer) => ({
+          questionId: answer.questionId,
+          answer: answer.answer || '',
+          isCorrect: answer.isCorrect,
+          explanation: answer.llmExplanation,
+        })),
+        timeSpent: timeSpent.toString(),
+      });
+
+      console.log('Test results submitted successfully');
+    } catch (error) {
+      console.error('Failed to submit test results:', error);
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось сохранить результаты',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCloseAttempt = () => {
@@ -167,7 +202,12 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
             bgcolor: 'background.default',
           }}
         >
-          <TestResult result={testResult} onClose={onClose} />
+          <TestResult
+            result={testResult}
+            onClose={onClose}
+            isSubmitting={isSubmitting}
+            submitError={submitError}
+          />
         </Box>
       </Dialog>
     );
@@ -344,4 +384,3 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
     </Dialog>
   );
 };
-

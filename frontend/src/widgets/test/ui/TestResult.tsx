@@ -1,4 +1,11 @@
-import { Box, Button, Typography, Paper } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Paper,
+  Alert,
+  CircularProgress,
+} from '@mui/material';
 import {
   SentimentVerySatisfied,
   SentimentSatisfied,
@@ -9,6 +16,8 @@ import type { TestResult as TestResultType } from '../types';
 interface TestResultProps {
   result: TestResultType;
   onClose: () => void;
+  isSubmitting?: boolean;
+  submitError?: string | null;
 }
 
 const formatTime = (seconds: number): string => {
@@ -41,7 +50,12 @@ const getMessage = (percentage: number): string => {
   }
 };
 
-export const TestResult = ({ result, onClose }: TestResultProps) => {
+export const TestResult = ({
+  result,
+  onClose,
+  isSubmitting,
+  submitError,
+}: TestResultProps) => {
   const percentage = Math.round(
     (result.correctAnswers / result.totalQuestions) * 100,
   );
@@ -111,11 +125,34 @@ export const TestResult = ({ result, onClose }: TestResultProps) => {
           Время прохождения: {formatTime(result.timeSpent)}
         </Typography>
 
+        {/* Статус отправки */}
+        {isSubmitting && (
+          <Box
+            mb={3}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            gap={2}
+          >
+            <CircularProgress size={24} />
+            <Typography variant="body2" color="text.secondary">
+              Сохранение результатов...
+            </Typography>
+          </Box>
+        )}
+
+        {submitError && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {submitError}
+          </Alert>
+        )}
+
         {/* Кнопка закрытия */}
         <Button
           variant="contained"
           size="large"
           onClick={onClose}
+          disabled={isSubmitting}
           sx={{
             py: 2,
             px: 6,
@@ -130,4 +167,3 @@ export const TestResult = ({ result, onClose }: TestResultProps) => {
     </Box>
   );
 };
-

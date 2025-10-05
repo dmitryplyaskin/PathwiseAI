@@ -13,6 +13,8 @@ import { CreateExamDto } from '../dto/create-exam.dto';
 import { UpdateExamDto } from '../dto/update-exam.dto';
 import { CreateExamResultDto } from '../dto/create-exam-result.dto';
 import { UpdateExamResultDto } from '../dto/update-exam-result.dto';
+import { GenerateTestDto } from '../dto/generate-test.dto';
+import { SubmitTestResultDto } from '../dto/submit-test-result.dto';
 
 @Controller('exams')
 export class ExamsController {
@@ -72,5 +74,16 @@ export class ExamsController {
   @Delete('results/:id')
   removeExamResult(@Param('id', ParseUUIDPipe) id: string) {
     return this.examsService.removeExamResult(id);
+  }
+
+  // New endpoints for test generation and submission
+  @Post('generate-for-lesson')
+  generateTestForLesson(@Body() generateTestDto: GenerateTestDto) {
+    return this.examsService.getOrGenerateTestForLesson(generateTestDto);
+  }
+
+  @Post('submit-result')
+  submitTestResult(@Body() submitTestResultDto: SubmitTestResultDto) {
+    return this.examsService.submitTestResult(submitTestResultDto);
   }
 }

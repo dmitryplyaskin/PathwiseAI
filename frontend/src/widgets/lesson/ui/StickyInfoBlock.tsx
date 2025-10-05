@@ -8,6 +8,8 @@ import {
   Divider,
   Chip,
   LinearProgress,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import {
   Quiz,
@@ -20,7 +22,9 @@ import {
 } from '@mui/icons-material';
 import type { Lesson } from '../../../shared/api/lessons';
 import { TestModal } from '../../test/ui';
-import { mockTestData } from '../../test/mock/testData';
+import { testsApi } from '../../../shared/api/tests';
+import type { TestData } from '../../test/types';
+import { useCurrentUser } from '../../../shared/model';
 
 interface StickyInfoBlockProps {
   lesson: Lesson | null;
@@ -62,17 +66,44 @@ const getStatusInfo = (status: string) => {
 
 export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [testData, setTestData] = useState<TestData | null>(null);
+  const [isLoadingTest, setIsLoadingTest] = useState(false);
+  const [testError, setTestError] = useState<string | null>(null);
+  const { userId } = useCurrentUser();
 
   const statusInfo = lesson
     ? getStatusInfo(lesson.status)
     : getStatusInfo('not_started');
 
-  const handleOpenTest = () => {
-    setIsTestModalOpen(true);
+  const handleOpenTest = async () => {
+    if (!lesson) return;
+
+    setIsLoadingTest(true);
+    setTestError(null);
+
+    try {
+      const generatedTest = await testsApi.generateTestForLesson({
+        lessonId: lesson.id,
+        userId: userId ?? '',
+        questionCount: 5,
+      });
+
+      setTestData(generatedTest);
+      setIsTestModalOpen(true);
+    } catch (error) {
+      console.error('Failed to generate test:', error);
+      setTestError(
+        error instanceof Error ? error.message : 'Не удалось загрузить тест',
+      );
+    } finally {
+      setIsLoadingTest(false);
+    }
   };
 
   const handleCloseTest = () => {
     setIsTestModalOpen(false);
+    setTestData(null);
+    setTestError(null);
   };
 
   return (
@@ -301,8 +332,10 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
           <Button
             variant="contained"
             fullWidth
-            startIcon={<Quiz />}
-            disabled={notFound}
+            startIcon={
+              isLoadingTest ? <CircularProgress size={20} /> : <Quiz />
+            }
+            disabled={notFound || isLoadingTest}
             onClick={handleOpenTest}
             sx={{
               py: 1.5,
@@ -314,8 +347,15 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
               },
             }}
           >
-            Пройти тест
+            {isLoadingTest ? 'Загрузка теста...' : 'Пройти тест'}
           </Button>
+
+          {/* Ошибка загрузки теста */}
+          {testError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {testError}
+            </Alert>
+          )}
 
           {lesson && (
             <Typography
@@ -330,11 +370,13 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
       </Box>
 
       {/* Модальное окно теста */}
-      <TestModal
-        open={isTestModalOpen}
-        onClose={handleCloseTest}
-        testData={mockTestData}
-      />
+      {testData && (
+        <TestModal
+          open={isTestModalOpen}
+          onClose={handleCloseTest}
+          testData={testData}
+        />
+      )}
     </>
   );
 };

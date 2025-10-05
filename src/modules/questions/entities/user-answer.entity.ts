@@ -22,7 +22,7 @@ export class UserAnswer {
   @Column('text')
   answer_text: string;
 
-  @Column()
+  @Column({ type: 'boolean' })
   is_correct: boolean;
 
   @CreateDateColumn()

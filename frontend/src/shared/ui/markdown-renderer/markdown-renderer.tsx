@@ -180,10 +180,6 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
     // Инлайн код
     code: ({ children, className, node, ...props }) => {
-      console.log('children', children);
-      console.log('className', className);
-      console.log('props', props);
-
       const isInline =
         node?.position?.start?.line === node?.position?.end?.line;
 

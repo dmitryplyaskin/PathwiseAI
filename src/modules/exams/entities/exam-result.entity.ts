@@ -16,6 +16,6 @@ export class ExamResult {
   @Column('text')
   user_answer: string;
 
-  @Column()
+  @Column({ type: 'boolean' })
   is_correct: boolean;
 }
