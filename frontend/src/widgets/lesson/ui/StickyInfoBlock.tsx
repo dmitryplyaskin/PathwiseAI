@@ -25,6 +25,7 @@ import { TestModal } from '../../test/ui';
 import { testsApi } from '../../../shared/api/tests';
 import type { TestData } from '../../test/types';
 import { useCurrentUser } from '../../../shared/model';
+import { LessonManagementMenu } from './LessonManagementMenu';
 
 interface StickyInfoBlockProps {
   lesson: Lesson | null;
@@ -366,6 +367,9 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
               Интервал повторения: {lesson.interval} дней
             </Typography>
           )}
+
+          {/* Меню управления уроком */}
+          <LessonManagementMenu />
         </Stack>
       </Box>
 
