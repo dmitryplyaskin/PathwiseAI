@@ -26,6 +26,7 @@ COMPLEXITY LEVEL: \${complexityDescription}
 
 CONTENT REQUIREMENTS:
 - Title: Clear, specific title in Russian related to the topic
+- Description: Brief summary (1-2 sentences) explaining what the lesson covers and its main value
 - Content: Use markdown formatting (headers ##, ###, lists, **bold**, *italic*, code blocks where appropriate)
 - Structure: Introduction → Core concepts → Examples → Practical tips → Summary
 - Complexity alignment: Content depth must match the specified complexity level
@@ -35,6 +36,7 @@ CONTENT REQUIREMENTS:
 JSON SCHEMA:
 {
   "title": "string - lesson title in Russian",
+  "description": "string - brief summary (1-2 sentences) explaining what the lesson covers and its main value in Russian",
   "content": "string - full lesson text in Russian with markdown formatting including sections: ## Введение, ## Основной материал, ## Примеры, ## Практические советы, ## Заключение",
   "readingTime": "number - estimated reading time in minutes (based on average reading speed of 200 words/minute in Russian)",
   "difficulty": "number - difficulty rating from 1 to 10 based on cognitive load, prerequisites, and concept abstraction. Simple: 1-3, Normal: 4-6, Professional: 7-10"
@@ -42,6 +44,7 @@ JSON SCHEMA:
 
 OUTPUT VALIDATION:
 - Ensure valid JSON syntax (proper escaping of quotes, newlines as \\n)
+- Description field must be concise (1-2 sentences) and informative
 - Content field must contain well-formatted markdown text in Russian
 - All fields are required and non-empty
 - readingTime must be realistic (5-30 minutes typical range)

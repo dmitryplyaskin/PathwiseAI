@@ -28,8 +28,17 @@ export class Lesson {
   @Column()
   title: string;
 
+  @Column('text', { nullable: true })
+  description: string;
+
   @Column('text')
   content: string;
+
+  @Column('int', { nullable: true })
+  reading_time: number;
+
+  @Column('int', { nullable: true })
+  difficulty: number;
 
   @Column('int')
   order: number;

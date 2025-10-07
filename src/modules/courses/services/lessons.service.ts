@@ -104,8 +104,11 @@ export class LessonsService {
     // Создаем урок
     const lesson = this.lessonRepository.create({
       unit: { id: unit.id },
-      title: createModuleDto.topic,
-      content: lessonContent,
+      title: lessonContent.title,
+      description: lessonContent.description,
+      content: lessonContent.content,
+      reading_time: lessonContent.readingTime,
+      difficulty: lessonContent.difficulty,
       order: lessonsCount + 1,
     });
 
@@ -124,7 +127,7 @@ export class LessonsService {
     topic: string,
     details: string | undefined,
     complexity: string,
-  ): Promise<string> {
+  ): Promise<LessonGenerationResponse> {
     // Get complexity description from prompts config
     const validComplexity = ['simple', 'normal', 'professional'].includes(
       complexity,
@@ -162,12 +165,13 @@ export class LessonsService {
       // Log the parsed lesson data
       console.log('Parsed lesson data:', {
         title: lessonData.title,
+        description: lessonData.description,
         readingTime: lessonData.readingTime,
         difficulty: lessonData.difficulty,
         contentLength: lessonData.content.length,
       });
 
-      return lessonData.content;
+      return lessonData;
     } catch (error) {
       console.error('Error generating lesson content:', error);
       throw new Error('Failed to generate lesson content');

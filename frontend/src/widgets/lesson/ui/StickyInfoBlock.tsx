@@ -19,6 +19,8 @@ import {
   CheckCircle,
   PlayCircle,
   Info,
+  AccessTime,
+  TrendingUp,
 } from '@mui/icons-material';
 import type { Lesson } from '../../../shared/api/lessons';
 import { TestModal } from '../../test/ui';
@@ -66,6 +68,23 @@ const getStatusInfo = (status: string) => {
     },
   };
   return statuses[status as StatusKey] || statuses.not_started;
+};
+
+const getDifficultyInfo = (difficulty?: number) => {
+  if (!difficulty) return null;
+
+  const levels = [
+    { label: 'Очень легко', color: 'success' as const, range: [1, 2] },
+    { label: 'Легко', color: 'success' as const, range: [3, 4] },
+    { label: 'Средне', color: 'warning' as const, range: [5, 6] },
+    { label: 'Сложно', color: 'error' as const, range: [7, 8] },
+    { label: 'Очень сложно', color: 'error' as const, range: [9, 10] },
+  ];
+
+  const level = levels.find(
+    (l) => difficulty >= l.range[0] && difficulty <= l.range[1],
+  );
+  return level || levels[2]; // По умолчанию средний уровень
 };
 
 export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
@@ -239,6 +258,74 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
           </Stack>
 
           <Divider />
+
+          {/* Время чтения и сложность */}
+          {lesson && (lesson.reading_time || lesson.difficulty) && (
+            <>
+              <Stack spacing={2}>
+                {lesson.reading_time && (
+                  <Box>
+                    <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+                      <AccessTime
+                        sx={{ fontSize: 18, color: 'primary.main' }}
+                      />
+                      <Typography
+                        variant="caption"
+                        fontWeight={600}
+                        color="text.primary"
+                      >
+                        Время чтения
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ pl: 3 }}
+                    >
+                      {lesson.reading_time} мин
+                    </Typography>
+                  </Box>
+                )}
+
+                {lesson.difficulty && (
+                  <Box>
+                    <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+                      <TrendingUp
+                        sx={{ fontSize: 18, color: 'primary.main' }}
+                      />
+                      <Typography
+                        variant="caption"
+                        fontWeight={600}
+                        color="text.primary"
+                      >
+                        Сложность
+                      </Typography>
+                    </Box>
+                    <Box sx={{ pl: 3 }}>
+                      <Chip
+                        label={getDifficultyInfo(lesson.difficulty)?.label}
+                        color={getDifficultyInfo(lesson.difficulty)?.color}
+                        size="small"
+                        sx={{
+                          fontWeight: 600,
+                          borderRadius: 2,
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ ml: 1 }}
+                      >
+                        ({lesson.difficulty}/10)
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
+              </Stack>
+
+              <Divider />
+            </>
+          )}
 
           {/* Даты */}
           <Stack spacing={2}>

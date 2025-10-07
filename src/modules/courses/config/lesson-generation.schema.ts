@@ -1,5 +1,6 @@
 export interface LessonGenerationResponse {
   title: string;
+  description: string;
   content: string;
   readingTime: number;
   difficulty: number;
@@ -17,6 +18,10 @@ export const lessonGenerationSchema = {
           type: 'string',
           description: 'Заголовок урока',
         },
+        description: {
+          type: 'string',
+          description: 'Краткое описание урока (1-2 предложения)',
+        },
         content: {
           type: 'string',
           description:
@@ -31,7 +36,13 @@ export const lessonGenerationSchema = {
           description: 'Уровень сложности урока от 1 до 5',
         },
       },
-      required: ['title', 'content', 'readingTime', 'difficulty'],
+      required: [
+        'title',
+        'description',
+        'content',
+        'readingTime',
+        'difficulty',
+      ],
       additionalProperties: false,
     },
   },

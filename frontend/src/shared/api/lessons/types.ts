@@ -25,7 +25,10 @@ export interface Unit {
 export interface Lesson {
   id: string;
   title: string;
+  description?: string;
   content: string;
+  reading_time?: number;
+  difficulty?: number;
   order: number;
   status: LessonStatus;
   last_reviewed_at?: string;

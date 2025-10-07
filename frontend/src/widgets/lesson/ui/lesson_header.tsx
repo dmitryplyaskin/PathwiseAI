@@ -1,6 +1,6 @@
 import { Box, Container, Typography, Stack, Chip, Fade } from '@mui/material';
 import { Info } from '@mui/icons-material';
-import type { Lesson } from '../../../shared/model/lessons';
+import type { Lesson } from '../../../shared/api/lessons';
 
 interface LessonHeaderProps {
   lesson: Lesson | null;
@@ -76,7 +76,8 @@ export const LessonHeader = ({
             }}
           >
             {lesson
-              ? 'Интерактивный урок с поддержкой ИИ-помощника для персонализированного обучения'
+              ? lesson.description ||
+                'Интерактивный урок с поддержкой ИИ-помощника для персонализированного обучения'
               : 'Демо-версия урока · Данные отсутствуют в базе'}
           </Typography>
         </Stack>
