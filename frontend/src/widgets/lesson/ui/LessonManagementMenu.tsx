@@ -15,8 +15,17 @@ import {
   Edit,
   Delete,
 } from '@mui/icons-material';
+import type { Lesson } from '../../../shared/api/lessons/types';
 
-export const LessonManagementMenu = () => {
+interface LessonManagementMenuProps {
+  lesson: Lesson | null;
+  onDeleteLesson: () => void;
+}
+
+export const LessonManagementMenu: React.FC<LessonManagementMenuProps> = ({
+  lesson,
+  onDeleteLesson,
+}) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -30,6 +39,11 @@ export const LessonManagementMenu = () => {
 
   const handleMenuItemClick = (action: string) => {
     console.log(`Выполняется действие: ${action}`);
+    handleClose();
+  };
+
+  const handleDeleteClick = () => {
+    onDeleteLesson();
     handleClose();
   };
 
@@ -148,7 +162,8 @@ export const LessonManagementMenu = () => {
         <Divider sx={{ my: 0.5 }} />
 
         <MenuItem
-          onClick={() => handleMenuItemClick('delete-lesson')}
+          onClick={handleDeleteClick}
+          disabled={!lesson}
           sx={{
             py: 1.5,
             px: 2,

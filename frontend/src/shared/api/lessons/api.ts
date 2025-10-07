@@ -106,4 +106,20 @@ export const lessonsApi = {
     }
     return response.json();
   },
+
+  deleteLesson: async (lessonId: string): Promise<{ message: string }> => {
+    const response = await fetch(
+      `${API_BASE_URL}/courses/lessons/${lessonId}`,
+      {
+        method: 'DELETE',
+      },
+    );
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Lesson not found');
+      }
+      throw new Error('Failed to delete lesson');
+    }
+    return response.json();
+  },
 };

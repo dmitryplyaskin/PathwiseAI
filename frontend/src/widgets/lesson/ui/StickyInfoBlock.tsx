@@ -26,6 +26,9 @@ import { testsApi } from '../../../shared/api/tests';
 import type { TestData } from '../../test/types';
 import { useCurrentUser } from '../../../shared/model';
 import { LessonManagementMenu } from './LessonManagementMenu';
+import { LessonDeleteDialog } from './LessonDeleteDialog';
+import { lessonsApi } from '../../../shared/api/lessons/api';
+import { useNavigate } from 'react-router';
 
 interface StickyInfoBlockProps {
   lesson: Lesson | null;
@@ -70,7 +73,11 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
   const [testData, setTestData] = useState<TestData | null>(null);
   const [isLoadingTest, setIsLoadingTest] = useState(false);
   const [testError, setTestError] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeletingLesson, setIsDeletingLesson] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const { userId } = useCurrentUser();
+  const navigate = useNavigate();
 
   const statusInfo = lesson
     ? getStatusInfo(lesson.status)
@@ -105,6 +112,36 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
     setIsTestModalOpen(false);
     setTestData(null);
     setTestError(null);
+  };
+
+  const handleDeleteLesson = () => {
+    setIsDeleteDialogOpen(true);
+    setDeleteError(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!lesson) return;
+
+    setIsDeletingLesson(true);
+    setDeleteError(null);
+
+    try {
+      await lessonsApi.deleteLesson(lesson.id);
+      // Редирект на главную страницу после успешного удаления
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to delete lesson:', error);
+      setDeleteError(
+        error instanceof Error ? error.message : 'Не удалось удалить урок',
+      );
+    } finally {
+      setIsDeletingLesson(false);
+    }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+    setDeleteError(null);
   };
 
   return (
@@ -369,7 +406,10 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
           )}
 
           {/* Меню управления уроком */}
-          <LessonManagementMenu />
+          <LessonManagementMenu
+            lesson={lesson}
+            onDeleteLesson={handleDeleteLesson}
+          />
         </Stack>
       </Box>
 
@@ -381,6 +421,16 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
           testData={testData}
         />
       )}
+
+      {/* Модальное окно удаления урока */}
+      <LessonDeleteDialog
+        open={isDeleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        lessonTitle={lesson?.title}
+        isLoading={isDeletingLesson}
+        error={deleteError}
+      />
     </>
   );
 };
