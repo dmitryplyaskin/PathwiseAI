@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Button,
@@ -13,40 +13,10 @@ import {
   Toolbar,
 } from '@mui/material';
 import { Add, MenuBook, AccessTime } from '@mui/icons-material';
-import {
-  EducationCard,
-  NewModuleModal,
-} from '../../../features/education-module/ui';
-
-// Заглушки данных для демонстрации
-const recentModules = [
-  {
-    id: '1',
-    title: 'Основы JavaScript',
-    description:
-      'Изучение базовых концепций JavaScript: переменные, функции, циклы',
-    progress: 85,
-    lastStudied: '2 дня назад',
-    status: 'completed',
-  },
-  {
-    id: '2',
-    title: 'React Hooks',
-    description:
-      'Глубокое погружение в хуки React: useState, useEffect, useContext',
-    progress: 60,
-    lastStudied: '5 дней назад',
-    status: 'in-progress',
-  },
-  {
-    id: '3',
-    title: 'TypeScript Fundamentals',
-    description: 'Основы TypeScript: типы, интерфейсы, дженерики',
-    progress: 100,
-    lastStudied: '1 неделя назад',
-    status: 'completed',
-  },
-];
+import { NewModuleModal } from '../../../features/education-module/ui';
+import { LessonsList } from '../../../widgets/lessons-list';
+import { lessonsApi } from '../../../shared/api/lessons/api';
+import type { Lesson } from '../../../shared/api/lessons/types';
 
 const reviewModules = [
   {
@@ -75,6 +45,9 @@ const reviewModules = [
 
 export const HomePage = () => {
   const [isNewModuleModalOpen, setIsNewModuleModalOpen] = useState(false);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [lessonsLoading, setLessonsLoading] = useState(true);
+  const [lessonsError, setLessonsError] = useState<string | null>(null);
 
   const handleNewModule = () => {
     setIsNewModuleModalOpen(true);
@@ -83,6 +56,25 @@ export const HomePage = () => {
   const handleModuleClick = (moduleId: string) => {
     console.log('Клик по модуль:', moduleId);
   };
+
+  useEffect(() => {
+    const fetchLessons = async () => {
+      try {
+        setLessonsLoading(true);
+        setLessonsError(null);
+        const lessonsData = await lessonsApi.getAllLessons();
+        setLessons(lessonsData);
+      } catch (error) {
+        setLessonsError(
+          error instanceof Error ? error.message : 'Ошибка загрузки уроков',
+        );
+      } finally {
+        setLessonsLoading(false);
+      }
+    };
+
+    fetchLessons();
+  }, []);
 
   const getPriorityColor = (
     priority: string,
@@ -140,23 +132,18 @@ export const HomePage = () => {
           </Button>
         </Box>
 
-        {/* Последние пройденные модули */}
+        {/* Все доступные уроки */}
         <Stack spacing={3} mb={6}>
           <Box display="flex" alignItems="center" gap={1}>
             <MenuBook color="primary" />
-            <Typography variant="h2">Последние пройденные уроки</Typography>
+            <Typography variant="h2">Все доступные уроки</Typography>
           </Box>
 
-          <Grid container spacing={3}>
-            {recentModules.map((module) => (
-              <Grid key={module.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-                <EducationCard
-                  module={module}
-                  handleModuleClick={handleModuleClick}
-                />
-              </Grid>
-            ))}
-          </Grid>
+          <LessonsList
+            lessons={lessons}
+            loading={lessonsLoading}
+            error={lessonsError}
+          />
         </Stack>
 
         {/* Модули для повторения */}

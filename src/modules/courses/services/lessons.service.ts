@@ -41,7 +41,9 @@ export class LessonsService {
   }
 
   findAllLessons() {
-    return this.lessonRepository.find();
+    return this.lessonRepository.find({
+      relations: ['unit', 'unit.course'],
+    });
   }
 
   async findOneLesson(id: string) {

@@ -4,6 +4,24 @@ export enum LessonStatus {
   MASTERED = 'mastered',
 }
 
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  progress: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Unit {
+  id: string;
+  title: string;
+  order: number;
+  course: Course;
+  created_at: string;
+}
+
 export interface Lesson {
   id: string;
   title: string;
@@ -14,6 +32,7 @@ export interface Lesson {
   next_review_at?: string;
   ease_factor: number;
   interval: number;
+  unit: Unit;
   created_at: string;
   updated_at: string;
 }

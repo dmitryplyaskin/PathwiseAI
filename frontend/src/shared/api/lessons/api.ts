@@ -8,6 +8,14 @@ import {
 const API_BASE_URL = 'http://localhost:3000';
 
 export const lessonsApi = {
+  getAllLessons: async (): Promise<Lesson[]> => {
+    const response = await fetch(`${API_BASE_URL}/courses/lessons`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch lessons');
+    }
+    return response.json();
+  },
+
   getLessonById: async (id: string): Promise<Lesson> => {
     const response = await fetch(`${API_BASE_URL}/courses/lessons/${id}`);
     if (!response.ok) {

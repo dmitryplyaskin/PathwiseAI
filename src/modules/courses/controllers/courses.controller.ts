@@ -45,6 +45,11 @@ export class CoursesController {
     return this.coursesService.findCoursesForList();
   }
 
+  @Get('lessons')
+  findAllLessons() {
+    return this.lessonsService.findAllLessons();
+  }
+
   @Get(':id')
   findOneCourse(@Param('id', ParseUUIDPipe) id: string) {
     return this.coursesService.findOneCourse(id);
@@ -93,19 +98,14 @@ export class CoursesController {
   }
 
   // Lesson endpoints
-  @Post('lessons')
-  createLesson(@Body() createLessonDto: CreateLessonDto) {
-    return this.lessonsService.createLesson(createLessonDto);
-  }
-
-  @Get('lessons')
-  findAllLessons() {
-    return this.lessonsService.findAllLessons();
-  }
-
   @Get('lessons/:id')
   findOneLesson(@Param('id', ParseUUIDPipe) id: string) {
     return this.lessonsService.findOneLesson(id);
+  }
+
+  @Post('lessons')
+  createLesson(@Body() createLessonDto: CreateLessonDto) {
+    return this.lessonsService.createLesson(createLessonDto);
   }
 
   @Patch('lessons/:id')
