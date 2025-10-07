@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -19,7 +19,10 @@ import {
   List,
   ListItem,
   ListItemText,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import { ContentCopy, Check } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import type { Components } from 'react-markdown';
 
@@ -35,7 +38,7 @@ export interface MarkdownRendererProps {
   /**
    * Кастомная тема для подсветки синтаксиса
    */
-  codeTheme?: any;
+  codeTheme?: Record<string, unknown>;
   /**
    * Размер шрифта для кода
    */
@@ -59,6 +62,23 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   maxCodeHeight = '400px',
 }) => {
   const theme = useTheme();
+  const [copiedBlocks, setCopiedBlocks] = useState<Set<string>>(new Set());
+
+  const copyToClipboard = async (text: string, blockId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedBlocks((prev) => new Set(prev).add(blockId));
+      setTimeout(() => {
+        setCopiedBlocks((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(blockId);
+          return newSet;
+        });
+      }, 2000);
+    } catch (err) {
+      console.error('Ошибка копирования:', err);
+    }
+  };
 
   const customComponents: Components = {
     // Заголовки
@@ -179,7 +199,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     ),
 
     // Инлайн код
-    code: ({ children, className, node, ...props }) => {
+    code: ({ children, className, node }) => {
       const isInline =
         node?.position?.start?.line === node?.position?.end?.line;
 
@@ -206,6 +226,9 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
       const match = /language-(\w+)/.exec(className || '');
       const language = match ? match[1] : '';
+      const codeText = String(children).replace(/\n$/, '');
+      const blockId = `code-${Math.random().toString(36).substr(2, 9)}`;
+      const isCopied = copiedBlocks.has(blockId);
 
       return (
         <Box
@@ -217,7 +240,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             borderColor: 'divider',
           }}
         >
-          {language && (
+          {(language || !isInline) && (
             <Box
               sx={{
                 backgroundColor: 'grey.100',
@@ -225,18 +248,42 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                 py: 1,
                 borderBottom: '1px solid',
                 borderColor: 'divider',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
               }}
             >
-              <Typography
-                variant="caption"
-                sx={{
-                  fontWeight: 500,
-                  color: 'text.secondary',
-                  textTransform: 'uppercase',
-                }}
-              >
-                {language}
-              </Typography>
+              {language && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontWeight: 500,
+                    color: 'text.secondary',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {language}
+                </Typography>
+              )}
+              <Tooltip title={isCopied ? 'Скопировано!' : 'Копировать код'}>
+                <IconButton
+                  size="small"
+                  onClick={() => copyToClipboard(codeText, blockId)}
+                  sx={{
+                    ml: 'auto',
+                    color: isCopied ? 'success.main' : 'text.secondary',
+                    '&:hover': {
+                      backgroundColor: 'action.hover',
+                    },
+                  }}
+                >
+                  {isCopied ? (
+                    <Check fontSize="small" />
+                  ) : (
+                    <ContentCopy fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
             </Box>
           )}
           <Box
@@ -259,9 +306,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
                 fontSize: codeFontSize,
                 backgroundColor: 'transparent',
               }}
-              {...props}
             >
-              {String(children).replace(/\n$/, '')}
+              {codeText}
             </SyntaxHighlighter>
           </Box>
         </Box>
@@ -269,11 +315,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     },
 
     // Блоки кода (pre)
-    pre: ({ children, ...props }) => (
-      <Box component="div" {...props}>
-        {children}
-      </Box>
-    ),
+    pre: ({ children }) => <Box>{children}</Box>,
 
     // Ссылки
     a: ({ href, children, ...props }) => (
@@ -320,9 +362,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     ),
 
     // Цитаты
-    blockquote: ({ children, ...props }) => (
-      <Paper
-        elevation={0}
+    blockquote: ({ children }) => (
+      <Box
         sx={{
           backgroundColor: 'info.50',
           borderLeft: '4px solid',
@@ -330,11 +371,11 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           p: 2,
           my: 2,
           fontStyle: 'italic',
+          borderRadius: 1,
         }}
-        {...props}
       >
         {children}
-      </Paper>
+      </Box>
     ),
 
     // Горизонтальная линия
@@ -366,7 +407,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       <TableBody {...props}>{children}</TableBody>
     ),
     tr: ({ children, ...props }) => <TableRow {...props}>{children}</TableRow>,
-    th: ({ children, ...props }) => (
+    th: ({ children }) => (
       <TableCell
         component="th"
         sx={{
@@ -375,18 +416,16 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           borderBottom: '2px solid',
           borderColor: 'divider',
         }}
-        {...props}
       >
         {children}
       </TableCell>
     ),
-    td: ({ children, ...props }) => (
+    td: ({ children }) => (
       <TableCell
         sx={{
           borderBottom: '1px solid',
           borderColor: 'divider',
         }}
-        {...props}
       >
         {children}
       </TableCell>
