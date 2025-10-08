@@ -5,7 +5,7 @@ import {
   type ThreadMessage,
 } from './types';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 export const lessonsApi = {
   getAllLessons: async (): Promise<Lesson[]> => {
