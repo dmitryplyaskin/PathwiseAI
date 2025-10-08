@@ -16,16 +16,15 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix('api');
 
-  app.useStaticAssets(join(__dirname, 'frontend'), {
+  app.useStaticAssets(join(__dirname, '..', 'frontend', 'dist'), {
     index: ['index.html'],
   });
 
   app.use((req, res, next) => {
-    console.log(req.originalUrl);
     if (req.originalUrl.startsWith('/api')) {
       return next();
     }
-    res.sendFile(join(__dirname, 'frontend', 'index.html'));
+    res.sendFile(join(__dirname, '..', 'frontend', 'dist', 'index.html'));
   });
 
   await app.listen(process.env.PORT ?? 3000);
