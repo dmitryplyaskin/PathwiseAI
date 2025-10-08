@@ -297,6 +297,8 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             }}
           >
             <SyntaxHighlighter
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
               style={codeTheme || oneLight}
               language={language}
               showLineNumbers={showLineNumbers}

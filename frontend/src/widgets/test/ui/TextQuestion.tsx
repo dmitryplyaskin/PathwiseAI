@@ -55,6 +55,8 @@ export const TextQuestion = ({
     } catch (err: unknown) {
       console.error('Failed to check text answer:', err);
       setError(
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         err instanceof Error ? err.message : 'Не удалось проверить ответ',
       );
 

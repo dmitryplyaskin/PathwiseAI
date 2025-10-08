@@ -35,7 +35,6 @@ import {
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { mockUnitDetail } from '../model/mock';
-import type { LessonGroup } from '../model/mock';
 
 const getDifficultyColor = (difficulty: string) => {
   switch (difficulty) {
@@ -304,7 +303,7 @@ export const UnitPage = () => {
 
                     <AccordionDetails sx={{ pt: 0 }}>
                       <List disablePadding>
-                        {group.lessons.map((lesson, index) => (
+                        {group.lessons.map((lesson) => (
                           <ListItem key={lesson.id} disablePadding>
                             <ListItemButton
                               onClick={() => handleLessonClick(lesson.id)}

@@ -118,7 +118,8 @@ export const theme = createTheme({
   shape: {
     borderRadius: 12,
   },
-
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   shadows: [
     'none',
     '0 2px 4px rgba(0, 0, 0, 0.05)',

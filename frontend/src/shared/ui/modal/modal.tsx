@@ -7,7 +7,7 @@ import {
   Typography,
 } from '@mui/material';
 import { Close } from '@mui/icons-material';
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 interface ModalProps {
   open: boolean;

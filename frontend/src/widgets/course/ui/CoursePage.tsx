@@ -32,8 +32,6 @@ import {
   People,
   Star,
   Assignment,
-  EmojiEvents,
-  TrendingUp,
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { mockCourseDetail } from '../model/mock';
@@ -125,7 +123,7 @@ export const CoursePage = () => {
     (unit) => unit.status === 'in_progress' || unit.status === 'not_started',
   );
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
 
@@ -159,7 +157,7 @@ export const CoursePage = () => {
                     />
                     <Chip
                       label={getDifficultyLabel(course.difficulty)}
-                      color={getDifficultyColor(course.difficulty) as any}
+                      color={getDifficultyColor(course.difficulty)}
                       icon={<Star />}
                     />
                   </Box>

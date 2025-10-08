@@ -28,15 +28,13 @@ const ProfileInfoRow = ({
   value: string;
 }) => (
   <Grid container spacing={2} alignItems="center">
-    <Grid item xs={1}>
-      {icon}
-    </Grid>
-    <Grid item xs={4}>
+    <Grid size={{ xs: 1 }}>{icon}</Grid>
+    <Grid size={{ xs: 4 }}>
       <Typography variant="body1" color="text.secondary">
         {label}
       </Typography>
     </Grid>
-    <Grid item xs={7}>
+    <Grid size={{ xs: 7 }}>
       <Typography variant="body1">{value}</Typography>
     </Grid>
   </Grid>

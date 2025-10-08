@@ -1,11 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
-import {
-  Breadcrumbs as MuiBreadcrumbs,
-  Typography,
-  Box,
-  Chip,
-} from '@mui/material';
+import { Breadcrumbs as MuiBreadcrumbs, Typography, Box } from '@mui/material';
 import { NavigateNext, Home } from '@mui/icons-material';
 import type { BreadcrumbsProps } from './types';
 

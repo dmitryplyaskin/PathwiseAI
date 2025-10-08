@@ -6,7 +6,6 @@ import {
   Chip,
   Box,
   Stack,
-  Badge,
 } from '@mui/material';
 import {
   EmojiEvents,

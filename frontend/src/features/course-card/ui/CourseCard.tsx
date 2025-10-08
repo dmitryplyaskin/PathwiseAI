@@ -11,14 +11,12 @@ import {
   Rating,
 } from '@mui/material';
 import {
-  EmojiEvents,
   School,
   AccessTime,
   People,
   Circle,
   CheckCircle,
   PlayCircle,
-  Star,
 } from '@mui/icons-material';
 import type { FC } from 'react';
 import type { Course } from '@/widgets/courses-list/model/mock';

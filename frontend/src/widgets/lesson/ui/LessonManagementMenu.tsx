@@ -12,7 +12,6 @@ import {
   Refresh,
   SwapHoriz,
   Add,
-  Edit,
   Delete,
 } from '@mui/icons-material';
 import type { Lesson } from '../../../shared/api/lessons/types';

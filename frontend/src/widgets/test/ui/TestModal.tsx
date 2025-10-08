@@ -10,7 +10,6 @@ import {
   Alert,
   Slide,
   LinearProgress,
-  CircularProgress,
 } from '@mui/material';
 import { Close, NavigateNext, SkipNext } from '@mui/icons-material';
 import type { TransitionProps } from '@mui/material/transitions';

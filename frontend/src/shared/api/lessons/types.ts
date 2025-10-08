@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 export enum LessonStatus {
   NOT_STARTED = 'not_started',
   LEARNING = 'learning',

@@ -1,7 +1,8 @@
-import type { ComponentType } from 'react';
 import { RouterProvider } from 'react-router';
 import { router } from '../config/router';
+import type { ComponentType } from 'react';
 
-export const withRouter = (Component: ComponentType) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const withRouter = (_: ComponentType) => {
   return () => <RouterProvider router={router} />;
 };

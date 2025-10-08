@@ -61,7 +61,7 @@ export const CoursesList = () => {
   }, []);
 
   // Фильтрация и сортировка
-  let filteredCourses = mockCourses.filter((course) => {
+  const filteredCourses = mockCourses.filter((course) => {
     // Фильтр по статусу
     if (filter !== 'all' && course.status !== filter) return false;
 
@@ -113,34 +113,6 @@ export const CoursesList = () => {
     mockCourses.reduce((acc, course) => acc + course.progress, 0) /
       mockCourses.length,
   );
-
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'machine_learning':
-        return 'ML';
-      case 'data_science':
-        return 'Data Science';
-      case 'programming':
-        return 'Программирование';
-      case 'mathematics':
-        return 'Математика';
-      default:
-        return 'Все';
-    }
-  };
-
-  const getDifficultyLabel = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner':
-        return 'Начальный';
-      case 'intermediate':
-        return 'Средний';
-      case 'advanced':
-        return 'Продвинутый';
-      default:
-        return 'Все';
-    }
-  };
 
   return (
     <Box sx={{ minHeight: '100vh' }}>

@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -12,6 +14,20 @@ async function bootstrap() {
     }),
   );
   app.enableCors();
+  app.setGlobalPrefix('api');
+
+  app.useStaticAssets(join(__dirname, 'frontend'), {
+    index: ['index.html'],
+  });
+
+  app.use((req, res, next) => {
+    console.log(req.originalUrl);
+    if (req.originalUrl.startsWith('/api')) {
+      return next();
+    }
+    res.sendFile(join(__dirname, 'frontend', 'index.html'));
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 
