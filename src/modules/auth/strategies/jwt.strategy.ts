@@ -16,6 +16,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new Error('JWT_SECRET is not defined');
     }
 
+    const expiresIn = configService.get<string>('JWT_EXPIRES_IN');
+
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         // Сначала пытаемся получить токен из cookie
@@ -25,7 +27,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         // Если нет cookie, пытаемся получить из заголовка Authorization
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
-      ignoreExpiration: false,
+      ignoreExpiration: expiresIn === 'never',
       secretOrKey: secret,
     });
   }
