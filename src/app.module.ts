@@ -9,6 +9,7 @@ import { CoursesModule } from './modules/courses/courses.module';
 import { QuestionsModule } from './modules/questions/questions.module';
 import { ExamsModule } from './modules/exams/exams.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { SharedModule } from './shared/shared.module';
 
@@ -30,6 +31,7 @@ import { SharedModule } from './shared/shared.module';
     }),
     SharedModule,
     UsersModule,
+    AuthModule,
     CoursesModule,
     QuestionsModule,
     ExamsModule,

@@ -76,6 +76,29 @@ export class UsersService {
     return user;
   }
 
+  async findByEmailForAuth(email: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { email } });
+    if (!user) {
+      throw new NotFoundException(`User with email "${email}" not found`);
+    }
+    return user;
+  }
+
+  async findByLoginForAuth(login: string): Promise<User> {
+    // Сначала пытаемся найти по email
+    let user = await this.usersRepository.findOne({ where: { email: login } });
+
+    // Если не найден по email, ищем по username
+    if (!user) {
+      user = await this.usersRepository.findOne({ where: { username: login } });
+    }
+
+    if (!user) {
+      throw new NotFoundException(`User with login "${login}" not found`);
+    }
+    return user;
+  }
+
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
