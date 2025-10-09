@@ -3,9 +3,14 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Подключаем cookie-parser для работы с httpOnly cookies
+  app.use(cookieParser());
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -13,7 +18,13 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.enableCors();
+
+  // Настраиваем CORS для работы с cookies
+  app.enableCors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'], // Добавляем фронтенд URL
+    credentials: true, // Важно для работы с cookies
+  });
+
   app.setGlobalPrefix('api');
 
   app.useStaticAssets(join(__dirname, '..', 'frontend', 'dist'), {

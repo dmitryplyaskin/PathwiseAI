@@ -10,6 +10,7 @@ import { Unit } from '../../pages/unit';
 import { Courses } from '../../pages/courses';
 import { Course } from '../../pages/course';
 import { Layout } from '../ui/Layout';
+import { AuthGuard } from '../../shared/ui/auth-guard';
 
 export const router = createBrowserRouter([
   {
@@ -18,26 +19,91 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: HomePage,
+        Component: () => (
+          <AuthGuard requireAuth={true}>
+            <HomePage />
+          </AuthGuard>
+        ),
       },
-      { path: 'login', Component: LoginPage },
-      { path: 'register', Component: RegisterPage },
-      { path: 'profile', Component: ProfilePage },
-      { path: 'courses', Component: Courses },
-      { path: 'courses/:id', Component: Course },
-      { path: 'courses/:id/units', Component: Units },
-      { path: 'courses/:id/units/:unitId', Component: Unit },
+      {
+        path: 'login',
+        Component: () => (
+          <AuthGuard requireAuth={false}>
+            <LoginPage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: 'register',
+        Component: () => (
+          <AuthGuard requireAuth={false}>
+            <RegisterPage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: 'profile',
+        Component: () => (
+          <AuthGuard requireAuth={true}>
+            <ProfilePage />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: 'courses',
+        Component: () => (
+          <AuthGuard requireAuth={true}>
+            <Courses />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: 'courses/:id',
+        Component: () => (
+          <AuthGuard requireAuth={true}>
+            <Course />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: 'courses/:id/units',
+        Component: () => (
+          <AuthGuard requireAuth={true}>
+            <Units />
+          </AuthGuard>
+        ),
+      },
+      {
+        path: 'courses/:id/units/:unitId',
+        Component: () => (
+          <AuthGuard requireAuth={true}>
+            <Unit />
+          </AuthGuard>
+        ),
+      },
       {
         path: 'courses/:id/units/:unitId/lessons',
-        Component: Lessons,
+        Component: () => (
+          <AuthGuard requireAuth={true}>
+            <Lessons />
+          </AuthGuard>
+        ),
       },
       {
         path: 'courses/:id/units/:unitId/lessons/:lessonId',
-        Component: Lesson,
+        Component: () => (
+          <AuthGuard requireAuth={true}>
+            <Lesson />
+          </AuthGuard>
+        ),
       },
       {
         path: 'courses/:id/lessons/:lessonId',
-        Component: Lesson,
+        Component: () => (
+          <AuthGuard requireAuth={true}>
+            <Lesson />
+          </AuthGuard>
+        ),
       },
     ],
   },

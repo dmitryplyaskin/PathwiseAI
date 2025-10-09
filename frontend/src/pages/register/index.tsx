@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { useUnit } from 'effector-react';
 import {
   Container,
   Box,
@@ -7,10 +10,53 @@ import {
   Button,
   Stack,
   Link as MuiLink,
+  Alert,
 } from '@mui/material';
 import { Link } from 'react-router';
+import {
+  registerRequested,
+  $authLoading,
+  $registerError,
+} from '../../shared/model/auth';
 
 export const RegisterPage = () => {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [authLoading, registerError] = useUnit([$authLoading, $registerError]);
+
+  // Статичные данные как указано в требованиях
+  const STATIC_PASSWORD = 'password123';
+  const STATIC_ROLE = 'user' as const;
+  const STATIC_SETTINGS = {};
+
+  // Генерируем случайный email для каждого пользователя
+  const generateRandomEmail = (username: string) => {
+    const randomId = Math.random().toString(36).substring(2, 8);
+    return `${username.toLowerCase()}_${randomId}@example.com`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!username.trim()) {
+      return;
+    }
+
+    try {
+      await registerRequested({
+        username: username.trim(),
+        email: generateRandomEmail(username.trim()),
+        password: STATIC_PASSWORD,
+        role: STATIC_ROLE,
+        settings: STATIC_SETTINGS,
+      });
+
+      navigate('/');
+    } catch {
+      // Ошибка обрабатывается в модели
+    }
+  };
+
   return (
     <Container
       maxWidth="xs"
@@ -28,34 +74,26 @@ export const RegisterPage = () => {
               Регистрация
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Создайте новый аккаунт для доступа к платформе.
+              Создайте новый аккаунт. Введите только ваше имя пользователя.
             </Typography>
           </Box>
 
-          <Stack spacing={2} component="form">
+          {registerError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {registerError}
+            </Alert>
+          )}
+
+          <Stack spacing={2} component="form" onSubmit={handleSubmit}>
             <TextField
-              label="Ваше имя"
+              label="Имя пользователя"
               type="text"
               variant="outlined"
               fullWidth
-            />
-            <TextField
-              label="Email"
-              type="email"
-              variant="outlined"
-              fullWidth
-            />
-            <TextField
-              label="Пароль"
-              type="password"
-              variant="outlined"
-              fullWidth
-            />
-            <TextField
-              label="Подтвердите пароль"
-              type="password"
-              variant="outlined"
-              fullWidth
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={authLoading}
+              required
             />
             <Button
               type="submit"
@@ -63,8 +101,9 @@ export const RegisterPage = () => {
               size="large"
               fullWidth
               sx={{ mt: 2 }}
+              disabled={authLoading || !username.trim()}
             >
-              Зарегистрироваться
+              {authLoading ? 'Регистрация...' : 'Зарегистрироваться'}
             </Button>
           </Stack>
 

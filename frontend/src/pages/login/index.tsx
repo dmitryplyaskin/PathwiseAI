@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { useUnit } from 'effector-react';
 import {
   Container,
   Box,
@@ -7,10 +10,42 @@ import {
   Button,
   Stack,
   Link as MuiLink,
+  Alert,
 } from '@mui/material';
 import { Link } from 'react-router';
+import {
+  loginRequested,
+  $authLoading,
+  $loginError,
+} from '../../shared/model/auth';
 
 export const LoginPage = () => {
+  const navigate = useNavigate();
+  const [login, setLogin] = useState('');
+  const [authLoading, loginError] = useUnit([$authLoading, $loginError]);
+
+  // Статичный пароль как указано в требованиях
+  const STATIC_PASSWORD = 'password123';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!login.trim()) {
+      return;
+    }
+
+    try {
+      await loginRequested({
+        login: login.trim(),
+        password: STATIC_PASSWORD,
+      });
+
+      navigate('/');
+    } catch {
+      // Ошибка обрабатывается в модели
+    }
+  };
+
   return (
     <Container
       maxWidth="xs"
@@ -28,22 +63,26 @@ export const LoginPage = () => {
               Вход
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Добро пожаловать! Пожалуйста, войдите в свой аккаунт.
+              Добро пожаловать! Введите ваш логин (email или username).
             </Typography>
           </Box>
 
-          <Stack spacing={2} component="form">
+          {loginError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {loginError}
+            </Alert>
+          )}
+
+          <Stack spacing={2} component="form" onSubmit={handleSubmit}>
             <TextField
-              label="Email"
-              type="email"
+              label="Логин (email или username)"
+              type="text"
               variant="outlined"
               fullWidth
-            />
-            <TextField
-              label="Пароль"
-              type="password"
-              variant="outlined"
-              fullWidth
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              disabled={authLoading}
+              required
             />
             <Button
               type="submit"
@@ -51,8 +90,9 @@ export const LoginPage = () => {
               size="large"
               fullWidth
               sx={{ mt: 2 }}
+              disabled={authLoading || !login.trim()}
             >
-              Войти
+              {authLoading ? 'Вход...' : 'Войти'}
             </Button>
           </Stack>
 
