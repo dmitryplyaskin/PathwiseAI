@@ -1,28 +1,22 @@
-import { useEffect } from 'react';
-import { useStore } from 'effector-react';
+import { useUnit } from 'effector-react';
 import {
   $currentUser,
-  $currentUserLoading,
-  $currentUserError,
-  loadCurrentUser,
-} from './users-model';
+  $authLoading,
+  $checkAuthError,
+} from '../auth/auth-model';
 
 /**
  * Хук для получения текущего пользователя.
- * Автоматически загружает пользователя при первом использовании.
+ * Использует данные из auth-model.
  *
  * @returns Объект с данными пользователя, статусом загрузки и ошибкой
  */
 export const useCurrentUser = () => {
-  const user = useStore($currentUser);
-  const loading = useStore($currentUserLoading);
-  const error = useStore($currentUserError);
-
-  useEffect(() => {
-    if (!user && !loading && !error) {
-      loadCurrentUser();
-    }
-  }, [user, loading, error]);
+  const [user, loading, error] = useUnit([
+    $currentUser,
+    $authLoading,
+    $checkAuthError,
+  ]);
 
   return {
     user,

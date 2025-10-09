@@ -63,7 +63,7 @@ POST /auth/login
 ```http
 POST /auth/register
 {
-  "username": "testuser",
+  "username": "newuser",
   "email": "test@example.com",
   "password": "password123",
   "role": "admin"  // Новое поле, опциональное

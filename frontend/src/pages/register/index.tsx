@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useUnit } from 'effector-react';
 import {
@@ -17,12 +17,17 @@ import {
   registerRequested,
   $authLoading,
   $registerError,
+  $isAuthenticated,
 } from '../../shared/model/auth';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
-  const [authLoading, registerError] = useUnit([$authLoading, $registerError]);
+  const [authLoading, registerError, isAuthenticated] = useUnit([
+    $authLoading,
+    $registerError,
+    $isAuthenticated,
+  ]);
 
   // Статичные данные как указано в требованиях
   const STATIC_PASSWORD = 'password123';
@@ -34,6 +39,13 @@ export const RegisterPage = () => {
     const randomId = Math.random().toString(36).substring(2, 8);
     return `${username.toLowerCase()}_${randomId}@example.com`;
   };
+
+  // Перенаправляем на главную страницу после успешной регистрации
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,8 +62,7 @@ export const RegisterPage = () => {
         role: STATIC_ROLE,
         settings: STATIC_SETTINGS,
       });
-
-      navigate('/');
+      // Навигация происходит в useEffect при изменении isAuthenticated
     } catch {
       // Ошибка обрабатывается в модели
     }

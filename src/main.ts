@@ -23,6 +23,8 @@ async function bootstrap() {
   app.enableCors({
     origin: ['http://localhost:5173', 'http://localhost:3000'], // Добавляем фронтенд URL
     credentials: true, // Важно для работы с cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   });
 
   app.setGlobalPrefix('api');

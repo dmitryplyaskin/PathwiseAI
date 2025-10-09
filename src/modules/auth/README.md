@@ -19,8 +19,8 @@ POST /auth/register
 Content-Type: application/json
 
 {
-  "username": "testuser",
-  "email": "test@example.com",
+  "username": "newuser",
+  "email": "user@example.com",
   "password": "password123",
   "settings": {}
 }

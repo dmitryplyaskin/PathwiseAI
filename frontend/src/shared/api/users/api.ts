@@ -8,16 +8,6 @@ import {
 const API_BASE_URL = 'http://localhost:3000';
 
 export const usersApi = {
-  getUserByUsername: async (username: string): Promise<User> => {
-    const response = await fetch(
-      `${API_BASE_URL}/api/users/by-username/${username}`,
-    );
-    if (!response.ok) {
-      throw new Error(`Failed to fetch user with username ${username}`);
-    }
-    return response.json();
-  },
-
   // Авторизация
   login: async (loginData: LoginRequest): Promise<AuthResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {

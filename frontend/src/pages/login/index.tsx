@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useUnit } from 'effector-react';
 import {
@@ -17,15 +17,27 @@ import {
   loginRequested,
   $authLoading,
   $loginError,
+  $isAuthenticated,
 } from '../../shared/model/auth';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const [login, setLogin] = useState('');
-  const [authLoading, loginError] = useUnit([$authLoading, $loginError]);
+  const [authLoading, loginError, isAuthenticated] = useUnit([
+    $authLoading,
+    $loginError,
+    $isAuthenticated,
+  ]);
 
   // Статичный пароль как указано в требованиях
   const STATIC_PASSWORD = 'password123';
+
+  // Перенаправляем на главную страницу после успешной авторизации
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,8 +51,7 @@ export const LoginPage = () => {
         login: login.trim(),
         password: STATIC_PASSWORD,
       });
-
-      navigate('/');
+      // Навигация происходит в useEffect при изменении isAuthenticated
     } catch {
       // Ошибка обрабатывается в модели
     }

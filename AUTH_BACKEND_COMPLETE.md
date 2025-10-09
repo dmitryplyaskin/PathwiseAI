@@ -120,7 +120,7 @@ POST /auth/register
 Content-Type: application/json
 
 {
-  "username": "testuser",
+  "username": "newuser",
   "email": "test@example.com",
   "password": "password123",
   "role": "admin",  // Опционально, по умолчанию "user"
@@ -135,7 +135,7 @@ Content-Type: application/json
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": "uuid",
-    "username": "testuser",
+    "username": "newuser",
     "email": "test@example.com",
     "role": "admin",
     "settings": {},
@@ -171,7 +171,7 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "id": "uuid",
-  "username": "testuser",
+  "username": "newuser",
   "email": "test@example.com",
   "role": "admin",
   "settings": {},
@@ -220,7 +220,7 @@ Authorization: Bearer <jwt_token>
   "message": "Информация доступна всем авторизованным пользователям",
   "user": {
     "id": "uuid",
-    "username": "testuser",
+    "username": "newuser",
     "email": "test@example.com",
     "role": "user"
   }
@@ -637,7 +637,7 @@ export class ProtectedModule {}
 # Регистрация пользователя
 curl -X POST http://localhost:3000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"username":"testuser","email":"test@example.com","password":"password123"}'
+  -d '{"username":"newuser","email":"user@example.com","password":"password123"}'
 
 # Авторизация по email
 curl -X POST http://localhost:3000/auth/login \
@@ -647,7 +647,7 @@ curl -X POST http://localhost:3000/auth/login \
 # Авторизация по username
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"login":"testuser","password":"password123"}'
+  -d '{"login":"newuser","password":"password123"}'
 
 # Получение профиля
 curl -X GET http://localhost:3000/profile \

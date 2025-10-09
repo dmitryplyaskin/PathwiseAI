@@ -27,8 +27,9 @@ export class AuthController {
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', // Изменено с 'strict' на 'lax' для лучшей совместимости
       maxAge: 24 * 60 * 60 * 1000, // 24 часа
+      path: '/', // Явно указываем путь
     });
 
     // Возвращаем только данные пользователя без токена
@@ -50,8 +51,9 @@ export class AuthController {
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax', // Изменено с 'strict' на 'lax' для лучшей совместимости
       maxAge: 24 * 60 * 60 * 1000, // 24 часа
+      path: '/', // Явно указываем путь
     });
 
     // Возвращаем только данные пользователя без токена

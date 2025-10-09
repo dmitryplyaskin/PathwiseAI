@@ -16,20 +16,42 @@ export const authReset = createEvent();
 // Effects
 export const loginFx = createEffect(
   async (loginData: LoginRequest): Promise<User> => {
-    const response = await usersApi.login(loginData);
-    return response.user;
+    console.log('Login attempt:', loginData);
+    try {
+      const response = await usersApi.login(loginData);
+      console.log('Login successful:', response.user);
+      return response.user;
+    } catch (error) {
+      console.log('Login failed:', error);
+      throw error;
+    }
   },
 );
 
 export const registerFx = createEffect(
   async (registerData: RegisterRequest): Promise<User> => {
-    const response = await usersApi.register(registerData);
-    return response.user;
+    console.log('Register attempt:', registerData);
+    try {
+      const response = await usersApi.register(registerData);
+      console.log('Register successful:', response.user);
+      return response.user;
+    } catch (error) {
+      console.log('Register failed:', error);
+      throw error;
+    }
   },
 );
 
 export const checkAuthFx = createEffect(async (): Promise<User> => {
-  return usersApi.getProfile();
+  console.log('Checking auth...');
+  try {
+    const user = await usersApi.getProfile();
+    console.log('Auth check successful:', user);
+    return user;
+  } catch (error) {
+    console.log('Auth check failed:', error);
+    throw error;
+  }
 });
 
 export const logoutFx = createEffect(async (): Promise<void> => {

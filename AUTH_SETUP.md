@@ -61,8 +61,8 @@ POST /auth/register
 Content-Type: application/json
 
 {
-  "username": "testuser",
-  "email": "test@example.com",
+  "username": "newuser",
+  "email": "user@example.com",
   "password": "password123",
   "settings": {}
 }
@@ -75,7 +75,7 @@ Content-Type: application/json
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "user": {
     "id": "uuid",
-    "username": "testuser",
+    "username": "newuser",
     "email": "test@example.com",
     "settings": {},
     "created_at": "2024-01-01T00:00:00.000Z",
@@ -145,7 +145,7 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "id": "uuid",
-  "username": "testuser",
+  "username": "newuser",
   "email": "test@example.com",
   "settings": {},
   "created_at": "2024-01-01T00:00:00.000Z",
@@ -281,7 +281,7 @@ npm run start:dev
 # Тестирование регистрации
 curl -X POST http://localhost:3000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"username":"testuser","email":"test@example.com","password":"password123"}'
+  -d '{"username":"newuser","email":"user@example.com","password":"password123"}'
 
 # Тестирование авторизации по email
 curl -X POST http://localhost:3000/auth/login \
@@ -291,7 +291,7 @@ curl -X POST http://localhost:3000/auth/login \
 # Тестирование авторизации по username
 curl -X POST http://localhost:3000/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"login":"testuser","password":"password123"}'
+  -d '{"login":"newuser","password":"password123"}'
 
 # Тестирование защищенного эндпоинта
 curl -X GET http://localhost:3000/profile \

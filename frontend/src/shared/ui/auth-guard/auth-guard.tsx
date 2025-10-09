@@ -1,12 +1,7 @@
-import { useEffect } from 'react';
 import { useUnit } from 'effector-react';
 import { Navigate } from 'react-router';
 import { Box, CircularProgress } from '@mui/material';
-import {
-  $isAuthenticated,
-  $authLoading,
-  checkAuthRequested,
-} from '../../model/auth';
+import { $isAuthenticated, $authLoading } from '../../model/auth';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -18,13 +13,6 @@ export const AuthGuard = ({ children, requireAuth = true }: AuthGuardProps) => {
     $isAuthenticated,
     $authLoading,
   ]);
-
-  useEffect(() => {
-    // Проверяем авторизацию только если она требуется
-    if (requireAuth) {
-      checkAuthRequested();
-    }
-  }, [requireAuth]);
 
   // Если авторизация не требуется, просто рендерим детей
   if (!requireAuth) {

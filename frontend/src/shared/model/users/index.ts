@@ -1,9 +1,2 @@
-export {
-  $currentUser,
-  $currentUserLoading,
-  $currentUserError,
-  loadCurrentUser,
-  resetUser,
-} from './users-model';
-
+// Экспортируем только хук, так как users-model больше не используется
 export { useCurrentUser } from './use-current-user';

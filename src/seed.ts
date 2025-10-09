@@ -16,24 +16,24 @@ async function seed() {
 
   // Создаем тестового пользователя
   let testUser = await userRepository.findOne({
-    where: { username: 'testuser' },
+    where: { username: 'admin' },
   });
   if (!testUser) {
     // Хешируем пароль
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash('Test123456!', salt);
+    const hashedPassword = await bcrypt.hash('password123', salt);
 
     testUser = userRepository.create({
-      username: 'testuser',
-      email: 'test@example.com',
+      username: 'admin',
+      email: 'admin@example.com',
       password_hash: hashedPassword,
       settings: {},
     });
     await userRepository.save(testUser);
-    console.log('Создан тестовый пользователь:', testUser.id);
-    console.log('Email: test@example.com, Password: Test123456!');
+    console.log('Создан администратор:', testUser.id);
+    console.log('Email: admin@example.com, Password: password123');
   } else {
-    console.log('Тестовый пользователь уже существует:', testUser.id);
+    console.log('Администратор уже существует:', testUser.id);
   }
 
   // Создаем тестовые курсы
