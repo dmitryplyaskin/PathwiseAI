@@ -12,6 +12,7 @@ export const registerRequested = createEvent<RegisterRequest>();
 export const logoutRequested = createEvent();
 export const checkAuthRequested = createEvent();
 export const authReset = createEvent();
+export const appInitialized = createEvent();
 
 // Effects
 export const loginFx = createEffect(
@@ -89,6 +90,13 @@ export const $registerError = createStore<string | null>(null)
 export const $checkAuthError = createStore<string | null>(null)
   .on(checkAuthFx.failData, (_, error) => error.message)
   .reset([checkAuthFx, authReset]);
+
+// Состояние инициализации приложения
+export const $appInitialized = createStore(false)
+  .on(appInitialized, () => true)
+  .on(checkAuthFx.done, () => true)
+  .on(checkAuthFx.fail, () => true)
+  .reset([authReset]);
 
 // Общая ошибка для совместимости (только для логина и регистрации)
 export const $authError = createStore<string | null>(null)
