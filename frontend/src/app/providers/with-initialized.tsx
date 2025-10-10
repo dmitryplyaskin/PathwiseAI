@@ -1,7 +1,7 @@
-import { $appInitialized } from '../../shared/model/auth';
+import { $appInitialized, checkAuthFx } from '../../shared/model/auth';
 import { AppLoader } from '../../shared/ui';
 import { useUnit } from 'effector-react';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 interface InitializedProviderProps {
   children: ReactNode;
@@ -9,6 +9,10 @@ interface InitializedProviderProps {
 
 export const InitializedProvider = ({ children }: InitializedProviderProps) => {
   const appInitialized = useUnit($appInitialized);
+
+  useEffect(() => {
+    checkAuthFx();
+  }, [appInitialized]);
 
   if (!appInitialized) {
     return <AppLoader />;
