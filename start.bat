@@ -4,10 +4,25 @@ echo Starting PathwiseAI Project
 echo ========================================
 
 echo.
-echo [1/6] Checking backend dependencies...
+echo [0/7] Checking package manager...
+where yarn >nul 2>&1
+if %errorlevel% equ 0 (
+    set PACKAGE_MANAGER=yarn
+    echo Using yarn as package manager
+) else (
+    set PACKAGE_MANAGER=npm
+    echo Using npm as package manager (yarn not found)
+)
+
+echo.
+echo [1/7] Checking backend dependencies...
 if not exist "node_modules" (
-    echo Installing backend dependencies...
-    call npm install --prefer-offline --no-audit --no-fund
+    echo Installing backend dependencies with %PACKAGE_MANAGER%...
+    if "%PACKAGE_MANAGER%"=="yarn" (
+        call yarn install --prefer-offline --silent
+    ) else (
+        call npm install --prefer-offline --no-audit --no-fund
+    )
     if %errorlevel% neq 0 (
         echo Error installing backend dependencies!
         pause
@@ -18,11 +33,15 @@ if not exist "node_modules" (
 )
 
 echo.
-echo [2/6] Checking frontend dependencies...
+echo [2/7] Checking frontend dependencies...
 cd frontend
 if not exist "node_modules" (
-    echo Installing frontend dependencies...
-    call npm install --prefer-offline --no-audit --no-fund
+    echo Installing frontend dependencies with %PACKAGE_MANAGER%...
+    if "%PACKAGE_MANAGER%"=="yarn" (
+        call yarn install --prefer-offline --silent
+    ) else (
+        call npm install --prefer-offline --no-audit --no-fund
+    )
     if %errorlevel% neq 0 (
         echo Error installing frontend dependencies!
         pause
@@ -34,11 +53,15 @@ if not exist "node_modules" (
 cd ..
 
 echo.
-echo [3/6] Checking frontend build...
+echo [3/7] Checking frontend build...
 if not exist "frontend\dist\index.html" (
-    echo Building frontend...
+    echo Building frontend with %PACKAGE_MANAGER%...
     cd frontend
-    call npm run build
+    if "%PACKAGE_MANAGER%"=="yarn" (
+        call yarn build
+    ) else (
+        call npm run build
+    )
     if %errorlevel% neq 0 (
         echo Error building frontend!
         pause
@@ -50,10 +73,14 @@ if not exist "frontend\dist\index.html" (
 )
 
 echo.
-echo [4/6] Checking backend build...
+echo [4/7] Checking backend build...
 if not exist "dist\main.js" (
-    echo Building backend...
-    call npm run build
+    echo Building backend with %PACKAGE_MANAGER%...
+    if "%PACKAGE_MANAGER%"=="yarn" (
+        call yarn build
+    ) else (
+        call npm run build
+    )
     if %errorlevel% neq 0 (
         echo Error building backend!
         pause
@@ -64,15 +91,20 @@ if not exist "dist\main.js" (
 )
 
 echo.
-echo [5/6] Starting production server...
+echo [5/7] Starting production server...
 echo Project will be available at: http://localhost:3000
 echo Press Ctrl+C to stop the server
 echo.
 
-echo [6/6] Opening browser...
+echo [6/7] Opening browser...
 timeout /t 3 /nobreak >nul
 start http://localhost:3000
 
-call npm run start:prod
+echo [7/7] Starting server with %PACKAGE_MANAGER%...
+if "%PACKAGE_MANAGER%"=="yarn" (
+    call yarn start:prod
+) else (
+    call npm run start:prod
+)
 
 pause
