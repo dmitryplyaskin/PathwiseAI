@@ -81,6 +81,21 @@ export const theme = createTheme({
       WebkitTextFillColor: 'transparent',
       backgroundClip: 'text',
     },
+    h1Gradient: {
+      fontSize: '2.5rem',
+      fontWeight: 700,
+      lineHeight: 1.2,
+      background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+    },
+    h1Solid: {
+      fontSize: '2.5rem',
+      fontWeight: 700,
+      lineHeight: 1.2,
+      color: '#1e3a8a',
+    },
     h2: {
       fontSize: '1.5rem',
       fontWeight: 600,

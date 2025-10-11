@@ -67,12 +67,26 @@ export class UsersService {
     return user;
   }
 
-  async findByUsername(username: string): Promise<Omit<User, 'password_hash'>> {
-    const user = await this.usersRepository.findOne({ where: { username } });
+  async findByEmailForAuth(email: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { email } });
     if (!user) {
-      throw new NotFoundException(`User with username "${username}" not found`);
+      throw new NotFoundException(`User with email "${email}" not found`);
     }
-    delete user.password_hash;
+    return user;
+  }
+
+  async findByLoginForAuth(login: string): Promise<User> {
+    // Сначала пытаемся найти по email
+    let user = await this.usersRepository.findOne({ where: { email: login } });
+
+    // Если не найден по email, ищем по username
+    if (!user) {
+      user = await this.usersRepository.findOne({ where: { username: login } });
+    }
+
+    if (!user) {
+      throw new NotFoundException(`User with login "${login}" not found`);
+    }
     return user;
   }
 

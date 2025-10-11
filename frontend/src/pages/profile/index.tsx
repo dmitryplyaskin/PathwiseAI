@@ -8,15 +8,17 @@ import {
   Avatar,
   Divider,
   Grid,
+  Chip,
 } from '@mui/material';
-import { Edit, Email, Person, CalendarToday } from '@mui/icons-material';
-
-const userProfile = {
-  username: 'JohnDoe',
-  email: 'johndoe@example.com',
-  createdAt: '2023-09-19T10:00:00Z',
-  avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d', // Placeholder image
-};
+import {
+  Edit,
+  Email,
+  Person,
+  CalendarToday,
+  Security,
+} from '@mui/icons-material';
+import { useUnit } from 'effector-react';
+import { $currentUser } from '../../shared/model/auth';
 
 const ProfileInfoRow = ({
   icon,
@@ -41,6 +43,18 @@ const ProfileInfoRow = ({
 );
 
 export const ProfilePage = () => {
+  const currentUser = useUnit($currentUser);
+
+  if (!currentUser) {
+    return (
+      <Container maxWidth="md" sx={{ py: 6 }}>
+        <Typography variant="h4" textAlign="center">
+          Пользователь не найден
+        </Typography>
+      </Container>
+    );
+  }
+
   return (
     <Container
       maxWidth="md"
@@ -61,16 +75,34 @@ export const ProfilePage = () => {
             gap={4}
           >
             <Avatar
-              src={userProfile.avatarUrl}
-              sx={{ width: 100, height: 100 }}
-            />
+              sx={{
+                width: 100,
+                height: 100,
+                bgcolor:
+                  currentUser.role === 'admin'
+                    ? 'secondary.main'
+                    : 'primary.main',
+              }}
+            >
+              {currentUser.username.charAt(0).toUpperCase()}
+            </Avatar>
             <Box flexGrow={1}>
               <Typography variant="h2" component="h1">
-                {userProfile.username}
+                {currentUser.username}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Профиль пользователя
               </Typography>
+              <Chip
+                label={
+                  currentUser.role === 'admin'
+                    ? 'Администратор'
+                    : 'Пользователь'
+                }
+                color={currentUser.role === 'admin' ? 'secondary' : 'default'}
+                size="small"
+                sx={{ mt: 1 }}
+              />
             </Box>
             <Button
               variant="outlined"
@@ -88,17 +120,24 @@ export const ProfilePage = () => {
             <ProfileInfoRow
               icon={<Person color="primary" />}
               label="Имя пользователя"
-              value={userProfile.username}
+              value={currentUser.username}
             />
             <ProfileInfoRow
               icon={<Email color="primary" />}
               label="Email"
-              value={userProfile.email}
+              value={currentUser.email}
+            />
+            <ProfileInfoRow
+              icon={<Security color="primary" />}
+              label="Роль"
+              value={
+                currentUser.role === 'admin' ? 'Администратор' : 'Пользователь'
+              }
             />
             <ProfileInfoRow
               icon={<CalendarToday color="primary" />}
               label="Дата регистрации"
-              value={new Date(userProfile.createdAt).toLocaleDateString(
+              value={new Date(currentUser.created_at).toLocaleDateString(
                 'ru-RU',
               )}
             />

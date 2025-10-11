@@ -138,7 +138,7 @@ export const LessonsList: React.FC<LessonsListProps> = ({
                     overflow: 'hidden',
                   }}
                 >
-                  {lesson.content}
+                  {lesson.description}
                 </Typography>
 
                 <Box

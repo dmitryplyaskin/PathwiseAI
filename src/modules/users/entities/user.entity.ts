@@ -10,6 +10,7 @@ import { Course } from '../../courses/entities/course.entity';
 import { UserAnswer } from '../../questions/entities/user-answer.entity';
 import { Exam } from '../../exams/entities/exam.entity';
 import { ClarificationMessage } from '../../chat/entities/clarification-message.entity';
+import { UserRole } from '../enums/user-role.enum';
 
 @Entity({ name: 'users' })
 export class User {
@@ -24,6 +25,13 @@ export class User {
 
   @Column({ type: 'varchar' })
   password_hash?: string;
+
+  @Column({
+    type: 'enum',
+    enum: UserRole,
+    default: UserRole.USER,
+  })
+  role: UserRole;
 
   @Column({ type: 'jsonb', nullable: true })
   settings: Record<string, any>;

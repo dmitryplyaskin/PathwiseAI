@@ -53,7 +53,7 @@ export const LessonHeader = ({
             </Fade>
           )}
           <Typography
-            variant="h1"
+            variant="h1Solid"
             component="h1"
             color="white"
             sx={{

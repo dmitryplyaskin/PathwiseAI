@@ -134,7 +134,7 @@ AI получает промпт с:
 - У вас есть кредиты на OpenRouter
 - Бэкенд был перезапущен после изменения `.env`
 
-### Ошибка "User with username testuser not found"
+### Ошибка "User with username admin not found"
 
 Запустите seed:
 \`\`\`bash
