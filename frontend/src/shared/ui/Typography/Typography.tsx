@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Typography as MuiTypography,
-  TypographyProps as MuiTypographyProps,
+  type TypographyProps as MuiTypographyProps,
 } from '@mui/material';
 
 export interface TypographyProps extends Omit<MuiTypographyProps, 'variant'> {
