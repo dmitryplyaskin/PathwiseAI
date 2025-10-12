@@ -15,6 +15,7 @@ export const testsApi = {
   ): Promise<TestData> => {
     const response = await fetch(`${API_BASE_URL}/exams/generate-for-lesson`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -36,6 +37,7 @@ export const testsApi = {
   ): Promise<SubmitTestResultResponse> => {
     const response = await fetch(`${API_BASE_URL}/exams/submit-result`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -54,6 +56,7 @@ export const testsApi = {
   ): Promise<CheckTextAnswerResponse> => {
     const response = await fetch(`${API_BASE_URL}/exams/check-text-answer`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },

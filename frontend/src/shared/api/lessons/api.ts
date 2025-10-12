@@ -9,7 +9,9 @@ const API_BASE_URL = 'http://localhost:3000/api';
 
 export const lessonsApi = {
   getAllLessons: async (): Promise<Lesson[]> => {
-    const response = await fetch(`${API_BASE_URL}/courses/lessons`);
+    const response = await fetch(`${API_BASE_URL}/courses/lessons`, {
+      credentials: 'include',
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch lessons');
     }
@@ -17,7 +19,9 @@ export const lessonsApi = {
   },
 
   getLessonById: async (id: string): Promise<Lesson> => {
-    const response = await fetch(`${API_BASE_URL}/courses/lessons/${id}`);
+    const response = await fetch(`${API_BASE_URL}/courses/lessons/${id}`, {
+      credentials: 'include',
+    });
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error('Lesson not found');
@@ -38,6 +42,7 @@ export const lessonsApi = {
       `${API_BASE_URL}/courses/lessons/${lessonId}/ask`,
       {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -59,6 +64,9 @@ export const lessonsApi = {
   getThreads: async (lessonId: string): Promise<Thread[]> => {
     const response = await fetch(
       `${API_BASE_URL}/courses/lessons/${lessonId}/threads`,
+      {
+        credentials: 'include',
+      },
     );
     if (!response.ok) {
       throw new Error('Failed to fetch threads');
@@ -72,6 +80,9 @@ export const lessonsApi = {
   ): Promise<ThreadMessage[]> => {
     const response = await fetch(
       `${API_BASE_URL}/courses/lessons/${lessonId}/threads/${threadId}`,
+      {
+        credentials: 'include',
+      },
     );
     if (!response.ok) {
       throw new Error('Failed to fetch thread messages');
@@ -85,7 +96,10 @@ export const lessonsApi = {
   ): Promise<{ message: string; threadId: string }> => {
     const response = await fetch(
       `${API_BASE_URL}/courses/lessons/${lessonId}/threads/${threadId}`,
-      { method: 'DELETE' },
+      {
+        method: 'DELETE',
+        credentials: 'include',
+      },
     );
     if (!response.ok) {
       throw new Error('Failed to delete thread');
@@ -99,7 +113,10 @@ export const lessonsApi = {
   ): Promise<{ message: string; newMessage: ThreadMessage }> => {
     const response = await fetch(
       `${API_BASE_URL}/courses/lessons/${lessonId}/regenerate/${messageId}`,
-      { method: 'POST' },
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
     );
     if (!response.ok) {
       throw new Error('Failed to regenerate message');
@@ -112,6 +129,7 @@ export const lessonsApi = {
       `${API_BASE_URL}/courses/lessons/${lessonId}`,
       {
         method: 'DELETE',
+        credentials: 'include',
       },
     );
     if (!response.ok) {

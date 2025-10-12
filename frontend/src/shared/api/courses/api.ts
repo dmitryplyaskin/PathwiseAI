@@ -8,7 +8,10 @@ const API_BASE_URL = 'http://localhost:3000/api';
 
 export const coursesApi = {
   getCoursesList: async (): Promise<CourseListItem[]> => {
-    const response = await fetch(`${API_BASE_URL}/courses/list`);
+    const response = await fetch(`${API_BASE_URL}/courses/list`, {
+      credentials: 'include',
+      method: 'GET',
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch courses list');
     }
@@ -20,6 +23,7 @@ export const coursesApi = {
   ): Promise<CreateModuleResponse> => {
     const response = await fetch(`${API_BASE_URL}/courses/modules`, {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
