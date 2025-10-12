@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsInt, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsInt,
+  IsUUID,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
 
 export class CreateLessonDto {
   @IsUUID()
@@ -16,4 +23,8 @@ export class CreateLessonDto {
   @IsInt()
   @IsNotEmpty()
   order: number;
+
+  @IsOptional()
+  @IsBoolean()
+  shared?: boolean;
 }

@@ -10,6 +10,8 @@ import { OpenRouterService } from '../../chat/services/openrouter.service';
 import { ChatService } from '../../chat/services/chat.service';
 import { CoursesService } from './courses.service';
 import { UnitsService } from './units.service';
+import { AccessControlService } from '../../../shared/services/access-control.service';
+import { AccessDeniedException } from '../../../shared/exceptions/access-denied.exception';
 import {
   lessonGenerationPrompts,
   PromptsConfig,
@@ -30,12 +32,14 @@ export class LessonsService {
     private readonly chatService: ChatService,
     private readonly coursesService: CoursesService,
     private readonly unitsService: UnitsService,
+    private readonly accessControlService: AccessControlService,
   ) {}
 
-  createLesson(createLessonDto: CreateLessonDto) {
+  createLesson(createLessonDto: CreateLessonDto, userId: string) {
     const lesson = this.lessonRepository.create({
       ...createLessonDto,
       unit: { id: createLessonDto.unitId },
+      user: { id: userId },
     });
     return this.lessonRepository.save(lesson);
   }
@@ -46,23 +50,44 @@ export class LessonsService {
     });
   }
 
-  async findOneLesson(id: string) {
+  async findOneLesson(id: string, userId: string) {
     const lesson = await this.lessonRepository.findOneBy({ id });
     if (!lesson) {
       throw new NotFoundException(`Lesson with ID "${id}" not found`);
     }
+
+    const hasAccess = await this.accessControlService.checkLessonAccess(
+      id,
+      userId,
+    );
+    if (!hasAccess) {
+      throw new AccessDeniedException('уроку', id);
+    }
+
     return lesson;
   }
 
-  async updateLesson(id: string, updateLessonDto: UpdateLessonDto) {
-    await this.findOneLesson(id);
+  async updateLesson(
+    id: string,
+    updateLessonDto: UpdateLessonDto,
+    userId: string,
+  ) {
+    await this.findOneLesson(id, userId);
     await this.lessonRepository.update(id, updateLessonDto);
-    return this.findOneLesson(id);
+    return this.findOneLesson(id, userId);
   }
 
-  async removeLesson(id: string) {
-    await this.findOneLesson(id);
+  async removeLesson(id: string, userId: string) {
+    await this.findOneLesson(id, userId);
     return this.lessonRepository.delete(id);
+  }
+
+  async findAccessibleLessons(userId: string): Promise<Lesson[]> {
+    return this.accessControlService.getAccessibleLessons(userId);
+  }
+
+  async findSharedLessons(): Promise<Lesson[]> {
+    return this.accessControlService.getSharedLessons();
   }
 
   async createModule(createModuleDto: CreateModuleDto) {
@@ -86,7 +111,11 @@ export class LessonsService {
     let unit = await this.unitsService.findUnitByCourseId(courseId);
 
     if (!unit) {
-      unit = await this.unitsService.createUnitForCourse(courseId, 1);
+      unit = await this.unitsService.createUnitForCourse(
+        courseId,
+        1,
+        createModuleDto.userId,
+      );
     }
 
     // Генерируем контент урока через AI
@@ -104,6 +133,7 @@ export class LessonsService {
     // Создаем урок
     const lesson = this.lessonRepository.create({
       unit: { id: unit.id },
+      user: { id: createModuleDto.userId },
       title: lessonContent.title,
       description: lessonContent.description,
       content: lessonContent.content,
@@ -114,12 +144,16 @@ export class LessonsService {
 
     const savedLesson = await this.lessonRepository.save(lesson);
 
+    if (!savedLesson) {
+      throw new Error('Failed to save lesson');
+    }
+
     return {
       courseId,
-      lessonId: savedLesson.id,
+      lessonId: savedLesson.id as string,
       unitId: unit.id,
-      title: savedLesson.title,
-      content: savedLesson.content,
+      title: savedLesson.title as string,
+      content: savedLesson.content as string,
     };
   }
 
@@ -224,7 +258,7 @@ export class LessonsService {
       askLessonQuestionDto;
 
     // Проверяем, что урок существует
-    const lesson = await this.findOneLesson(lessonId);
+    const lesson = await this.findOneLesson(lessonId, userId);
 
     // Используем ChatService для обработки вопроса
     const result = await this.chatService.sendMessage({
@@ -247,22 +281,24 @@ export class LessonsService {
   async deleteThread(
     lessonId: string,
     threadId: string,
+    userId: string,
   ): Promise<{
     message: string;
     threadId: string;
   }> {
-    await this.findOneLesson(lessonId);
+    await this.findOneLesson(lessonId, userId);
     return this.chatService.deleteThread(lessonId, threadId);
   }
 
   async regenerateMessage(
     lessonId: string,
     messageId: string,
+    userId: string,
   ): Promise<{
     message: string;
     newMessage: any;
   }> {
-    const lesson = await this.findOneLesson(lessonId);
+    const lesson = await this.findOneLesson(lessonId, userId);
     return this.chatService.regenerateMessage(
       lessonId,
       messageId,
@@ -270,13 +306,17 @@ export class LessonsService {
     );
   }
 
-  async getThreads(lessonId: string): Promise<any[]> {
-    await this.findOneLesson(lessonId);
+  async getThreads(lessonId: string, userId: string): Promise<any[]> {
+    await this.findOneLesson(lessonId, userId);
     return this.chatService.getThreads(lessonId);
   }
 
-  async getThreadMessages(lessonId: string, threadId: string): Promise<any[]> {
-    await this.findOneLesson(lessonId);
+  async getThreadMessages(
+    lessonId: string,
+    threadId: string,
+    userId: string,
+  ): Promise<any[]> {
+    await this.findOneLesson(lessonId, userId);
     return this.chatService.getThreadMessages(lessonId, threadId);
   }
 }

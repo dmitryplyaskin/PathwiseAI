@@ -6,8 +6,8 @@ export class AskLessonQuestionDto {
   lessonId: string;
 
   @IsUUID()
-  @IsOptional()
-  userId?: string;
+  @IsNotEmpty()
+  userId: string;
 
   @IsString()
   @IsNotEmpty()

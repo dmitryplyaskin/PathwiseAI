@@ -41,6 +41,9 @@ export class Course {
   @Column('float', { default: 0 })
   progress: number;
 
+  @Column({ type: 'boolean', default: false })
+  shared: boolean;
+
   @OneToMany(() => Unit, (unit) => unit.course)
   units: Unit[];
 

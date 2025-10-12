@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsUUID,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
 
 export class CreateCourseDto {
   @IsUUID()
@@ -12,4 +18,8 @@ export class CreateCourseDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+
+  @IsOptional()
+  @IsBoolean()
+  shared?: boolean;
 }
