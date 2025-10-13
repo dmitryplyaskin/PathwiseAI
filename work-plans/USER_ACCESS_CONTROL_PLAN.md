@@ -255,3 +255,4 @@ export class AccessControlInterceptor implements NestInterceptor {
 - [ ] Тесты покрывают основную функциональность
 - [ ] Документация обновлена
 - [ ] Фронтенд совместим с новой системой
+
