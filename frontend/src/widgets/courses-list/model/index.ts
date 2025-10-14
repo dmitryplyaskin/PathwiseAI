@@ -1,10 +1,8 @@
 import { createEffect, createEvent, createStore } from 'effector';
+import { apiClient } from '../../../shared/api/config';
 
 export const $courses = createStore([]);
 export const getCourses = createEvent();
 export const getCoursesFx = createEffect(async () => {
-  const response = await fetch('http://localhost:3000/api/courses', {
-    credentials: 'include',
-  });
-  return response.json();
+  return apiClient.get('/courses');
 });

@@ -20,8 +20,10 @@ export type { UseApiState, UseApiOptions } from './hooks/use-api';
 export { usersApi } from './users/api';
 export { testsApi } from './tests/api';
 export { lessonsApi } from './lessons/api';
+export { coursesApi } from './courses/api';
 
 // Типы
 export type * from './users/types';
 export type * from './tests/types';
 export type * from './lessons/types';
+export type * from './courses/types';
