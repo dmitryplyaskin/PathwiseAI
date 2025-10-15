@@ -19,10 +19,10 @@ import {
   PlayCircle,
 } from '@mui/icons-material';
 import type { FC } from 'react';
-import type { Course } from '@/widgets/courses-list/model/mock';
+import type { CourseListItem } from '@/shared/api/courses/types';
 
 interface CourseCardProps {
-  course: Course;
+  course: CourseListItem;
   handleCourseClick: (id: string) => void;
 }
 

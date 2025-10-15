@@ -15,6 +15,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router';
 import {
@@ -29,7 +31,14 @@ import {
 import { useEffect, useState } from 'react';
 import { CourseCard } from '../../../features/course-card/ui/CourseCard';
 import { mockCourses } from '../model/mock';
-import { getCoursesFx } from '../model';
+import { loadCoursesList } from '../../../shared/model/courses';
+import { useUnit } from 'effector-react';
+import {
+  $coursesList,
+  $coursesListLoading,
+  $coursesListError,
+} from '../../../shared/model/courses';
+import type { CourseListItem } from '../../../shared/api/courses/types';
 
 type FilterType = 'all' | 'completed' | 'in_progress' | 'not_started';
 type ViewMode = 'grid' | 'list';
@@ -52,16 +61,24 @@ export const CoursesList = () => {
   const [difficultyFilter, setDifficultyFilter] =
     useState<DifficultyType>('all');
 
+  const coursesList = useUnit($coursesList);
+  const coursesListLoading = useUnit($coursesListLoading);
+  const coursesListError = useUnit($coursesListError);
+
   const handleCourseClick = (courseId: string) => {
     navigate(`/courses/${courseId}`);
   };
 
   useEffect(() => {
-    getCoursesFx();
+    loadCoursesList();
   }, []);
 
+  // Используем данные из API или моки как fallback
+  const courses: CourseListItem[] =
+    coursesList.length > 0 ? coursesList : mockCourses;
+
   // Фильтрация и сортировка
-  const filteredCourses = mockCourses.filter((course) => {
+  const filteredCourses = courses.filter((course) => {
     // Фильтр по статусу
     if (filter !== 'all' && course.status !== filter) return false;
 
@@ -102,16 +119,15 @@ export const CoursesList = () => {
     }
   });
 
-  const inProgressCourses = mockCourses.filter(
+  const inProgressCourses = courses.filter(
     (course) => course.status === 'in_progress',
   );
-  const completedCourses = mockCourses.filter(
+  const completedCourses = courses.filter(
     (course) => course.status === 'completed',
   );
 
   const totalProgress = Math.round(
-    mockCourses.reduce((acc, course) => acc + course.progress, 0) /
-      mockCourses.length,
+    courses.reduce((acc, course) => acc + course.progress, 0) / courses.length,
   );
 
   return (
@@ -139,7 +155,7 @@ export const CoursesList = () => {
             <Box display="flex" alignItems="center" gap={1}>
               <School color="primary" />
               <Typography variant="body2" color="text.secondary">
-                {mockCourses.length} курсов
+                {courses.length} курсов
               </Typography>
             </Box>
             <Box display="flex" alignItems="center" gap={1}>
@@ -160,6 +176,19 @@ export const CoursesList = () => {
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
         <Stack spacing={4}>
+          {/* Индикатор загрузки */}
+          {coursesListLoading && (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          )}
+
+          {/* Ошибка загрузки */}
+          {coursesListError && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              Ошибка загрузки курсов: {coursesListError}
+            </Alert>
+          )}
           {/* Поиск и фильтры */}
           <Stack spacing={3}>
             {/* Поиск */}
@@ -205,7 +234,7 @@ export const CoursesList = () => {
                     variant={filter === 'all' ? 'contained' : 'outlined'}
                     onClick={() => setFilter('all')}
                   >
-                    Все ({mockCourses.length})
+                    Все ({courses.length})
                   </Button>
                   <Button
                     variant={

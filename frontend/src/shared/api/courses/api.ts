@@ -7,7 +7,7 @@ import {
 
 export const coursesApi = {
   getCoursesList: async (): Promise<CourseListItem[]> => {
-    return apiClient.get<CourseListItem[]>('/courses/list');
+    return apiClient.get<CourseListItem[]>('/courses');
   },
 
   createModule: async (
