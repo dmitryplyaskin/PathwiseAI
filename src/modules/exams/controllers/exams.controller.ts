@@ -31,6 +31,19 @@ export class ExamsController {
     return this.examsService.findAllExams();
   }
 
+  @Get('lesson/:lessonId/user/:userId')
+  findExamsByLesson(
+    @Param('lessonId', ParseUUIDPipe) lessonId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return this.examsService.findExamsByLesson(lessonId, userId);
+  }
+
+  @Get('user/:userId')
+  findExamsByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.examsService.findExamsByUser(userId);
+  }
+
   @Get(':id')
   findOneExam(@Param('id', ParseUUIDPipe) id: string) {
     return this.examsService.findOneExam(id);

@@ -52,6 +52,37 @@ export class ExamsService {
     return this.examRepository.find();
   }
 
+  async findExamsByUser(userId: string) {
+    return this.examRepository.find({
+      where: { user: { id: userId } },
+      relations: ['results', 'results.question', 'course'],
+      order: { completed_at: 'DESC' },
+    });
+  }
+
+  async findExamsByLesson(lessonId: string, userId: string) {
+    // Получаем урок для определения курса
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: lessonId },
+      relations: ['unit', 'unit.course'],
+    });
+
+    if (!lesson) {
+      throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
+    }
+
+    // Ищем экзамены для этого курса с названием, содержащим название урока
+    return this.examRepository.find({
+      where: {
+        user: { id: userId },
+        course: { id: lesson.unit.course.id },
+        title: `Тест по уроку: ${lesson.title}`,
+      },
+      relations: ['results', 'results.question', 'course'],
+      order: { completed_at: 'DESC' },
+    });
+  }
+
   async findOneExam(id: string) {
     const exam = await this.examRepository.findOneBy({ id });
     if (!exam) {
@@ -108,21 +139,7 @@ export class ExamsService {
   async getOrGenerateTestForLesson(generateTestDto: GenerateTestDto) {
     const { lessonId, userId, questionCount } = generateTestDto;
 
-    // Проверяем, есть ли уже тест для этого урока
-    const existingExam = await this.examRepository.findOne({
-      where: {
-        user: { id: userId },
-        course: { id: lessonId }, // Временно используем lessonId как courseId
-      },
-      relations: ['results', 'results.question'],
-    });
-
-    if (existingExam && existingExam.results.length > 0) {
-      // Возвращаем существующий тест
-      return this.formatTestForFrontend(existingExam);
-    }
-
-    // Получаем урок
+    // Получаем урок для определения курса
     const lesson = await this.lessonRepository.findOne({
       where: { id: lessonId },
       relations: ['unit', 'unit.course'],
@@ -130,6 +147,21 @@ export class ExamsService {
 
     if (!lesson) {
       throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
+    }
+
+    // Проверяем, есть ли уже тест для этого урока
+    const existingExam = await this.examRepository.findOne({
+      where: {
+        user: { id: userId },
+        course: { id: lesson.unit.course.id },
+        title: `Тест по уроку: ${lesson.title}`,
+      },
+      relations: ['results', 'results.question'],
+    });
+
+    if (existingExam && existingExam.results.length > 0) {
+      // Возвращаем существующий тест
+      return this.formatTestForFrontend(existingExam);
     }
 
     // Генерируем новый тест

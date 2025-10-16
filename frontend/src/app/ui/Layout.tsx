@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, useLocation } from 'react-router';
+import { Outlet, useLocation, Link } from 'react-router';
 import { useUnit } from 'effector-react';
 import {
   Container,
@@ -11,7 +11,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
-import { Logout as LogoutIcon } from '@mui/icons-material';
+import { Logout as LogoutIcon, Quiz } from '@mui/icons-material';
 import { Breadcrumbs, useBreadcrumbs } from '../../shared/ui';
 import {
   $currentUser,
@@ -60,6 +60,15 @@ export const Layout: React.FC = () => {
                     }
                     size="small"
                   />
+                  <Button
+                    component={Link}
+                    to="/test-history"
+                    color="inherit"
+                    startIcon={<Quiz />}
+                    sx={{ textDecoration: 'none' }}
+                  >
+                    История тестов
+                  </Button>
                 </>
               )}
               <Button

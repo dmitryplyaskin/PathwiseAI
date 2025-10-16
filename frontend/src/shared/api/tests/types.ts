@@ -49,3 +49,34 @@ export interface CheckTextAnswerResponse {
   explanation: string;
   feedback: string;
 }
+
+export interface ExamHistoryItem {
+  id: string;
+  title: string;
+  score: number;
+  status: 'completed' | 'in_progress' | 'cancelled';
+  started_at: string;
+  completed_at: string | null;
+  course: {
+    id: string;
+    title: string;
+  };
+  results: {
+    id: string;
+    user_answer: string;
+    is_correct: boolean;
+    question: {
+      id: string;
+      question: string;
+    };
+  }[];
+}
+
+export interface GetUserExamsRequest {
+  userId: string;
+}
+
+export interface GetLessonExamsRequest {
+  lessonId: string;
+  userId: string;
+}

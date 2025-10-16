@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -21,11 +21,13 @@ import {
   Info,
   AccessTime,
   TrendingUp,
+  Grade,
 } from '@mui/icons-material';
 import type { Lesson } from '../../../shared/api/lessons';
 import { TestModal } from '../../test/ui';
 import { testsApi } from '../../../shared/api/tests';
 import type { TestData } from '../../test/types';
+import type { ExamHistoryItem } from '../../../shared/api/tests/types';
 import { useCurrentUser } from '../../../shared/model';
 import { LessonManagementMenu } from './LessonManagementMenu';
 import { LessonDeleteDialog } from './LessonDeleteDialog';
@@ -95,12 +97,42 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeletingLesson, setIsDeletingLesson] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [lessonExams, setLessonExams] = useState<ExamHistoryItem[]>([]);
   const { userId } = useCurrentUser();
   const navigate = useNavigate();
 
   const statusInfo = lesson
     ? getStatusInfo(lesson.status)
     : getStatusInfo('not_started');
+
+  // Загружаем экзамены для урока
+  useEffect(() => {
+    const fetchLessonExams = async () => {
+      if (!lesson || !userId) return;
+
+      try {
+        console.log('Fetching exams for lesson:', lesson.id, 'user:', userId);
+        const exams = await testsApi.getLessonExams({
+          lessonId: lesson.id,
+          userId,
+        });
+        console.log('Fetched exams:', exams);
+        setLessonExams(exams);
+      } catch (error) {
+        console.error('Failed to fetch lesson exams:', error);
+      }
+    };
+
+    fetchLessonExams();
+  }, [lesson, userId]);
+
+  // Получаем последний завершенный экзамен
+  const latestCompletedExam = lessonExams.find(
+    (exam) => exam.status === 'completed',
+  );
+
+  console.log('Latest completed exam:', latestCompletedExam);
+  console.log('All lesson exams:', lessonExams);
 
   const handleOpenTest = async () => {
     if (!lesson) return;
@@ -221,7 +253,54 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                 borderRadius: 2,
               }}
             />
-            {lesson && lesson.status === 'learning' && (
+
+            {/* Результат последнего теста */}
+            {latestCompletedExam && (
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: 'success.50',
+                  border: '1px solid',
+                  borderColor: 'success.200',
+                }}
+              >
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <Grade sx={{ fontSize: 18, color: 'success.main' }} />
+                  <Typography
+                    variant="caption"
+                    fontWeight={600}
+                    color="success.main"
+                  >
+                    Последний результат теста
+                  </Typography>
+                </Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Typography
+                    variant="h6"
+                    fontWeight={700}
+                    color="success.main"
+                  >
+                    {Math.round(latestCompletedExam.score)}%
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    (
+                    {
+                      latestCompletedExam.results.filter((r) => r.is_correct)
+                        .length
+                    }{' '}
+                    из {latestCompletedExam.results.length})
+                  </Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary">
+                  {new Date(
+                    latestCompletedExam.completed_at!,
+                  ).toLocaleDateString('ru-RU')}
+                </Typography>
+              </Box>
+            )}
+
+            {lesson && lesson.status === 'learning' && !latestCompletedExam && (
               <Box>
                 <Box
                   sx={{
@@ -472,7 +551,11 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
               },
             }}
           >
-            {isLoadingTest ? 'Загрузка теста...' : 'Пройти тест'}
+            {isLoadingTest
+              ? 'Загрузка теста...'
+              : latestCompletedExam
+                ? 'Пройти тест снова'
+                : 'Пройти тест'}
           </Button>
 
           {/* Ошибка загрузки теста */}

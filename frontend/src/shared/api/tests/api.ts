@@ -6,6 +6,9 @@ import {
   type SubmitTestResultResponse,
   type CheckTextAnswerRequest,
   type CheckTextAnswerResponse,
+  type ExamHistoryItem,
+  type GetUserExamsRequest,
+  type GetLessonExamsRequest,
 } from './types';
 
 export const testsApi = {
@@ -30,6 +33,20 @@ export const testsApi = {
     return apiClient.post<CheckTextAnswerResponse>(
       '/exams/check-text-answer',
       request,
+    );
+  },
+
+  getUserExams: async (
+    request: GetUserExamsRequest,
+  ): Promise<ExamHistoryItem[]> => {
+    return apiClient.get<ExamHistoryItem[]>(`/exams/user/${request.userId}`);
+  },
+
+  getLessonExams: async (
+    request: GetLessonExamsRequest,
+  ): Promise<ExamHistoryItem[]> => {
+    return apiClient.get<ExamHistoryItem[]>(
+      `/exams/lesson/${request.lessonId}/user/${request.userId}`,
     );
   },
 };
