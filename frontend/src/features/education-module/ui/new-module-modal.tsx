@@ -15,6 +15,8 @@ import {
   Alert,
   Dialog,
   DialogContent,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import { useUnit } from 'effector-react';
 import { useNavigate } from 'react-router';
@@ -39,6 +41,7 @@ interface NewModuleModalProps {
 }
 
 type Complexity = ModuleComplexity | '';
+type TabType = 'lesson' | 'course';
 
 const COMPLEXITY_OPTIONS = [
   {
@@ -85,6 +88,7 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
   const { userId, loading: userLoading, error: userError } = useCurrentUser();
 
   // Form state
+  const [activeTab, setActiveTab] = useState<TabType>('lesson');
   const [topic, setTopic] = useState('');
   const [details, setDetails] = useState('');
   const [complexity, setComplexity] = useState<Complexity>('normal');
@@ -93,6 +97,7 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
 
   // Reset form to initial state
   const resetForm = useCallback(() => {
+    setActiveTab('lesson');
     setTopic('');
     setDetails('');
     setComplexity('normal');
@@ -129,6 +134,13 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
   }, [open]);
 
   // Handlers
+  const handleTabChange = useCallback(
+    (event: React.SyntheticEvent, newValue: TabType) => {
+      setActiveTab(newValue);
+    },
+    [],
+  );
+
   const handleComplexityChange = useCallback((event: SelectChangeEvent) => {
     setComplexity(event.target.value as Complexity);
   }, []);
@@ -160,8 +172,9 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
     userLoading ||
     !userId ||
     !topic.trim() ||
-    !courseId ||
-    (courseId === 'new' && !newCourseName.trim());
+    !complexity ||
+    (activeTab === 'lesson' &&
+      (!courseId || (courseId === 'new' && !newCourseName.trim())));
 
   const errorMessage = coursesListError || moduleCreationError || userError;
 
@@ -170,71 +183,99 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
       <Modal
         open={open && !moduleCreating}
         onClose={onClose}
-        title="Создать новый урок"
+        title="Создать новый контент"
       >
         <Stack spacing={3} sx={{ pt: 1 }}>
+          {/* Переключатель табов */}
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="fullWidth"
+            sx={{
+              borderBottom: 1,
+              borderColor: 'divider',
+              mb: 2,
+            }}
+          >
+            <Tab label="Урок" value="lesson" />
+            <Tab label="Курс" value="course" />
+          </Tabs>
+
+          {/* Общие поля */}
           <TextField
-            label="Какой вопрос вы хотите изучить?"
+            label={
+              activeTab === 'lesson'
+                ? 'Какой вопрос вы хотите изучить?'
+                : 'Тема курса'
+            }
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             fullWidth
             required
           />
           <TextField
-            label="Опишите подробнее (опционально)"
+            label="Дополнительное описание (опционально)"
             value={details}
             onChange={(e) => setDetails(e.target.value)}
             multiline
             rows={4}
             fullWidth
           />
-          <FormControl fullWidth required>
-            <InputLabel id="course-select-label">Курс</InputLabel>
-            <Select
-              labelId="course-select-label"
-              value={courseId}
-              label="Курс"
-              onChange={handleCourseChange}
-              disabled={coursesListLoading}
-            >
-              {coursesListLoading ? (
-                <MenuItem disabled>
-                  <CircularProgress size={20} sx={{ mr: 1 }} />
-                  Загрузка курсов...
-                </MenuItem>
-              ) : (
-                [
-                  ...coursesList.map((course) => (
-                    <MenuItem key={course.id} value={course.id}>
-                      {course.title}
-                    </MenuItem>
-                  )),
-                  coursesList.length > 0 && <Divider key="divider" />,
-                  <MenuItem
-                    key="new"
-                    value="new"
-                    sx={{
-                      color: 'primary.main',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Создать новый курс
-                  </MenuItem>,
-                ]
-              )}
-            </Select>
-          </FormControl>
 
-          {courseId === 'new' && (
-            <TextField
-              label="Название нового курса"
-              value={newCourseName}
-              onChange={(e) => setNewCourseName(e.target.value)}
-              fullWidth
-              required
-              autoFocus
-            />
+          {/* Поля только для урока */}
+          {activeTab === 'lesson' && (
+            <>
+              <FormControl fullWidth required>
+                <InputLabel id="course-select-label">Курс</InputLabel>
+                <Select
+                  labelId="course-select-label"
+                  value={courseId}
+                  label="Курс"
+                  onChange={handleCourseChange}
+                  disabled={coursesListLoading}
+                >
+                  {coursesListLoading ? (
+                    <MenuItem disabled>
+                      <CircularProgress size={20} sx={{ mr: 1 }} />
+                      Загрузка курсов...
+                    </MenuItem>
+                  ) : (
+                    [
+                      ...coursesList.map((course) => (
+                        <MenuItem key={course.id} value={course.id}>
+                          {course.title}
+                        </MenuItem>
+                      )),
+                      coursesList.length > 0 && <Divider key="divider" />,
+                      <MenuItem
+                        key="new"
+                        value="new"
+                        sx={{
+                          color: 'primary.main',
+                          fontWeight: 600,
+                        }}
+                      >
+                        Создать новый курс
+                      </MenuItem>,
+                    ]
+                  )}
+                </Select>
+              </FormControl>
+
+              {courseId === 'new' && (
+                <TextField
+                  label="Название нового курса"
+                  value={newCourseName}
+                  onChange={(e) => setNewCourseName(e.target.value)}
+                  fullWidth
+                  required
+                  autoFocus
+                />
+              )}
+            </>
           )}
+
+          {/* Общее поле сложности */}
           <FormControl fullWidth>
             <InputLabel id="complexity-select-label">
               Сложность объяснения
@@ -285,13 +326,15 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
                 moduleCreating ? <CircularProgress size={16} /> : undefined
               }
             >
-              {moduleCreating ? 'Создание...' : 'Создать'}
+              {moduleCreating
+                ? 'Создание...'
+                : `Создать ${activeTab === 'lesson' ? 'урок' : 'курс'}`}
             </Button>
           </Box>
         </Stack>
       </Modal>
 
-      {/* Прелоадер во время создания урока */}
+      {/* Прелоадер во время создания контента */}
       <Dialog
         open={moduleCreating}
         PaperProps={{
@@ -307,12 +350,13 @@ export const NewModuleModal = ({ open, onClose }: NewModuleModalProps) => {
           <Stack spacing={3} alignItems="center">
             <CircularProgress size={60} thickness={4} />
             <Typography variant="h6" fontWeight={600}>
-              Создаем урок...
+              Создаем {activeTab === 'lesson' ? 'урок' : 'курс'}...
             </Typography>
             <Typography variant="body2" color="text.secondary">
               AI генерирует персонализированный контент
               <br />
-              для вашего урока. Это займет несколько секунд.
+              для вашего {activeTab === 'lesson' ? 'урока' : 'курса'}. Это
+              займет несколько секунд.
             </Typography>
           </Stack>
         </DialogContent>
