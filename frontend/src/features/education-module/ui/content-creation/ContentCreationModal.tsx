@@ -58,26 +58,34 @@ export const ContentCreationModal = ({
 
   // Validation for submit button
   const isSubmitDisabled = useCallback(() => {
-    const hasRequiredFields =
-      currentForm.topic.trim() && currentForm.complexity;
-
-    // If user is not loaded yet or loading, disable button
+    // Check if user data is loading or no userId
     if (userLoading) return true;
     if (!userId) return true;
 
-    // If creating module, disable button
+    // Check if module is being created
     if (moduleCreating) return true;
 
-    // Check required fields
-    if (!hasRequiredFields) return true;
+    // Check common required fields for all tabs
+    const hasTopic = currentForm.topic.trim().length > 0;
+    const hasComplexity = !!currentForm.complexity;
+
+    if (!hasTopic || !hasComplexity) return true;
 
     // Additional validation for lesson tab
     if (activeTab === 'lesson') {
-      const courseId = (lessonForm.courseId as string) || '';
-      const newCourseName = (lessonForm.newCourseName as string) || '';
-      return !courseId || (courseId === 'new' && !newCourseName.trim());
+      const courseId = lessonForm.courseId.trim();
+
+      // Course must be selected
+      if (!courseId) return true;
+
+      // If creating new course, course name must be filled
+      if (courseId === 'new') {
+        const newCourseName = lessonForm.newCourseName.trim();
+        if (!newCourseName) return true;
+      }
     }
 
+    // All validations passed - button is enabled
     return false;
   }, [
     moduleCreating,
