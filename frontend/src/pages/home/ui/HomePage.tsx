@@ -13,7 +13,7 @@ import {
   Toolbar,
 } from '@mui/material';
 import { Add, MenuBook, AccessTime } from '@mui/icons-material';
-import { NewModuleModal } from '../../../features/education-module/ui';
+import { ContentCreationModal } from '../../../features/education-module/ui';
 import { LessonsList } from '../../../widgets/lessons-list';
 import { lessonsApi } from '../../../shared/api/lessons/api';
 import type { Lesson } from '../../../shared/api/lessons/types';
@@ -193,7 +193,7 @@ export const HomePage = () => {
           </Grid>
         </Stack>
       </Container>
-      <NewModuleModal
+      <ContentCreationModal
         open={isNewModuleModalOpen}
         onClose={() => setIsNewModuleModalOpen(false)}
       />
