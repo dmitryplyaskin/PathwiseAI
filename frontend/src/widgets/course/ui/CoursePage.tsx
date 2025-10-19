@@ -10,15 +10,10 @@ import {
   Paper,
   LinearProgress,
   Grid,
-  Avatar,
-  Rating,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Divider,
-  Card,
-  CardContent,
   Tab,
   Tabs,
 } from '@mui/material';
@@ -29,13 +24,17 @@ import {
   CheckCircle,
   School,
   AccessTime,
-  People,
   Star,
   Assignment,
 } from '@mui/icons-material';
-import { useState } from 'react';
-import { mockCourseDetail } from '../model/mock';
-import { UnitCard } from '../../../features/unit-card/ui/UnitCard';
+import { useState, useEffect } from 'react';
+import { useUnit } from 'effector-react';
+import {
+  $courseDetail,
+  $courseDetailLoading,
+  $courseDetailError,
+  loadCourseDetail,
+} from '@shared/model/courses';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -59,53 +58,73 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const getDifficultyColor = (difficulty: string) => {
-  switch (difficulty) {
-    case 'beginner':
-      return 'success';
-    case 'intermediate':
-      return 'warning';
-    case 'advanced':
-      return 'error';
-    default:
-      return 'default';
-  }
-};
-
-const getDifficultyLabel = (difficulty: string) => {
-  switch (difficulty) {
-    case 'beginner':
-      return 'Начальный';
-    case 'intermediate':
-      return 'Средний';
-    case 'advanced':
-      return 'Продвинутый';
-    default:
-      return difficulty;
-  }
-};
-
-const getCategoryLabel = (category: string) => {
-  switch (category) {
-    case 'machine_learning':
-      return 'Машинное обучение';
-    case 'data_science':
-      return 'Data Science';
-    case 'programming':
-      return 'Программирование';
-    case 'mathematics':
-      return 'Математика';
-    default:
-      return category;
-  }
-};
-
 export const CoursePage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const [activeTab, setActiveTab] = useState(0);
 
-  const course = mockCourseDetail;
+  const { courseDetail, courseDetailLoading, courseDetailError } = useUnit({
+    courseDetail: $courseDetail,
+    courseDetailLoading: $courseDetailLoading,
+    courseDetailError: $courseDetailError,
+  });
+
+  // Загружаем данные курса при монтировании компонента
+  useEffect(() => {
+    if (params.id) {
+      loadCourseDetail(params.id);
+    }
+  }, [params.id]);
+
+  // Показываем загрузку или ошибку
+  if (courseDetailLoading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography>Загрузка курса...</Typography>
+      </Box>
+    );
+  }
+
+  if (courseDetailError) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography color="error">
+          Ошибка загрузки курса: {courseDetailError}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!courseDetail) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography>Курс не найден</Typography>
+      </Box>
+    );
+  }
+
+  const course = courseDetail;
 
   const handleBackToCourses = () => {
     navigate('/courses');
@@ -119,9 +138,12 @@ export const CoursePage = () => {
     navigate(`/courses/${params.id}/units/${unitId}`);
   };
 
-  const nextUnit = course.units.find(
-    (unit) => unit.status === 'in_progress' || unit.status === 'not_started',
-  );
+  const nextLesson = course.units
+    .flatMap((unit) => unit.lessons)
+    .find(
+      (lesson) =>
+        lesson.status === 'not_started' || lesson.status === 'learning',
+    );
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -148,18 +170,14 @@ export const CoursePage = () => {
                 <Stack spacing={3}>
                   <Box display="flex" gap={2} flexWrap="wrap">
                     <Chip
-                      label={getCategoryLabel(course.category)}
+                      label="Программирование"
                       variant="outlined"
                       sx={{
                         color: 'inherit',
                         borderColor: 'rgba(255,255,255,0.3)',
                       }}
                     />
-                    <Chip
-                      label={getDifficultyLabel(course.difficulty)}
-                      color={getDifficultyColor(course.difficulty)}
-                      icon={<Star />}
-                    />
+                    <Chip label="Средний" color="warning" icon={<Star />} />
                   </Box>
 
                   <Typography variant="h1" component="h1">
@@ -179,60 +197,34 @@ export const CoursePage = () => {
                     <Box display="flex" alignItems="center" gap={1}>
                       <School color="primary" />
                       <Typography variant="body2" color="text.secondary">
-                        {course.unitsCount} модулей
+                        {course.units.length} модулей
                       </Typography>
                     </Box>
                     <Box display="flex" alignItems="center" gap={1}>
                       <Assignment color="primary" />
                       <Typography variant="body2" color="text.secondary">
-                        {course.totalLessons} уроков
+                        {course.units.reduce(
+                          (total, unit) => total + unit.lessons.length,
+                          0,
+                        )}{' '}
+                        уроков
                       </Typography>
                     </Box>
                     <Box display="flex" alignItems="center" gap={1}>
                       <AccessTime color="primary" />
                       <Typography variant="body2" color="text.secondary">
-                        {course.estimatedTime}
+                        {course.units.reduce(
+                          (total, unit) =>
+                            total +
+                            unit.lessons.reduce(
+                              (unitTotal, lesson) =>
+                                unitTotal + (lesson.reading_time || 0),
+                              0,
+                            ),
+                          0,
+                        )}{' '}
+                        мин
                       </Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <People color="primary" />
-                      <Typography variant="body2" color="text.secondary">
-                        {course.studentsCount.toLocaleString()} студентов
-                      </Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Star color="primary" />
-                      <Typography variant="body2" color="text.secondary">
-                        {course.rating} рейтинг
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {/* Инструктор */}
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar sx={{ width: 48, height: 48 }}>
-                      {course.instructor.name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="body1" fontWeight={500}>
-                        {course.instructor.name}
-                      </Typography>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Rating
-                          value={course.instructor.rating}
-                          precision={0.1}
-                          size="small"
-                          readOnly
-                        />
-                        <Typography variant="caption" color="text.secondary">
-                          {course.instructor.coursesCount} курсов •{' '}
-                          {course.instructor.studentsCount.toLocaleString()}{' '}
-                          студентов
-                        </Typography>
-                      </Box>
                     </Box>
                   </Box>
                 </Stack>
@@ -256,7 +248,19 @@ export const CoursePage = () => {
                     <Box>
                       <Box display="flex" justifyContent="space-between" mb={1}>
                         <Typography variant="body2" color="text.secondary">
-                          {course.completedLessons} из {course.totalLessons}{' '}
+                          {course.units.reduce(
+                            (total, unit) =>
+                              total +
+                              unit.lessons.filter(
+                                (lesson) => lesson.status === 'mastered',
+                              ).length,
+                            0,
+                          )}{' '}
+                          из{' '}
+                          {course.units.reduce(
+                            (total, unit) => total + unit.lessons.length,
+                            0,
+                          )}{' '}
                           уроков
                         </Typography>
                         <Typography
@@ -282,12 +286,16 @@ export const CoursePage = () => {
                     </Box>
 
                     <Stack spacing={2}>
-                      {nextUnit && (
+                      {nextLesson && (
                         <Button
                           variant="contained"
                           size="large"
                           startIcon={<PlayCircle />}
-                          onClick={() => handleUnitClick(nextUnit.id)}
+                          onClick={() =>
+                            navigate(
+                              `/courses/${params.id}/lessons/${nextLesson.id}`,
+                            )
+                          }
                           fullWidth
                         >
                           Продолжить обучение
@@ -321,161 +329,87 @@ export const CoursePage = () => {
           >
             <Tab label="Обзор" />
             <Tab label="Программа" />
-            <Tab label="Инструктор" />
-            <Tab label="Отзывы" />
           </Tabs>
         </Box>
 
         {/* Обзор */}
         <TabPanel value={activeTab} index={0}>
-          <Grid container spacing={4}>
-            <Grid size={{ xs: 12, md: 8 }}>
-              <Stack spacing={4}>
-                {/* Описание */}
-                <Paper
-                  elevation={0}
-                  sx={{ p: 3, border: '1px solid', borderColor: 'divider' }}
-                >
-                  <Typography variant="h3" gutterBottom>
-                    О курсе
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    sx={{ lineHeight: 1.7, whiteSpace: 'pre-line' }}
-                  >
-                    {course.fullDescription}
-                  </Typography>
-                </Paper>
+          <Stack spacing={4}>
+            {/* Описание */}
+            <Paper
+              elevation={0}
+              sx={{ p: 3, border: '1px solid', borderColor: 'divider' }}
+            >
+              <Typography variant="h3" gutterBottom>
+                О курсе
+              </Typography>
+              <Typography variant="body1" sx={{ lineHeight: 1.7 }}>
+                {course.description}
+              </Typography>
+            </Paper>
 
-                {/* Что вы изучите */}
-                <Paper
-                  elevation={0}
-                  sx={{ p: 3, border: '1px solid', borderColor: 'divider' }}
-                >
-                  <Typography variant="h3" gutterBottom>
-                    Что вы изучите
-                  </Typography>
-                  <List>
-                    {course.learningOutcomes.map((outcome, index) => (
-                      <ListItem key={index} disablePadding>
-                        <ListItemIcon sx={{ minWidth: 32 }}>
-                          <CheckCircle color="success" fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography variant="body2">{outcome}</Typography>
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Paper>
-
-                {/* Теги */}
-                <Paper
-                  elevation={0}
-                  sx={{ p: 3, border: '1px solid', borderColor: 'divider' }}
-                >
-                  <Typography variant="h3" gutterBottom>
-                    Технологии
-                  </Typography>
-                  <Box display="flex" flexWrap="wrap" gap={1}>
-                    {course.tags.map((tag) => (
-                      <Chip
-                        key={tag}
-                        label={tag}
-                        variant="outlined"
-                        size="small"
-                      />
-                    ))}
+            {/* Статистика */}
+            <Paper
+              elevation={0}
+              sx={{ p: 3, border: '1px solid', borderColor: 'divider' }}
+            >
+              <Typography variant="h3" gutterBottom>
+                Статистика курса
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Box textAlign="center">
+                    <Typography variant="h4" color="primary" fontWeight={600}>
+                      {course.units.length}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Модулей
+                    </Typography>
                   </Box>
-                </Paper>
-              </Stack>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <Stack spacing={3}>
-                {/* Требования */}
-                <Paper
-                  elevation={0}
-                  sx={{ p: 3, border: '1px solid', borderColor: 'divider' }}
-                >
-                  <Typography variant="h3" gutterBottom>
-                    Требования
-                  </Typography>
-                  <List dense>
-                    {course.prerequisites.map((prerequisite, index) => (
-                      <ListItem key={index} disablePadding>
-                        <ListItemIcon sx={{ minWidth: 32 }}>
-                          <CheckCircle color="primary" fontSize="small" />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
-                            <Typography variant="body2">
-                              {prerequisite}
-                            </Typography>
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </Paper>
-
-                {/* Статистика */}
-                <Paper
-                  elevation={0}
-                  sx={{ p: 3, border: '1px solid', borderColor: 'divider' }}
-                >
-                  <Typography variant="h3" gutterBottom>
-                    Статистика курса
-                  </Typography>
-                  <Stack spacing={2}>
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        Модулей:
-                      </Typography>
-                      <Typography variant="body2" fontWeight={500}>
-                        {course.unitsCount}
-                      </Typography>
-                    </Box>
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        Уроков:
-                      </Typography>
-                      <Typography variant="body2" fontWeight={500}>
-                        {course.totalLessons}
-                      </Typography>
-                    </Box>
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        Студентов:
-                      </Typography>
-                      <Typography variant="body2" fontWeight={500}>
-                        {course.studentsCount.toLocaleString()}
-                      </Typography>
-                    </Box>
-                    <Divider />
-                    <Box display="flex" justifyContent="space-between">
-                      <Typography variant="body2" color="text.secondary">
-                        Рейтинг:
-                      </Typography>
-                      <Box display="flex" alignItems="center" gap={0.5}>
-                        <Rating
-                          value={course.rating}
-                          precision={0.1}
-                          size="small"
-                          readOnly
-                        />
-                        <Typography variant="body2" fontWeight={500}>
-                          {course.rating}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Stack>
-                </Paper>
-              </Stack>
-            </Grid>
-          </Grid>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Box textAlign="center">
+                    <Typography variant="h4" color="primary" fontWeight={600}>
+                      {course.units.reduce(
+                        (total, unit) => total + unit.lessons.length,
+                        0,
+                      )}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Уроков
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Box textAlign="center">
+                    <Typography variant="h4" color="primary" fontWeight={600}>
+                      {course.units.reduce(
+                        (total, unit) =>
+                          total +
+                          unit.lessons.filter(
+                            (lesson) => lesson.status === 'mastered',
+                          ).length,
+                        0,
+                      )}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Завершено
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid size={{ xs: 6, sm: 3 }}>
+                  <Box textAlign="center">
+                    <Typography variant="h4" color="primary" fontWeight={600}>
+                      {course.progress}%
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Прогресс
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Paper>
+          </Stack>
         </TabPanel>
 
         {/* Программа */}
@@ -483,138 +417,77 @@ export const CoursePage = () => {
           <Stack spacing={4}>
             <Typography variant="h2">Программа курса</Typography>
 
-            {/* Краткое содержание */}
-            <Paper
-              elevation={0}
-              sx={{ p: 3, border: '1px solid', borderColor: 'divider' }}
-            >
-              <Typography variant="h3" gutterBottom>
-                Краткое содержание
-              </Typography>
-              <List>
-                {course.syllabus.map((item, index) => (
-                  <ListItem key={index} disablePadding>
-                    <ListItemIcon sx={{ minWidth: 32 }}>
-                      <Typography
-                        variant="body2"
-                        color="primary"
-                        fontWeight={600}
-                      >
-                        {index + 1}.
-                      </Typography>
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={<Typography variant="body2">{item}</Typography>}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-
-            {/* Модули курса */}
+            {/* Уроки курса */}
             <Box>
               <Typography variant="h3" gutterBottom>
-                Модули курса
+                Уроки курса
               </Typography>
-              <Grid container spacing={3}>
+              <Stack spacing={2}>
                 {course.units.map((unit) => (
-                  <Grid key={unit.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-                    <UnitCard unit={unit} handleUnitClick={handleUnitClick} />
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          </Stack>
-        </TabPanel>
-
-        {/* Инструктор */}
-        <TabPanel value={activeTab} index={2}>
-          <Paper
-            elevation={0}
-            sx={{ p: 4, border: '1px solid', borderColor: 'divider' }}
-          >
-            <Stack spacing={3}>
-              <Box display="flex" alignItems="center" gap={3}>
-                <Avatar sx={{ width: 80, height: 80, fontSize: '2rem' }}>
-                  {course.instructor.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')}
-                </Avatar>
-                <Box>
-                  <Typography variant="h3" gutterBottom>
-                    {course.instructor.name}
-                  </Typography>
-                  <Box display="flex" alignItems="center" gap={2} mb={1}>
-                    <Rating
-                      value={course.instructor.rating}
-                      precision={0.1}
-                      readOnly
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      {course.instructor.rating} рейтинг
-                    </Typography>
-                  </Box>
-                  <Box display="flex" gap={3}>
-                    <Typography variant="body2" color="text.secondary">
-                      {course.instructor.coursesCount} курсов
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {course.instructor.studentsCount.toLocaleString()}{' '}
-                      студентов
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-
-              <Typography variant="body1" sx={{ lineHeight: 1.7 }}>
-                {course.instructor.bio}
-              </Typography>
-            </Stack>
-          </Paper>
-        </TabPanel>
-
-        {/* Отзывы */}
-        <TabPanel value={activeTab} index={3}>
-          <Stack spacing={3}>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Typography variant="h2">Отзывы студентов</Typography>
-              <Chip
-                label={course.reviews.length}
-                color="primary"
-                size="small"
-              />
-            </Box>
-
-            {course.reviews.map((review) => (
-              <Card
-                key={review.id}
-                elevation={0}
-                sx={{ border: '1px solid', borderColor: 'divider' }}
-              >
-                <CardContent>
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="flex-start"
-                    mb={2}
+                  <Paper
+                    key={unit.id}
+                    elevation={0}
+                    sx={{ p: 3, border: '1px solid', borderColor: 'divider' }}
                   >
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={500}>
-                        {review.author}
-                      </Typography>
-                      <Rating value={review.rating} size="small" readOnly />
-                    </Box>
-                    <Typography variant="caption" color="text.secondary">
-                      {review.date}
+                    <Typography variant="h4" gutterBottom>
+                      {unit.title}
                     </Typography>
-                  </Box>
-                  <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                    {review.comment}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
+                    <List>
+                      {unit.lessons.map((lesson) => (
+                        <ListItem
+                          key={lesson.id}
+                          disablePadding
+                          sx={{ cursor: 'pointer' }}
+                          onClick={() =>
+                            navigate(
+                              `/courses/${params.id}/lessons/${lesson.id}`,
+                            )
+                          }
+                        >
+                          <ListItemIcon sx={{ minWidth: 32 }}>
+                            {lesson.status === 'mastered' ? (
+                              <CheckCircle color="success" fontSize="small" />
+                            ) : lesson.status === 'learning' ? (
+                              <PlayCircle color="primary" fontSize="small" />
+                            ) : (
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                fontWeight={600}
+                              >
+                                {lesson.order}.
+                              </Typography>
+                            )}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={
+                              <Typography
+                                variant="body2"
+                                fontWeight={
+                                  lesson.status !== 'not_started' ? 500 : 400
+                                }
+                              >
+                                {lesson.title}
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {lesson.description}
+                                {lesson.reading_time &&
+                                  ` • ${lesson.reading_time} мин`}
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                      ))}
+                    </List>
+                  </Paper>
+                ))}
+              </Stack>
+            </Box>
           </Stack>
         </TabPanel>
       </Container>

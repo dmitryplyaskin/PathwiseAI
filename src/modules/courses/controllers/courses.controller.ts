@@ -19,6 +19,7 @@ import { UpdateUnitDto } from '../dto/update-unit.dto';
 import { CreateLessonDto } from '../dto/create-lesson.dto';
 import { UpdateLessonDto } from '../dto/update-lesson.dto';
 import { CreateModuleDto } from '../dto/create-module.dto';
+import { CreateCourseOutlineDto } from '../dto/create-course-outline.dto';
 import { CourseListItemDto } from '../dto/course-list.dto';
 import { AskLessonQuestionDto } from '../dto/ask-lesson-question.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
@@ -70,7 +71,7 @@ export class CoursesController {
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() user: User,
   ) {
-    return this.coursesService.findOneCourse(id, user.id);
+    return this.coursesService.findCourseWithLessons(id, user.id);
   }
 
   @Patch(':id')
@@ -220,6 +221,19 @@ export class CoursesController {
   @UseGuards(JwtAuthGuard)
   createModule(@Body() createModuleDto: CreateModuleDto) {
     return this.lessonsService.createModule(createModuleDto);
+  }
+
+  // Course outline endpoint (создание курса с уроками-заглушками)
+  @Post('outlines')
+  @UseGuards(JwtAuthGuard)
+  createCourseOutline(
+    @Body() createCourseOutlineDto: CreateCourseOutlineDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.lessonsService.createCourseOutline({
+      ...createCourseOutlineDto,
+      userId: user.id,
+    });
   }
 
   // AI Assistant endpoint (вопросы к ИИ-помощнику по уроку)

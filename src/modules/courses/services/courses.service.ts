@@ -55,6 +55,30 @@ export class CoursesService {
     return course;
   }
 
+  async findCourseWithLessons(id: string, userId: string) {
+    const course = await this.courseRepository.findOne({
+      where: { id },
+      relations: ['units', 'units.lessons'],
+      order: {
+        units: { order: 'ASC', lessons: { order: 'ASC' } },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID "${id}" not found`);
+    }
+
+    const hasAccess = await this.accessControlService.checkCourseAccess(
+      id,
+      userId,
+    );
+    if (!hasAccess) {
+      throw new AccessDeniedException('курсу', id);
+    }
+
+    return course;
+  }
+
   async updateCourse(
     id: string,
     updateCourseDto: UpdateCourseDto,

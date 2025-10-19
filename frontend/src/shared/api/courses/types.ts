@@ -38,3 +38,78 @@ export interface CreateModuleResponse {
   title: string;
   content: string;
 }
+
+export interface CreateCourseOutlineRequest {
+  topic: string;
+  details?: string;
+  complexity: ModuleComplexity;
+  userId: string;
+}
+
+export interface CreateCourseOutlineResponse {
+  courseId: string;
+  unitId: string;
+  courseTitle: string;
+  courseDescription: string;
+  lessons: Array<{
+    id: string;
+    title: string;
+    description: string;
+    isCreated: boolean;
+  }>;
+}
+
+export interface CourseDetail {
+  id: string;
+  title: string;
+  description: string;
+  progress: number;
+  status: 'completed' | 'in_progress' | 'not_started';
+  shared: boolean;
+  created_at: string;
+  updated_at: string;
+  units: Array<{
+    id: string;
+    title: string;
+    order: number;
+    shared: boolean;
+    created_at: string;
+    lessons: Array<{
+      id: string;
+      title: string;
+      description: string;
+      content: string;
+      reading_time: number;
+      difficulty: number;
+      order: number;
+      status: 'not_started' | 'learning' | 'mastered';
+      isCreated: boolean;
+      shared: boolean;
+      created_at: string;
+      updated_at: string;
+    }>;
+  }>;
+}
+
+export interface LessonDetail {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  reading_time: number;
+  difficulty: number;
+  order: number;
+  status: 'not_started' | 'learning' | 'mastered';
+  isCreated: boolean;
+  shared: boolean;
+  created_at: string;
+  updated_at: string;
+  unit: {
+    id: string;
+    title: string;
+    course: {
+      id: string;
+      title: string;
+    };
+  };
+}

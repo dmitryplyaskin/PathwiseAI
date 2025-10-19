@@ -5,6 +5,7 @@ import { Modal } from '../../../../shared/ui/modal';
 import {
   $coursesListError,
   createModule,
+  createCourseOutline,
 } from '../../../../shared/model/courses';
 import type { ModuleComplexity } from '../../../../shared/api/courses/types';
 import { useContentCreationState } from './hooks';
@@ -37,6 +38,8 @@ export const ContentCreationModal = ({
     userError,
     moduleCreating,
     moduleCreationError,
+    courseOutlineCreating,
+    courseOutlineCreationError,
   } = useContentCreationState(open, onClose);
 
   // Initialize form hooks
@@ -62,8 +65,8 @@ export const ContentCreationModal = ({
     if (userLoading) return true;
     if (!userId) return true;
 
-    // Check if module is being created
-    if (moduleCreating) return true;
+    // Check if module or course outline is being created
+    if (moduleCreating || courseOutlineCreating) return true;
 
     // Check common required fields for all tabs
     const hasTopic = currentForm.topic.trim().length > 0;
@@ -89,6 +92,7 @@ export const ContentCreationModal = ({
     return false;
   }, [
     moduleCreating,
+    courseOutlineCreating,
     userLoading,
     userId,
     currentForm.topic,
@@ -116,24 +120,26 @@ export const ContentCreationModal = ({
         userId,
       });
     } else {
-      createModule({
+      createCourseOutline({
         topic: currentForm.topic,
         details: currentForm.details || undefined,
         complexity: currentForm.complexity as ModuleComplexity,
-        courseId: undefined,
-        newCourseName: courseForm.topic,
         userId,
       });
     }
-  }, [activeTab, currentForm, userId, lessonForm, courseForm]);
+  }, [activeTab, currentForm, userId, lessonForm]);
 
   // Combine all errors
-  const errorMessage = coursesListError || moduleCreationError || userError;
+  const errorMessage =
+    coursesListError ||
+    moduleCreationError ||
+    courseOutlineCreationError ||
+    userError;
 
   return (
     <>
       <Modal
-        open={open && !moduleCreating}
+        open={open && !moduleCreating && !courseOutlineCreating}
         onClose={onClose}
         title="Создать новый контент"
       >
@@ -181,7 +187,10 @@ export const ContentCreationModal = ({
       </Modal>
 
       {/* Loading dialog */}
-      <CreationLoadingDialog open={moduleCreating} activeTab={activeTab} />
+      <CreationLoadingDialog
+        open={moduleCreating || courseOutlineCreating}
+        activeTab={activeTab}
+      />
     </>
   );
 };

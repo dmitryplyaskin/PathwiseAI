@@ -69,6 +69,9 @@ export class Lesson {
   @Column({ type: 'boolean', default: false })
   shared: boolean;
 
+  @Column({ type: 'boolean', default: true })
+  isCreated: boolean;
+
   @OneToMany(() => Question, (question) => question.lesson)
   questions: Question[];
 

@@ -3,6 +3,10 @@ import {
   type CourseListItem,
   type CreateModuleRequest,
   type CreateModuleResponse,
+  type CreateCourseOutlineRequest,
+  type CreateCourseOutlineResponse,
+  type CourseDetail,
+  type LessonDetail,
 } from './types';
 
 export const coursesApi = {
@@ -14,5 +18,22 @@ export const coursesApi = {
     data: CreateModuleRequest,
   ): Promise<CreateModuleResponse> => {
     return apiClient.post<CreateModuleResponse>('/courses/modules', data);
+  },
+
+  createCourseOutline: async (
+    data: CreateCourseOutlineRequest,
+  ): Promise<CreateCourseOutlineResponse> => {
+    return apiClient.post<CreateCourseOutlineResponse>(
+      '/courses/outlines',
+      data,
+    );
+  },
+
+  getCourseDetail: async (courseId: string): Promise<CourseDetail> => {
+    return apiClient.get<CourseDetail>(`/courses/${courseId}`);
+  },
+
+  getLessonDetail: async (lessonId: string): Promise<LessonDetail> => {
+    return apiClient.get<LessonDetail>(`/courses/lessons/${lessonId}`);
   },
 };

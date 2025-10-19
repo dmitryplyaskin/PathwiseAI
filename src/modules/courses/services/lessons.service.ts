@@ -5,6 +5,7 @@ import { Lesson } from '../entities/lesson.entity';
 import { CreateLessonDto } from '../dto/create-lesson.dto';
 import { UpdateLessonDto } from '../dto/update-lesson.dto';
 import { CreateModuleDto } from '../dto/create-module.dto';
+import { CreateCourseOutlineDto } from '../dto/create-course-outline.dto';
 import { AskLessonQuestionDto } from '../dto/ask-lesson-question.dto';
 import { OpenRouterService } from '../../chat/services/openrouter.service';
 import { ChatService } from '../../chat/services/chat.service';
@@ -20,6 +21,14 @@ import {
   lessonGenerationSchema,
   LessonGenerationResponse,
 } from '../config/lesson-generation.schema';
+import {
+  courseGenerationPrompts,
+  CoursePromptsConfig,
+} from '../config/course-generation.prompts';
+import {
+  courseGenerationSchema,
+  CourseGenerationResponse,
+} from '../config/course-generation.schema';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -62,6 +71,32 @@ export class LessonsService {
     );
     if (!hasAccess) {
       throw new AccessDeniedException('уроку', id);
+    }
+
+    // Если контент урока еще не создан, генерируем его
+    if (!lesson.isCreated) {
+      const lessonContent = await this.generateLessonContent(
+        lesson.title,
+        lesson.description,
+        'normal', // Можно добавить поле complexity в Lesson entity позже
+      );
+
+      // Обновляем урок с сгенерированным контентом
+      await this.lessonRepository.update(id, {
+        content: lessonContent.content,
+        reading_time: lessonContent.readingTime,
+        difficulty: lessonContent.difficulty,
+        isCreated: true,
+      });
+
+      // Возвращаем обновленный урок
+      const updatedLesson = await this.lessonRepository.findOneBy({ id });
+      if (!updatedLesson) {
+        throw new NotFoundException(
+          `Lesson with ID "${id}" not found after update`,
+        );
+      }
+      return updatedLesson;
     }
 
     return lesson;
@@ -318,5 +353,111 @@ export class LessonsService {
   ): Promise<any[]> {
     await this.findOneLesson(lessonId, userId);
     return this.chatService.getThreadMessages(lessonId, threadId);
+  }
+
+  async createCourseOutline(createCourseOutlineDto: CreateCourseOutlineDto) {
+    // Генерируем структуру курса через AI
+    const courseOutline = await this.generateCourseOutline(
+      createCourseOutlineDto.topic,
+      createCourseOutlineDto.details,
+      createCourseOutlineDto.complexity,
+    );
+
+    // Создаем курс
+    const course = await this.coursesService.createCourse({
+      title: courseOutline.name,
+      description: courseOutline.description,
+      userId: createCourseOutlineDto.userId,
+    });
+
+    // Создаем Unit для курса
+    const unit = await this.unitsService.createUnitForCourse(
+      course.id,
+      1,
+      createCourseOutlineDto.userId,
+    );
+
+    // Создаем уроки-заглушки (без контента)
+    const lessons: Lesson[] = [];
+    for (let i = 0; i < courseOutline.lessons.length; i++) {
+      const lessonData = courseOutline.lessons[i];
+      const lesson = this.lessonRepository.create({
+        unit: { id: unit.id },
+        user: { id: createCourseOutlineDto.userId },
+        title: lessonData.name,
+        description: lessonData.description,
+        content: '', // Пустой контент - будет сгенерирован при открытии урока
+        order: i + 1,
+        isCreated: false, // Флаг указывает, что контент еще не создан
+      });
+      const savedLesson = await this.lessonRepository.save(lesson);
+      lessons.push(savedLesson);
+    }
+
+    return {
+      courseId: course.id,
+      unitId: unit.id,
+      courseTitle: course.title,
+      courseDescription: course.description,
+      lessons: lessons.map((lesson) => ({
+        id: lesson.id,
+        title: lesson.title,
+        description: lesson.description,
+        isCreated: lesson.isCreated,
+      })),
+    };
+  }
+
+  private async generateCourseOutline(
+    topic: string,
+    details: string | undefined,
+    complexity: string,
+  ): Promise<CourseGenerationResponse> {
+    // Get complexity description from prompts config
+    const validComplexity = ['simple', 'normal', 'professional'].includes(
+      complexity,
+    )
+      ? (complexity as keyof CoursePromptsConfig['complexityLevels'])
+      : 'normal';
+    const complexityDescription =
+      courseGenerationPrompts.complexityLevels[validComplexity];
+
+    // Build user prompt from template
+    const detailsSection = details ? `Additional details: ${details}\n` : '';
+
+    const userPrompt = courseGenerationPrompts.userPromptTemplate
+      .replace('${topic}', topic)
+      .replace('${details}', detailsSection)
+      .replace('${complexityDescription}', complexityDescription);
+
+    const messages = [
+      { role: 'system', content: courseGenerationPrompts.systemPrompt },
+      { role: 'user', content: userPrompt },
+    ];
+
+    try {
+      const response = await this.openRouterService.generateResponse(messages, {
+        response_format: courseGenerationSchema,
+      });
+
+      // Сохраняем response в JSON файл для отладки
+      this.saveDebugResponse(response, `Course_${topic}`);
+
+      console.log('Course generation response:\n', response);
+      // Parse the structured JSON response
+      const courseData = JSON.parse(response) as CourseGenerationResponse;
+
+      // Log the parsed course data
+      console.log('Parsed course data:', {
+        name: courseData.name,
+        description: courseData.description,
+        lessonsCount: courseData.lessons.length,
+      });
+
+      return courseData;
+    } catch (error) {
+      console.error('Error generating course outline:', error);
+      throw new Error('Failed to generate course outline');
+    }
   }
 }
