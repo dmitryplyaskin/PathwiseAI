@@ -27,6 +27,7 @@ export interface TestData {
   id: string;
   title: string;
   questions: Question[];
+  lessonId?: string;
 }
 
 export interface QuestionAnswer {
@@ -42,4 +43,3 @@ export interface TestResult {
   timeSpent: number; // в секундах
   answers: QuestionAnswer[];
 }
-

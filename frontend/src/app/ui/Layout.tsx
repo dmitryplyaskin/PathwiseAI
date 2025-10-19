@@ -11,7 +11,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material';
-import { Logout as LogoutIcon, Quiz } from '@mui/icons-material';
+import { Logout as LogoutIcon, Quiz, AccessTime } from '@mui/icons-material';
 import { Breadcrumbs, useBreadcrumbs } from '@shared/ui';
 import {
   $currentUser,
@@ -68,6 +68,15 @@ export const Layout: React.FC = () => {
                     sx={{ textDecoration: 'none' }}
                   >
                     История тестов
+                  </Button>
+                  <Button
+                    component={Link}
+                    to="/review"
+                    color="inherit"
+                    startIcon={<AccessTime />}
+                    sx={{ textDecoration: 'none' }}
+                  >
+                    Повторение
                   </Button>
                 </>
               )}

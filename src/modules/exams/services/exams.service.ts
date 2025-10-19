@@ -14,6 +14,7 @@ import { Lesson } from '../../courses/entities/lesson.entity';
 import { Question } from '../../questions/entities/question.entity';
 import { QuestionType } from '../../questions/entities/question.entity';
 import { OpenRouterService } from '../../chat/services/openrouter.service';
+import { SM2SpacedRepetitionService } from '../../courses/services/sm2-spaced-repetition.service';
 import { testGenerationPrompts } from '../config/test-generation.prompts';
 import { testGenerationSchema } from '../config/test-generation.schema';
 import { TestGenerationResponse } from '../config/test-generation.schema';
@@ -36,6 +37,7 @@ export class ExamsService {
     @InjectRepository(Question)
     private readonly questionRepository: Repository<Question>,
     private readonly openRouterService: OpenRouterService,
+    private readonly sm2Service: SM2SpacedRepetitionService,
   ) {}
 
   // Exam methods
@@ -160,8 +162,13 @@ export class ExamsService {
     });
 
     if (existingExam && existingExam.results.length > 0) {
+      // Получаем вопросы для существующего экзамена
+      const existingQuestions = await this.questionRepository.find({
+        where: { lesson: { id: lessonId } },
+      });
+
       // Возвращаем существующий тест
-      return this.formatTestForFrontend(existingExam);
+      return this.formatTestForFrontend(existingExam, existingQuestions);
     }
 
     // Генерируем новый тест
@@ -322,6 +329,9 @@ export class ExamsService {
     exam.completed_at = new Date();
     await this.examRepository.save(exam);
 
+    // НОВОЕ: Обновляем прогресс урока
+    await this.updateLessonProgress(exam, score);
+
     return {
       examId,
       score,
@@ -330,6 +340,38 @@ export class ExamsService {
       timeSpent: parseInt(timeSpent),
       completedAt: exam.completed_at,
     };
+  }
+
+  private async updateLessonProgress(exam: Exam, score: number) {
+    // Получаем урок по названию экзамена (формат: "Тест по уроку: {название урока}")
+    const lessonTitle = exam.title.replace('Тест по уроку: ', '');
+
+    const lesson = await this.lessonRepository.findOne({
+      where: { title: lessonTitle },
+      relations: ['unit', 'unit.course'],
+    });
+
+    if (!lesson) {
+      console.warn(`Lesson with title "${lessonTitle}" not found`);
+      return;
+    }
+
+    // Рассчитываем новые параметры по SM-2
+    const sm2Result = this.sm2Service.calculateNextReview(
+      lesson.status,
+      lesson.interval,
+      lesson.ease_factor,
+      score,
+    );
+
+    // Обновляем урок
+    await this.lessonRepository.update(lesson.id, {
+      status: sm2Result.status,
+      interval: sm2Result.interval,
+      ease_factor: sm2Result.easeFactor,
+      last_reviewed_at: new Date(),
+      next_review_at: sm2Result.nextReviewAt,
+    });
   }
 
   async checkTextAnswer(

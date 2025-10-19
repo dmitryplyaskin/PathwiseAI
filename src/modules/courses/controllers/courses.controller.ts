@@ -65,6 +65,12 @@ export class CoursesController {
     return this.lessonsService.findAccessibleLessons(user.id);
   }
 
+  @Get('lessons/for-review/:userId')
+  @UseGuards(JwtAuthGuard)
+  getLessonsForReview(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.lessonsService.findLessonsForReview(userId);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOneCourse(

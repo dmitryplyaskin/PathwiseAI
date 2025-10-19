@@ -126,6 +126,43 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
     fetchLessonExams();
   }, [lesson, userId]);
 
+  // Слушаем событие обновления урока после прохождения теста
+  useEffect(() => {
+    const handleLessonUpdate = (event: CustomEvent) => {
+      if (lesson && event.detail.lessonId === lesson.id) {
+        console.log('Lesson updated, refreshing exams data');
+        // Перезагружаем экзамены
+        const fetchLessonExams = async () => {
+          if (!lesson || !userId) return;
+
+          try {
+            const exams = await testsApi.getLessonExams({
+              lessonId: lesson.id,
+              userId,
+            });
+            setLessonExams(exams);
+          } catch (error) {
+            console.error('Failed to refresh lesson exams:', error);
+          }
+        };
+
+        fetchLessonExams();
+      }
+    };
+
+    window.addEventListener(
+      'lessonUpdated',
+      handleLessonUpdate as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        'lessonUpdated',
+        handleLessonUpdate as EventListener,
+      );
+    };
+  }, [lesson, userId]);
+
   // Получаем последний завершенный экзамен
   const latestCompletedExam = lessonExams.find(
     (exam) => exam.status === 'completed',
@@ -147,7 +184,13 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
         questionCount: 5,
       });
 
-      setTestData(generatedTest);
+      // Добавляем lessonId к данным теста
+      const testDataWithLessonId = {
+        ...generatedTest,
+        lessonId: lesson.id,
+      };
+
+      setTestData(testDataWithLessonId);
       setIsTestModalOpen(true);
     } catch (error) {
       console.error('Failed to generate test:', error);

@@ -4,6 +4,7 @@ import {
   type LessonQuestionResponse,
   type Thread,
   type ThreadMessage,
+  type LessonForReview,
 } from './types';
 
 export const lessonsApi = {
@@ -68,6 +69,12 @@ export const lessonsApi = {
   deleteLesson: async (lessonId: string): Promise<{ message: string }> => {
     return apiClient.delete<{ message: string }>(
       `/courses/lessons/${lessonId}`,
+    );
+  },
+
+  getLessonsForReview: async (userId: string): Promise<LessonForReview[]> => {
+    return apiClient.get<LessonForReview[]>(
+      `/courses/lessons/for-review/${userId}`,
     );
   },
 };

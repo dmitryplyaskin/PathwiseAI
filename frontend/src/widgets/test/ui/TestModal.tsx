@@ -63,6 +63,37 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
   const progress =
     ((currentQuestionIndex + 1) / testData.questions.length) * 100;
 
+  // Проверяем, что вопросы есть и текущий вопрос существует
+  if (
+    !testData.questions ||
+    testData.questions.length === 0 ||
+    !currentQuestion
+  ) {
+    return (
+      <Dialog
+        open={open}
+        onClose={onClose}
+        fullScreen
+        TransitionComponent={Transition}
+      >
+        <Box
+          sx={{
+            position: 'relative',
+            height: '100vh',
+            bgcolor: 'background.default',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Alert severity="error" sx={{ p: 3 }}>
+            Ошибка: Тест не содержит вопросов
+          </Alert>
+        </Box>
+      </Dialog>
+    );
+  }
+
   // Таймер
   useEffect(() => {
     if (!open || testCompleted) return;
@@ -163,6 +194,17 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
       });
 
       console.log('Test results submitted successfully');
+
+      // НОВОЕ: Обновляем данные урока
+      if (testData.lessonId) {
+        // Можно добавить callback для обновления родительского компонента
+        // или использовать глобальное состояние
+        window.dispatchEvent(
+          new CustomEvent('lessonUpdated', {
+            detail: { lessonId: testData.lessonId },
+          }),
+        );
+      }
     } catch (error) {
       console.error('Failed to submit test results:', error);
       setSubmitError(

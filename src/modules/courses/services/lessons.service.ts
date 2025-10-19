@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Lesson } from '../entities/lesson.entity';
+import { Repository, LessThanOrEqual, In } from 'typeorm';
+import { Lesson, LessonStatus } from '../entities/lesson.entity';
 import { CreateLessonDto } from '../dto/create-lesson.dto';
 import { UpdateLessonDto } from '../dto/update-lesson.dto';
 import { CreateModuleDto } from '../dto/create-module.dto';
@@ -459,5 +459,21 @@ export class LessonsService {
       console.error('Error generating course outline:', error);
       throw new Error('Failed to generate course outline');
     }
+  }
+
+  async findLessonsForReview(userId: string): Promise<Lesson[]> {
+    const now = new Date();
+
+    return this.lessonRepository.find({
+      where: {
+        user: { id: userId },
+        next_review_at: LessThanOrEqual(now),
+        status: In([LessonStatus.LEARNING, LessonStatus.MASTERED]),
+      },
+      relations: ['unit', 'unit.course'],
+      order: {
+        next_review_at: 'ASC',
+      },
+    });
   }
 }
