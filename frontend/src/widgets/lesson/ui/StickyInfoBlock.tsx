@@ -23,15 +23,15 @@ import {
   TrendingUp,
   Grade,
 } from '@mui/icons-material';
-import type { Lesson } from '../../../shared/api/lessons';
+import type { Lesson } from '@shared/api/lessons';
 import { TestModal } from '../../test/ui';
-import { testsApi } from '../../../shared/api/tests';
+import { testsApi } from '@shared/api/tests';
 import type { TestData } from '../../test/types';
-import type { ExamHistoryItem } from '../../../shared/api/tests/types';
-import { useCurrentUser } from '../../../shared/model';
+import type { ExamHistoryItem } from '@shared/api/tests/types';
+import { useCurrentUser } from '@shared/model';
 import { LessonManagementMenu } from './LessonManagementMenu';
 import { LessonDeleteDialog } from './LessonDeleteDialog';
-import { lessonsApi } from '../../../shared/api/lessons/api';
+import { lessonsApi } from '@shared/api/lessons/api';
 import { useNavigate } from 'react-router';
 
 interface StickyInfoBlockProps {

@@ -18,7 +18,7 @@ import {
   $authLoading,
   $registerError,
   $isAuthenticated,
-} from '../../shared/model/auth';
+} from '@shared/model/auth';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();

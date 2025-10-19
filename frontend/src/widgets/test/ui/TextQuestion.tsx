@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { CheckCircle, Error } from '@mui/icons-material';
 import type { TextQuestion as TextQuestionType } from '../types';
-import { testsApi } from '../../../shared/api/tests';
+import { testsApi } from '@shared/api/tests';
 
 interface TextQuestionProps {
   question: TextQuestionType;

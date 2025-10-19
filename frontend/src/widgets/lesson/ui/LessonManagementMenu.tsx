@@ -14,7 +14,7 @@ import {
   Add,
   Delete,
 } from '@mui/icons-material';
-import type { Lesson } from '../../../shared/api/lessons/types';
+import type { Lesson } from '@shared/api/lessons/types';
 
 interface LessonManagementMenuProps {
   lesson: Lesson | null;

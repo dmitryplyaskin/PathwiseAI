@@ -15,8 +15,8 @@ import {
   $coursesList,
   $coursesListLoading,
   loadCoursesList,
-} from '../../../../../shared/model/courses';
-import type { CourseListItem } from '../../../../../shared/api/courses/types';
+} from '@shared/model/courses';
+import type { CourseListItem } from '@shared/api/courses/types';
 import { useEffect } from 'react';
 
 interface LessonFormProps {

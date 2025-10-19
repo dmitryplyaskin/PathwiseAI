@@ -18,7 +18,7 @@ import {
   $authLoading,
   $loginError,
   $isAuthenticated,
-} from '../../shared/model/auth';
+} from '@shared/model/auth';
 
 export const LoginPage = () => {
   const navigate = useNavigate();

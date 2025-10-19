@@ -29,16 +29,16 @@ import {
   Star,
 } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
-import { CourseCard } from '../../../features/course-card/ui/CourseCard';
+import { CourseCard } from '@features/course-card/ui/CourseCard';
 import { mockCourses } from '../model/mock';
-import { loadCoursesList } from '../../../shared/model/courses';
+import { loadCoursesList } from '@shared/model/courses';
 import { useUnit } from 'effector-react';
 import {
   $coursesList,
   $coursesListLoading,
   $coursesListError,
-} from '../../../shared/model/courses';
-import type { CourseListItem } from '../../../shared/api/courses/types';
+} from '@shared/model/courses';
+import type { CourseListItem } from '@shared/api/courses/types';
 
 type FilterType = 'all' | 'completed' | 'in_progress' | 'not_started';
 type ViewMode = 'grid' | 'list';

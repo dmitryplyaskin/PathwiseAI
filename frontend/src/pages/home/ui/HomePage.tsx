@@ -13,10 +13,10 @@ import {
   Toolbar,
 } from '@mui/material';
 import { Add, MenuBook, AccessTime } from '@mui/icons-material';
-import { ContentCreationModal } from '../../../features/education-module/ui';
-import { LessonsList } from '../../../widgets/lessons-list';
-import { lessonsApi } from '../../../shared/api/lessons/api';
-import type { Lesson } from '../../../shared/api/lessons/types';
+import { ContentCreationModal } from '@features/education-module/ui';
+import { LessonsList } from '@widgets/lessons-list';
+import { lessonsApi } from '@shared/api/lessons/api';
+import type { Lesson } from '@shared/api/lessons/types';
 
 const reviewModules = [
   {

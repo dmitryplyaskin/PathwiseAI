@@ -1,17 +1,17 @@
 import { createBrowserRouter } from 'react-router';
-import { HomePage } from '../../pages/home';
-import { LoginPage } from '../../pages/login';
-import { RegisterPage } from '../../pages/register';
-import { ProfilePage } from '../../pages/profile';
-import { Lesson } from '../../pages/lesson';
-import { Lessons } from '../../pages/lessons';
-import { Units } from '../../pages/units';
-import { Unit } from '../../pages/unit';
-import { Courses } from '../../pages/courses';
-import { Course } from '../../pages/course';
-import { TestHistoryPage } from '../../pages/test-history';
-import { Layout } from '../ui/Layout';
-import { AuthGuard } from '../../shared/ui/auth-guard';
+import { HomePage } from '@pages/home';
+import { LoginPage } from '@pages/login';
+import { RegisterPage } from '@pages/register';
+import { ProfilePage } from '@pages/profile';
+import { Lesson } from '@pages/lesson';
+import { Lessons } from '@pages/lessons';
+import { Units } from '@pages/units';
+import { Unit } from '@pages/unit';
+import { Courses } from '@pages/courses';
+import { Course } from '@pages/course';
+import { TestHistoryPage } from '@pages/test-history';
+import { Layout } from '@app/ui/Layout';
+import { AuthGuard } from '@shared/ui/auth-guard';
 
 export const router = createBrowserRouter([
   {

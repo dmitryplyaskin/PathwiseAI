@@ -8,7 +8,7 @@ import {
   Fade,
 } from '@mui/material';
 import { AutoAwesome, MoreVert } from '@mui/icons-material';
-import { MarkdownRenderer } from '../../../shared/ui';
+import { MarkdownRenderer } from '@shared/ui';
 import type { Message } from '../model/lesson_api';
 
 interface MessageItemProps {

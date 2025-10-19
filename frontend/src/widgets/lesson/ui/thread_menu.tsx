@@ -13,7 +13,7 @@ import {
   CheckCircle,
   Delete,
 } from '@mui/icons-material';
-import type { Thread } from '../../../shared/api/lessons';
+import type { Thread } from '@shared/api/lessons';
 
 interface ThreadMenuProps {
   anchorEl: HTMLElement | null;

@@ -1,6 +1,6 @@
 import { Box, Container, Typography, Stack, Chip, Fade } from '@mui/material';
 import { Info } from '@mui/icons-material';
-import type { Lesson } from '../../../shared/api/lessons';
+import type { Lesson } from '@shared/api/lessons';
 
 interface LessonHeaderProps {
   lesson: Lesson | null;

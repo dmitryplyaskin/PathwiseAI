@@ -5,7 +5,7 @@ export type {
   QuizOption,
   QuestionAnswer,
   TestResult,
-} from '../../../widgets/test/types';
+} from '@widgets/test/types';
 
 export interface GenerateTestRequest {
   lessonId: string;

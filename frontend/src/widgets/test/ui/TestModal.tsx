@@ -22,8 +22,8 @@ import type {
 import { QuizQuestion } from './QuizQuestion';
 import { TextQuestion } from './TextQuestion';
 import { TestResult } from './TestResult';
-import { testsApi } from '../../../shared/api/tests';
-import { useCurrentUser } from '../../../shared/model';
+import { testsApi } from '@shared/api/tests';
+import { useCurrentUser } from '@shared/model';
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {

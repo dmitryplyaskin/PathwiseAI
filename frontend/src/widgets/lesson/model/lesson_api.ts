@@ -2,7 +2,7 @@ import {
   lessonsApi,
   type Thread,
   type ThreadMessage,
-} from '../../../shared/api/lessons';
+} from '@shared/api/lessons';
 
 export interface Message {
   id: string;

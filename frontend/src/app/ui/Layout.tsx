@@ -12,12 +12,12 @@ import {
   Stack,
 } from '@mui/material';
 import { Logout as LogoutIcon, Quiz } from '@mui/icons-material';
-import { Breadcrumbs, useBreadcrumbs } from '../../shared/ui';
+import { Breadcrumbs, useBreadcrumbs } from '@shared/ui';
 import {
   $currentUser,
   $isAuthenticated,
   logoutRequested,
-} from '../../shared/model/auth';
+} from '@shared/model/auth';
 
 export const Layout: React.FC = () => {
   const location = useLocation();

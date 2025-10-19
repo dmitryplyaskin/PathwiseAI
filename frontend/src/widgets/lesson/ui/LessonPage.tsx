@@ -2,7 +2,7 @@ import { Box, Container, Stack } from '@mui/material';
 import { useParams } from 'react-router';
 import { mockLessonContent } from '../model/mock';
 import { StickyInfoBlock } from './StickyInfoBlock';
-import { useLesson } from '../../../shared/model/lessons';
+import { useLesson } from '@shared/model/lessons';
 import { useLessonPage } from '../model/use_lesson_page';
 import { LoadingScreen } from './loading_screen';
 import { LessonHeader } from './lesson_header';

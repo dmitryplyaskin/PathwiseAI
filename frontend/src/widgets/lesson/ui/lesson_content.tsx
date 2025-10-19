@@ -1,6 +1,6 @@
 import { Paper, Box, Typography, Fade } from '@mui/material';
 import { AutoAwesome } from '@mui/icons-material';
-import { MarkdownRenderer } from '../../../shared/ui';
+import { MarkdownRenderer } from '@shared/ui';
 
 interface LessonContentProps {
   content: string;

@@ -21,9 +21,9 @@ import {
   Schedule,
   TrendingUp,
 } from '@mui/icons-material';
-import { useCurrentUser } from '../../../shared/model/users/use-current-user';
-import { testsApi } from '../../../shared/api/tests/api';
-import type { ExamHistoryItem } from '../../../shared/api/tests/types';
+import { useCurrentUser } from '@shared/model/users/use-current-user';
+import { testsApi } from '@shared/api/tests/api';
+import type { ExamHistoryItem } from '@shared/api/tests/types';
 
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString);

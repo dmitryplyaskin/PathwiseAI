@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LessonApiService, type Message } from './lesson_api';
-import type { Thread } from '../../../shared/api/lessons';
+import type { Thread } from '@shared/api/lessons';
 
 export const useLessonPage = (
   lessonId: string | undefined,

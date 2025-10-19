@@ -12,8 +12,8 @@ import {
 } from '@mui/material';
 import { MenuBook, AccessTime } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
-import type { Lesson } from '../../../shared/api/lessons/types';
-import { LessonStatus } from '../../../shared/api/lessons/types';
+import type { Lesson } from '@shared/api/lessons/types';
+import { LessonStatus } from '@shared/api/lessons/types';
 
 interface LessonsListProps {
   lessons: Lesson[];

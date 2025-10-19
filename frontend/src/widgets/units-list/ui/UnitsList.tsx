@@ -19,7 +19,7 @@ import {
   ViewList,
 } from '@mui/icons-material';
 import { useState } from 'react';
-import { UnitCard } from '../../../features/unit-card/ui/UnitCard';
+import { UnitCard } from '@features/unit-card/ui/UnitCard';
 import { mockUnits } from '../model/mock';
 
 type FilterType = 'all' | 'completed' | 'in_progress' | 'not_started';

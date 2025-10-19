@@ -9,8 +9,8 @@ import {
   $courseOutlineCreationError,
   $createdCourseOutline,
   resetCreationState,
-} from '../../../../../shared/model/courses';
-import { useCurrentUser } from '../../../../../shared/model/users';
+} from '@shared/model/courses';
+import { useCurrentUser } from '@shared/model/users';
 
 export const useContentCreationState = (open: boolean, onClose: () => void) => {
   const navigate = useNavigate();

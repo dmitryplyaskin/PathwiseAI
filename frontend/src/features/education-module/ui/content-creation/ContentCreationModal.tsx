@@ -1,13 +1,13 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Alert, Box, Button, Stack, Tab, Tabs } from '@mui/material';
 import { useUnit } from 'effector-react';
-import { Modal } from '../../../../shared/ui/modal';
+import { Modal } from '@shared/ui/modal';
 import {
   $coursesListError,
   createModule,
   createCourseOutline,
-} from '../../../../shared/model/courses';
-import type { ModuleComplexity } from '../../../../shared/api/courses/types';
+} from '@shared/model/courses';
+import type { ModuleComplexity } from '@shared/api/courses/types';
 import { useContentCreationState } from './hooks';
 import { TABS_CONFIG } from './config';
 import { LessonForm, CourseForm } from './forms';

@@ -18,7 +18,7 @@ import {
   Security,
 } from '@mui/icons-material';
 import { useUnit } from 'effector-react';
-import { $currentUser } from '../../shared/model/auth';
+import { $currentUser } from '@shared/model/auth';
 
 const ProfileInfoRow = ({
   icon,

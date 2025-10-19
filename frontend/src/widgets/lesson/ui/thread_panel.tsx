@@ -9,7 +9,7 @@ import {
   Badge,
 } from '@mui/material';
 import { ChatBubbleOutline, ForkRight, MoreVert } from '@mui/icons-material';
-import type { Thread } from '../../../shared/api/lessons';
+import type { Thread } from '@shared/api/lessons';
 
 interface ThreadPanelProps {
   currentThreadId: string;

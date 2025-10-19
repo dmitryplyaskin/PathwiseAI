@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { Providers } from '../providers';
-import { checkAuthRequested } from '../../shared/model/auth';
+import { Providers } from '@app/providers';
+import { checkAuthRequested } from '@shared/model/auth';
 
 const AppComponent = () => {
   useEffect(() => {

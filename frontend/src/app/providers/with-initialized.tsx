@@ -1,5 +1,5 @@
-import { $appInitialized, checkAuthFx } from '../../shared/model/auth';
-import { AppLoader } from '../../shared/ui';
+import { $appInitialized, checkAuthFx } from '@shared/model/auth';
+import { AppLoader } from '@shared/ui';
 import { useUnit } from 'effector-react';
 import { useEffect, type ReactNode } from 'react';
 
