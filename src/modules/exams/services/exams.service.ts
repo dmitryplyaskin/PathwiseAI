@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Exam } from '../entities/exam.entity';
+import { Exam, ExamStatus } from '../entities/exam.entity';
 import { ExamResult } from '../entities/exam-result.entity';
 import { CreateExamDto } from '../dto/create-exam.dto';
 import { UpdateExamDto } from '../dto/update-exam.dto';
@@ -278,11 +278,13 @@ export class ExamsService {
           question: q.question_text,
           options:
             q.question_type === QuestionType.MULTIPLE_CHOICE && q.options
-              ? (q.options as Record<string, unknown>[]).map((opt: Record<string, unknown>, index: number) => ({
-                  id: `opt${index + 1}`,
-                  text: (opt.text as string) || (opt as string),
-                  isCorrect: (opt.isCorrect as boolean) || false,
-                }))
+              ? (q.options as Record<string, unknown>[]).map(
+                  (opt: Record<string, unknown>, index: number) => ({
+                    id: `opt${index + 1}`,
+                    text: (opt.text as string) || (opt as unknown as string),
+                    isCorrect: (opt.isCorrect as boolean) || false,
+                  }),
+                )
               : undefined,
           expectedAnswer:
             q.question_type === QuestionType.OPEN_ENDED

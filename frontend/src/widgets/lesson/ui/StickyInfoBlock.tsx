@@ -23,7 +23,8 @@ import {
   TrendingUp,
   Grade,
 } from '@mui/icons-material';
-import type { Lesson, LessonStatus } from '@shared/api/lessons';
+import type { Lesson } from '@shared/api/lessons';
+import { LessonStatus } from '@shared/api/lessons';
 import { TestModal } from '../../test/ui';
 import { testsApi } from '@shared/api/tests';
 import type { TestData } from '../../test/types';
@@ -343,40 +344,42 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
               </Box>
             )}
 
-            {lesson && lesson.status === LessonStatus.LEARNING && !latestCompletedExam && (
-              <Box>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    mb: 0.5,
-                  }}
-                >
-                  <Typography variant="caption" color="text.secondary">
-                    Прогресс
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    fontWeight={600}
-                    color="primary.main"
+            {lesson &&
+              lesson.status === LessonStatus.LEARNING &&
+              !latestCompletedExam && (
+                <Box>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      mb: 0.5,
+                    }}
                   >
-                    65%
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={65}
-                  sx={{
-                    height: 6,
-                    borderRadius: 3,
-                    bgcolor: 'primary.50',
-                    '& .MuiLinearProgress-bar': {
+                    <Typography variant="caption" color="text.secondary">
+                      Прогресс
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      fontWeight={600}
+                      color="primary.main"
+                    >
+                      65%
+                    </Typography>
+                  </Box>
+                  <LinearProgress
+                    variant="determinate"
+                    value={65}
+                    sx={{
+                      height: 6,
                       borderRadius: 3,
-                    },
-                  }}
-                />
-              </Box>
-            )}
+                      bgcolor: 'primary.50',
+                      '& .MuiLinearProgress-bar': {
+                        borderRadius: 3,
+                      },
+                    }}
+                  />
+                </Box>
+              )}
           </Stack>
 
           <Divider />
