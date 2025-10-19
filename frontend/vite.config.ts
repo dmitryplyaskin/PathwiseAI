@@ -16,7 +16,7 @@ export default defineConfig({
     },
   },
   server: {
-    open: !process.env.CI,
+    open: false,
   },
   build: {
     outDir: './dist',
