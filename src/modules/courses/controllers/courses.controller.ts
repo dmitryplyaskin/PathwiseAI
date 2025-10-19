@@ -49,13 +49,13 @@ export class CoursesController {
 
   @Get('list')
   @UseGuards(JwtAuthGuard)
-  findCoursesForList(@CurrentUser() user: User): Promise<CourseListItemDto[]> {
+  findCoursesForList(): Promise<CourseListItemDto[]> {
     return this.coursesService.findCoursesForList();
   }
 
   @Get('shared')
   @UseGuards(JwtAuthGuard)
-  findSharedCourses(@CurrentUser() user: User) {
+  findSharedCourses() {
     return this.coursesService.findSharedCourses();
   }
 
@@ -63,6 +63,12 @@ export class CoursesController {
   @UseGuards(JwtAuthGuard)
   findAllLessons(@CurrentUser() user: User) {
     return this.lessonsService.findAccessibleLessons(user.id);
+  }
+
+  @Get('lessons/for-review/:userId')
+  @UseGuards(JwtAuthGuard)
+  getLessonsForReview(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.lessonsService.findLessonsForReview(userId);
   }
 
   @Get(':id')

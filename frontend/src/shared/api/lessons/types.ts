@@ -65,3 +65,28 @@ export interface ThreadMessage {
   threadId: string;
   created_at: string;
 }
+
+export interface LessonForReview {
+  id: string;
+  title: string;
+  description?: string;
+  content: string;
+  reading_time?: number;
+  difficulty?: number;
+  order: number;
+  status: LessonStatus;
+  last_reviewed_at?: string;
+  next_review_at: string;
+  ease_factor: number;
+  interval: number;
+  unit: {
+    id: string;
+    title: string;
+    course: {
+      id: string;
+      title: string;
+    };
+  };
+  created_at: string;
+  updated_at: string;
+}

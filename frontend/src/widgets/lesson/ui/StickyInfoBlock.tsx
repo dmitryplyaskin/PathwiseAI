@@ -23,7 +23,7 @@ import {
   TrendingUp,
   Grade,
 } from '@mui/icons-material';
-import type { Lesson } from '@shared/api/lessons';
+import type { Lesson, LessonStatus } from '@shared/api/lessons';
 import { TestModal } from '../../test/ui';
 import { testsApi } from '@shared/api/tests';
 import type { TestData } from '../../test/types';
@@ -123,7 +123,44 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
       }
     };
 
-    fetchLessonExams();
+    void fetchLessonExams();
+  }, [lesson, userId]);
+
+  // Слушаем событие обновления урока после прохождения теста
+  useEffect(() => {
+    const handleLessonUpdate = (event: CustomEvent<{ lessonId: string }>) => {
+      if (lesson && event.detail.lessonId === lesson.id) {
+        console.log('Lesson updated, refreshing exams data');
+        // Перезагружаем экзамены
+        const fetchLessonExams = async () => {
+          if (!lesson || !userId) return;
+
+          try {
+            const exams = await testsApi.getLessonExams({
+              lessonId: lesson.id,
+              userId,
+            });
+            setLessonExams(exams);
+          } catch (error) {
+            console.error('Failed to refresh lesson exams:', error);
+          }
+        };
+
+        void fetchLessonExams();
+      }
+    };
+
+    window.addEventListener(
+      'lessonUpdated',
+      handleLessonUpdate as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        'lessonUpdated',
+        handleLessonUpdate as EventListener,
+      );
+    };
   }, [lesson, userId]);
 
   // Получаем последний завершенный экзамен
@@ -147,7 +184,13 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
         questionCount: 5,
       });
 
-      setTestData(generatedTest);
+      // Добавляем lessonId к данным теста
+      const testDataWithLessonId = {
+        ...generatedTest,
+        lessonId: lesson.id,
+      };
+
+      setTestData(testDataWithLessonId);
       setIsTestModalOpen(true);
     } catch (error) {
       console.error('Failed to generate test:', error);
@@ -179,7 +222,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
     try {
       await lessonsApi.deleteLesson(lesson.id);
       // Редирект на главную страницу после успешного удаления
-      navigate('/');
+      void navigate('/');
     } catch (error) {
       console.error('Failed to delete lesson:', error);
       setDeleteError(
@@ -300,7 +343,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
               </Box>
             )}
 
-            {lesson && lesson.status === 'learning' && !latestCompletedExam && (
+            {lesson && lesson.status === LessonStatus.LEARNING && !latestCompletedExam && (
               <Box>
                 <Box
                   sx={{
@@ -540,7 +583,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
               isLoadingTest ? <CircularProgress size={20} /> : <Quiz />
             }
             disabled={notFound || isLoadingTest}
-            onClick={handleOpenTest}
+            onClick={() => void handleOpenTest()}
             sx={{
               py: 1.5,
               borderRadius: 2,
@@ -596,7 +639,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
       <LessonDeleteDialog
         open={isDeleteDialogOpen}
         onClose={handleCloseDeleteDialog}
-        onConfirm={handleConfirmDelete}
+        onConfirm={() => void handleConfirmDelete()}
         lessonTitle={lesson?.title}
         isLoading={isDeletingLesson}
         error={deleteError}

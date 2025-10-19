@@ -2,12 +2,8 @@ import { useState, useEffect } from 'react';
 import {
   Container,
   Button,
-  Card,
-  CardContent,
-  Chip,
   Typography,
   Box,
-  Grid,
   Stack,
   AppBar,
   Toolbar,
@@ -15,33 +11,9 @@ import {
 import { Add, MenuBook, AccessTime } from '@mui/icons-material';
 import { ContentCreationModal } from '@features/education-module/ui';
 import { LessonsList } from '@widgets/lessons-list';
+import { ReviewLessonsList } from '@widgets/review-lessons';
 import { lessonsApi } from '@shared/api/lessons/api';
 import type { Lesson } from '@shared/api/lessons/types';
-
-const reviewModules = [
-  {
-    id: 4,
-    title: 'Алгоритмы сортировки',
-    description:
-      'Повторение основных алгоритмов сортировки и их временной сложности',
-    dueDate: 'Сегодня',
-    priority: 'high',
-  },
-  {
-    id: 5,
-    title: 'CSS Flexbox',
-    description: 'Закрепление знаний о флексбокс-контейнерах и их свойствах',
-    dueDate: 'Завтра',
-    priority: 'medium',
-  },
-  {
-    id: 6,
-    title: 'Git команды',
-    description: 'Повторение основных команд Git для работы с репозиторием',
-    dueDate: 'Через 2 дня',
-    priority: 'low',
-  },
-];
 
 export const HomePage = () => {
   const [isNewModuleModalOpen, setIsNewModuleModalOpen] = useState(false);
@@ -51,10 +23,6 @@ export const HomePage = () => {
 
   const handleNewModule = () => {
     setIsNewModuleModalOpen(true);
-  };
-
-  const handleModuleClick = (moduleId: string) => {
-    console.log('Клик по модуль:', moduleId);
   };
 
   useEffect(() => {
@@ -73,36 +41,8 @@ export const HomePage = () => {
       }
     };
 
-    fetchLessons();
+    void fetchLessons();
   }, []);
-
-  const getPriorityColor = (
-    priority: string,
-  ): 'error' | 'warning' | 'info' | 'default' => {
-    switch (priority) {
-      case 'high':
-        return 'error';
-      case 'medium':
-        return 'warning';
-      case 'low':
-        return 'info';
-      default:
-        return 'default';
-    }
-  };
-
-  const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'Срочно';
-      case 'medium':
-        return 'Средний';
-      case 'low':
-        return 'Низкий';
-      default:
-        return 'Обычный';
-    }
-  };
 
   return (
     <Box sx={{ minHeight: '100vh' }}>
@@ -153,44 +93,7 @@ export const HomePage = () => {
             <Typography variant="h2">Требуют повторения</Typography>
           </Box>
 
-          <Grid container spacing={3}>
-            {reviewModules.map((module) => (
-              <Grid key={module.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-                <Card
-                  onClick={() => handleModuleClick(module.id.toString())}
-                  sx={{ cursor: 'pointer', height: '100%' }}
-                >
-                  <CardContent>
-                    <Stack spacing={2}>
-                      <Typography variant="h4" component="h3">
-                        {module.title}
-                      </Typography>
-
-                      <Typography variant="body2" color="text.secondary">
-                        {module.description}
-                      </Typography>
-
-                      <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <Typography variant="caption" color="text.secondary">
-                          {module.dueDate}
-                        </Typography>
-
-                        <Chip
-                          label={getPriorityText(module.priority)}
-                          color={getPriorityColor(module.priority)}
-                          size="small"
-                        />
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+          <ReviewLessonsList maxItems={6} />
         </Stack>
       </Container>
       <ContentCreationModal
