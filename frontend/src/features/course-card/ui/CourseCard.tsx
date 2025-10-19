@@ -19,7 +19,7 @@ import {
   PlayCircle,
 } from '@mui/icons-material';
 import type { FC } from 'react';
-import type { CourseListItem } from '@/shared/api/courses/types';
+import type { CourseListItem } from '@shared/api/courses/types';
 
 interface CourseCardProps {
   course: CourseListItem;
@@ -279,7 +279,7 @@ export const CourseCard: FC<CourseCardProps> = ({
               <Avatar sx={{ width: 24, height: 24, fontSize: '0.75rem' }}>
                 {course.instructor
                   .split(' ')
-                  .map((n) => n[0])
+                  .map((n: string) => n[0])
                   .join('')}
               </Avatar>
               <Typography variant="caption" color="text.secondary">
@@ -297,7 +297,7 @@ export const CourseCard: FC<CourseCardProps> = ({
 
           {/* Теги */}
           <Box display="flex" flexWrap="wrap" gap={0.5}>
-            {course.tags.slice(0, 3).map((tag) => (
+            {course.tags.slice(0, 3).map((tag: string) => (
               <Chip
                 key={tag}
                 label={tag}

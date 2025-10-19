@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { EmojiEvents } from '@mui/icons-material';
 import type { FC } from 'react';
-import type { Lesson } from '@/widgets/lessons-list/model/mock';
+import type { Lesson } from '@widgets/lessons-list/model/mock';
 
 interface LessonCardProps {
   lesson: Lesson;

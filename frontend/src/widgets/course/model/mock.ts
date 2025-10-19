@@ -1,4 +1,4 @@
-import type { Unit } from '@/widgets/units-list/model/mock';
+import type { Unit } from '@widgets/units-list/model/mock';
 
 export interface CourseDetail {
   id: string;

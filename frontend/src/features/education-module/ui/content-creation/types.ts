@@ -1,4 +1,4 @@
-import type { ModuleComplexity } from '@/shared/api/courses/types';
+import type { ModuleComplexity } from '@shared/api/courses/types';
 
 export interface FormContextProps {
   topic: string;

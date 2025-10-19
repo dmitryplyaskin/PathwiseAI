@@ -134,10 +134,6 @@ export const CoursePage = () => {
     navigate(`/courses/${params.id}/units`);
   };
 
-  const handleUnitClick = (unitId: string) => {
-    navigate(`/courses/${params.id}/units/${unitId}`);
-  };
-
   const nextLesson = course.units
     .flatMap((unit) => unit.lessons)
     .find(

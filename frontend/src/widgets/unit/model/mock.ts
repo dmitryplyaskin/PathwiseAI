@@ -1,4 +1,4 @@
-import type { Lesson } from '@/widgets/lessons-list/model/mock';
+import type { Lesson } from '@widgets/lessons-list/model/mock';
 
 export interface LessonGroup {
   id: string;

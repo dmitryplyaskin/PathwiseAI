@@ -16,7 +16,7 @@ import {
   PlayCircle,
 } from '@mui/icons-material';
 import type { FC } from 'react';
-import type { Unit } from '@/widgets/units-list/model/mock';
+import type { Unit } from '@widgets/units-list/model/mock';
 
 interface UnitCardProps {
   unit: Unit;

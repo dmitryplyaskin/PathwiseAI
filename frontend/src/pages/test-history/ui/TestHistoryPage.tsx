@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -10,9 +10,7 @@ import {
   Stack,
   CircularProgress,
   Alert,
-  Grid,
   Divider,
-  Button,
 } from '@mui/material';
 import {
   Quiz,
@@ -172,8 +170,17 @@ export const TestHistoryPage = () => {
         </Box>
 
         {/* Статистика */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={3}>
+        <Box
+          display="grid"
+          gridTemplateColumns={{
+            xs: '1fr',
+            sm: 'repeat(2, 1fr)',
+            md: 'repeat(4, 1fr)',
+          }}
+          gap={3}
+          sx={{ mb: 4 }}
+        >
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -192,9 +199,9 @@ export const TestHistoryPage = () => {
                 Всего тестов
               </Typography>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -215,9 +222,9 @@ export const TestHistoryPage = () => {
                 Завершено
               </Typography>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -236,9 +243,9 @@ export const TestHistoryPage = () => {
                 Средний балл
               </Typography>
             </Paper>
-          </Grid>
+          </Box>
 
-          <Grid item xs={12} sm={6} md={3}>
+          <Box>
             <Paper
               elevation={0}
               sx={{
@@ -257,8 +264,8 @@ export const TestHistoryPage = () => {
                 В процессе
               </Typography>
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         {/* Список тестов */}
         {exams.length === 0 ? (
@@ -337,36 +344,40 @@ export const TestHistoryPage = () => {
 
                   <Divider sx={{ my: 2 }} />
 
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                  <Box
+                    display="grid"
+                    gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)' }}
+                    gap={2}
+                  >
+                    <Box>
                       <Typography variant="body2" color="text.secondary">
                         Начато: {formatDate(exam.started_at)}
                       </Typography>
-                    </Grid>
+                    </Box>
                     {exam.completed_at && (
-                      <Grid item xs={12} sm={6}>
+                      <Box>
                         <Typography variant="body2" color="text.secondary">
                           Завершено: {formatDate(exam.completed_at)}
                         </Typography>
-                      </Grid>
+                      </Box>
                     )}
                     {exam.status === 'completed' && (
                       <>
-                        <Grid item xs={12} sm={6}>
+                        <Box>
                           <Typography variant="body2" color="text.secondary">
                             Правильных ответов:{' '}
                             {exam.results.filter((r) => r.is_correct).length} из{' '}
                             {exam.results.length}
                           </Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
+                        </Box>
+                        <Box>
                           <Typography variant="body2" color="text.secondary">
                             Балл: {Math.round(exam.score)}%
                           </Typography>
-                        </Grid>
+                        </Box>
                       </>
                     )}
-                  </Grid>
+                  </Box>
 
                   {exam.status === 'completed' && exam.results.length > 0 && (
                     <>
