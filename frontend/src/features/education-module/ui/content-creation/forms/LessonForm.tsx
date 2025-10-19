@@ -23,10 +23,10 @@ interface LessonFormProps {
   isSubmitDisabled?: boolean;
   onSubmit?: () => void;
   modalOpen: boolean;
+  form: ReturnType<typeof useLessonForm>;
 }
 
-export const LessonForm = ({ modalOpen }: LessonFormProps) => {
-  const form = useLessonForm();
+export const LessonForm = ({ modalOpen, form }: LessonFormProps) => {
   const { coursesList, coursesListLoading } = useUnit({
     coursesList: $coursesList,
     coursesListLoading: $coursesListLoading,
@@ -105,5 +105,4 @@ export const LessonForm = ({ modalOpen }: LessonFormProps) => {
   );
 };
 
-export { useLessonForm };
 export type { LessonFormProps };

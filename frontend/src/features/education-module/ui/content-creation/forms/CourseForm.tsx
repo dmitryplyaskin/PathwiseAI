@@ -6,11 +6,10 @@ interface CourseFormProps {
   isSubmitDisabled?: boolean;
   onSubmit?: () => void;
   modalOpen?: boolean;
+  form: ReturnType<typeof useCourseForm>;
 }
 
-export const CourseForm = () => {
-  const form = useCourseForm();
-
+export const CourseForm = ({ form }: CourseFormProps) => {
   return (
     <Stack spacing={3}>
       <CommonFormFields
@@ -26,5 +25,4 @@ export const CourseForm = () => {
   );
 };
 
-export { useCourseForm };
 export type { CourseFormProps };

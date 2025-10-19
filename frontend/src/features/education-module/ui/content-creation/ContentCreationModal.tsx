@@ -57,7 +57,7 @@ export const ContentCreationModal = ({
   );
 
   // Validation for submit button
-  const isSubmitDisabled = useCallback(() => {
+  const isSubmitDisabled = useMemo(() => {
     // Check if user data is loading or no userId
     if (userLoading) return true;
     if (!userId) return true;
@@ -155,8 +155,10 @@ export const ContentCreationModal = ({
           </Tabs>
 
           {/* Forms */}
-          {activeTab === 'lesson' && <LessonForm modalOpen={open} />}
-          {activeTab === 'course' && <CourseForm />}
+          {activeTab === 'lesson' && (
+            <LessonForm modalOpen={open} form={lessonForm} />
+          )}
+          {activeTab === 'course' && <CourseForm form={courseForm} />}
 
           {/* Error message */}
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
@@ -169,7 +171,7 @@ export const ContentCreationModal = ({
             <Button
               onClick={handleSubmit}
               variant="contained"
-              disabled={isSubmitDisabled()}
+              disabled={isSubmitDisabled}
               size="small"
             >
               {`Создать ${activeTab === 'lesson' ? 'урок' : 'курс'}`}
