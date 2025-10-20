@@ -29,8 +29,7 @@ import {
   Star,
 } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
-import { CourseCard } from '@features/course-card/ui/CourseCard';
-import { mockCourses } from '../model/mock';
+import { CourseCardWithLessons } from '@features/course-card/ui/CourseCardWithLessons';
 import { loadCoursesList } from '@shared/model/courses';
 import { useUnit } from 'effector-react';
 import {
@@ -73,9 +72,8 @@ export const CoursesList = () => {
     loadCoursesList();
   }, []);
 
-  // Используем данные из API или моки как fallback
-  const courses: CourseListItem[] =
-    coursesList.length > 0 ? coursesList : mockCourses;
+  // Используем только данные из API
+  const courses: CourseListItem[] = coursesList;
 
   // Фильтрация и сортировка
   const filteredCourses = courses.filter((course) => {
@@ -348,7 +346,7 @@ export const CoursesList = () => {
                     key={course.id}
                     size={{ xs: 12, sm: 6, lg: viewMode === 'grid' ? 4 : 6 }}
                   >
-                    <CourseCard
+                    <CourseCardWithLessons
                       course={course}
                       handleCourseClick={handleCourseClick}
                     />
@@ -397,7 +395,7 @@ export const CoursesList = () => {
                   key={course.id}
                   size={{ xs: 12, sm: 6, lg: viewMode === 'grid' ? 4 : 6 }}
                 >
-                  <CourseCard
+                  <CourseCardWithLessons
                     course={course}
                     handleCourseClick={handleCourseClick}
                   />

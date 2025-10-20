@@ -71,6 +71,15 @@ export class CoursesController {
     return this.lessonsService.findLessonsForReview(userId);
   }
 
+  @Get(':id/lessons')
+  @UseGuards(JwtAuthGuard)
+  getCourseLessons(
+    @Param('id', ParseUUIDPipe) courseId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.lessonsService.findLessonsByCourseId(courseId, user.id);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOneCourse(

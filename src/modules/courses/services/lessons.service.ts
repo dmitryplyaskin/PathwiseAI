@@ -59,6 +59,29 @@ export class LessonsService {
     });
   }
 
+  async findLessonsByCourseId(courseId: string, userId: string) {
+    // Проверяем доступ к курсу
+    const hasAccess = await this.accessControlService.checkCourseAccess(
+      courseId,
+      userId,
+    );
+    if (!hasAccess) {
+      throw new AccessDeniedException('курсу', courseId);
+    }
+
+    return this.lessonRepository.find({
+      where: {
+        unit: {
+          course: { id: courseId },
+        },
+      },
+      relations: ['unit', 'unit.course'],
+      order: {
+        created_at: 'DESC',
+      },
+    });
+  }
+
   async findOneLesson(id: string, userId: string) {
     const lesson = await this.lessonRepository.findOneBy({ id });
     if (!lesson) {

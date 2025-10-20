@@ -30,12 +30,51 @@ export class CoursesService {
 
   async findCoursesForList(): Promise<CourseListItemDto[]> {
     const courses = await this.courseRepository.find({
-      select: ['id', 'title'],
+      relations: ['units', 'units.lessons'],
     });
-    return courses.map((course) => ({
-      id: course.id,
-      title: course.title,
-    }));
+
+    return courses.map((course) => {
+      const totalLessons =
+        course.units?.reduce(
+          (sum, unit) => sum + (unit.lessons?.length || 0),
+          0,
+        ) || 0;
+      const completedLessons =
+        course.units?.reduce(
+          (sum, unit) =>
+            sum +
+            (unit.lessons?.filter((lesson) => lesson.status === 'mastered')
+              .length || 0),
+          0,
+        ) || 0;
+
+      return {
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        shortDescription: course.description.substring(0, 100) + '...',
+        progress: Math.round(
+          (completedLessons / Math.max(totalLessons, 1)) * 100,
+        ),
+        unitsCount: course.units?.length || 0,
+        completedUnits:
+          course.units?.filter((unit) =>
+            unit.lessons?.every((lesson) => lesson.status === 'mastered'),
+          ).length || 0,
+        totalLessons,
+        completedLessons,
+        lastStudied: course.updated_at.toISOString(),
+        status: course.status,
+        difficulty: 'beginner' as const,
+        estimatedTime: '30-40 часов',
+        category: 'machine_learning' as const,
+        tags: ['ИИ-курс'],
+        rating: 4.5,
+        studentsCount: 1000,
+        instructor: 'ИИ-Помощник',
+        thumbnail: '',
+      };
+    });
   }
 
   async findOneCourse(id: string, userId: string) {
