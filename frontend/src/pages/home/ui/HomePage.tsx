@@ -9,10 +9,13 @@ import {
   Toolbar,
   Tooltip,
   IconButton,
+<<<<<<< HEAD
   Grid,
   Card,
   CardContent,
   Chip,
+=======
+>>>>>>> 91b452a1fc247d3be529e23f34295663cfd4a947
 } from '@mui/material';
 import {
   Add,
@@ -27,6 +30,34 @@ import { ReviewLessonsList } from '@widgets/review-lessons';
 import { lessonsApi } from '@shared/api/lessons/api';
 import type { Lesson } from '@shared/api/lessons/types';
 import { useNavigate } from 'react-router';
+<<<<<<< HEAD
+=======
+
+const reviewModules = [
+  {
+    id: 4,
+    title: 'Алгоритмы сортировки',
+    description:
+      'Повторение основных алгоритмов сортировки и их временной сложности',
+    dueDate: 'Сегодня',
+    priority: 'high',
+  },
+  {
+    id: 5,
+    title: 'CSS Flexbox',
+    description: 'Закрепление знаний о флексбокс-контейнерах и их свойствах',
+    dueDate: 'Завтра',
+    priority: 'medium',
+  },
+  {
+    id: 6,
+    title: 'Git команды',
+    description: 'Повторение основных команд Git для работы с репозиторием',
+    dueDate: 'Через 2 дня',
+    priority: 'low',
+  },
+];
+>>>>>>> 91b452a1fc247d3be529e23f34295663cfd4a947
 
 export const HomePage = () => {
   const navigate = useNavigate();
@@ -47,6 +78,13 @@ export const HomePage = () => {
 
     // Используем маршрут с полной иерархией: courses/:id/units/:unitId/lessons/:lessonId
     navigate(`/courses/${courseId}/units/${unitId}/lessons/${lessonId}`);
+<<<<<<< HEAD
+=======
+  };
+
+  const handleModuleClick = (moduleId: string) => {
+    console.log('Клик по модуль:', moduleId);
+>>>>>>> 91b452a1fc247d3be529e23f34295663cfd4a947
   };
 
   // Фильтрация уроков для повторения (лимит 5 дней)
@@ -98,6 +136,10 @@ export const HomePage = () => {
     if (diffDays === 2) return 'Послезавтра';
     return `Через ${diffDays} дней`;
   };
+<<<<<<< HEAD
+=======
+
+>>>>>>> 91b452a1fc247d3be529e23f34295663cfd4a947
   useEffect(() => {
     const fetchLessons = async () => {
       try {
