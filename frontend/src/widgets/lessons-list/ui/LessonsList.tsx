@@ -9,6 +9,7 @@ import {
   Stack,
   CircularProgress,
   Alert,
+  Tooltip,
 } from '@mui/material';
 import { MenuBook, AccessTime } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
@@ -119,12 +120,36 @@ export const LessonsList: React.FC<LessonsListProps> = ({
                 <Box display="flex" alignItems="center" gap={1}>
                   <MenuBook color="primary" />
                   <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography variant="h6" component="h3" noWrap>
-                      {lesson.title}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" noWrap>
-                      {lesson.unit.course.title} → {lesson.unit.title}
-                    </Typography>
+                    <Tooltip title={lesson.title} arrow>
+                      <Typography
+                        variant="h6"
+                        component="h3"
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {lesson.title}
+                      </Typography>
+                    </Tooltip>
+                    <Tooltip
+                      title={`${lesson.unit.course.title} → ${lesson.unit.title}`}
+                      arrow
+                    >
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          display: 'block',
+                        }}
+                      >
+                        {lesson.unit.course.title} → {lesson.unit.title}
+                      </Typography>
+                    </Tooltip>
                   </Box>
                 </Box>
 

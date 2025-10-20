@@ -42,7 +42,20 @@ export const Layout: React.FC = () => {
       {isAuthenticated && (
         <AppBar position="static" color="primary">
           <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <Typography
+              variant="h6"
+              component={Link}
+              to="/"
+              sx={{
+                flexGrow: 1,
+                textDecoration: 'none',
+                color: 'inherit',
+                cursor: 'pointer',
+                '&:hover': {
+                  opacity: 0.8,
+                },
+              }}
+            >
               PathwiseAI
             </Typography>
             <Stack direction="row" spacing={2} alignItems="center">
