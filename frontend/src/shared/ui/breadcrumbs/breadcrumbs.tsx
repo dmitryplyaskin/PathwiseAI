@@ -27,39 +27,39 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
         }}
       >
         {items.map((item, index) => {
-          // const isLast = index === items.length - 1;
+          const isLast = index === items.length - 1;
           const isHome = item.path === '/';
 
-          // if (isLast || !item.path) {
-          //   return (
-          //     <Chip
-          //       key={index}
-          //       label={
-          //         <Box display="flex" alignItems="center" gap={0.5}>
-          //           {isHome && <Home fontSize="small" />}
-          //           <Typography variant="body2" component="span">
-          //             {item.label}
-          //           </Typography>
-          //         </Box>
-          //       }
-          //       variant="filled"
-          //       color="primary"
-          //       size="small"
-          //       sx={{
-          //         fontWeight: 600,
-          //         '& .MuiChip-label': {
-          //           px: 1.5,
-          //           py: 0.5,
-          //         },
-          //       }}
-          //     />
-          //   );
-          // }
+          // Если это последний элемент или нет пути, отображаем как текст
+          if (isLast || !item.path) {
+            return (
+              <Box
+                key={index}
+                component="span"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  color: 'text.primary',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  px: 1,
+                  py: 0.5,
+                }}
+              >
+                {isHome && <Home fontSize="small" />}
+                <Typography variant="body2" component="span">
+                  {item.label}
+                </Typography>
+              </Box>
+            );
+          }
 
+          // Остальные элементы - ссылки
           return (
             <Link
               key={index}
-              to={item.path || ''}
+              to={item.path}
               style={{
                 textDecoration: 'none',
                 color: 'inherit',
