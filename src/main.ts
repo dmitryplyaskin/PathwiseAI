@@ -4,8 +4,26 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import cookieParser from 'cookie-parser';
+import { ConfigService } from '@nestjs/config';
+import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
+  // Валидация критических переменных окружения перед запуском приложения
+  const tempApp = await NestFactory.createApplicationContext(AppModule, {
+    logger: false,
+  });
+  const configService = tempApp.get(ConfigService);
+  const jwtSecret = configService.get<string>('JWT_SECRET');
+
+  if (!jwtSecret) {
+    console.error('ОШИБКА: JWT_SECRET не установлен в переменных окружения');
+    console.error('Приложение не может быть запущено без JWT_SECRET');
+    await tempApp.close();
+    process.exit(1);
+  }
+
+  await tempApp.close();
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Подключаем cookie-parser для работы с httpOnly cookies
@@ -24,7 +42,7 @@ async function bootstrap() {
     origin: ['http://localhost:5173', 'http://localhost:3000'], // Добавляем фронтенд URL
     credentials: true, // Важно для работы с cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-CSRF-Token'],
   });
 
   app.setGlobalPrefix('api');
@@ -33,7 +51,7 @@ async function bootstrap() {
     index: ['index.html'],
   });
 
-  app.use((req, res, next) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.originalUrl.startsWith('/api')) {
       return next();
     }
