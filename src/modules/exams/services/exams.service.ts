@@ -23,7 +23,7 @@ import {
   textCheckingSchema,
   TextCheckingResponse,
 } from '../config/text-checking.schema';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ExamsService {
@@ -252,10 +252,10 @@ export class ExamsService {
       // Добавляем уникальные ID к вопросам
       testData.questions = testData.questions.map((q) => ({
         ...q,
-        id: uuidv4(),
+        id: randomUUID(),
         options: q.options?.map((opt) => ({
           ...opt,
-          id: uuidv4(),
+          id: randomUUID(),
         })),
       }));
 

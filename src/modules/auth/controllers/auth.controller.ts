@@ -11,6 +11,7 @@ import { AuthService } from '../services/auth.service';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 import { LocalAuthGuard } from '../guards/local-auth.guard';
+import { Public } from '../../../shared/decorators/public.decorator';
 import type {
   Response as ExpressResponse,
   Request as ExpressRequest,
@@ -25,6 +26,7 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
+  @Public()
   @Post('register')
   async register(
     @Body() registerDto: RegisterDto,
@@ -55,6 +57,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(
@@ -87,6 +90,7 @@ export class AuthController {
     };
   }
 
+  @Public()
   @Post('logout')
   logout(@Response({ passthrough: true }) res: ExpressResponse) {
     // Очищаем cookie с токеном

@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ExamsService } from '../services/exams.service';
 import { CreateExamDto } from '../dto/create-exam.dto';
@@ -16,8 +17,10 @@ import { UpdateExamResultDto } from '../dto/update-exam-result.dto';
 import { GenerateTestDto } from '../dto/generate-test.dto';
 import { SubmitTestResultDto } from '../dto/submit-test-result.dto';
 import { CheckTextAnswerDto } from '../dto/check-text-answer.dto';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @Controller('exams')
+@UseGuards(JwtAuthGuard)
 export class ExamsController {
   constructor(private readonly examsService: ExamsService) {}
 
