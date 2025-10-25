@@ -21,6 +21,27 @@ export default defineConfig({
   build: {
     outDir: './dist',
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Разделяем большие библиотеки на отдельные чанки
+          'react-vendor': ['react', 'react-dom', 'react-router'],
+          'mui-vendor': [
+            '@mui/material',
+            '@mui/icons-material',
+            '@emotion/react',
+            '@emotion/styled',
+          ],
+          'effector-vendor': ['effector', 'effector-react'],
+          'markdown-vendor': [
+            'react-markdown',
+            'react-syntax-highlighter',
+            'remark-gfm',
+          ],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000, // Увеличиваем лимит до 1MB для предупреждений
   },
   base: '/',
 });

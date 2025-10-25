@@ -1,18 +1,45 @@
+import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
-import { HomePage } from '@pages/home';
-import { LoginPage } from '@pages/login';
-import { RegisterPage } from '@pages/register';
-import { ProfilePage } from '@pages/profile';
-import { Lesson } from '@pages/lesson';
-import { Lessons } from '@pages/lessons';
-import { Units } from '@pages/units';
-import { Unit } from '@pages/unit';
-import { Courses } from '@pages/courses';
-import { Course } from '@pages/course';
-import { TestHistoryPage } from '@pages/test-history';
-import { ReviewPage } from '@pages/review';
 import { Layout } from '@app/ui/Layout';
 import { AuthGuard } from '@shared/ui/auth-guard';
+
+// Lazy loading страниц для code splitting
+const HomePage = lazy(() =>
+  import('@pages/home').then((m) => ({ default: m.HomePage })),
+);
+const LoginPage = lazy(() =>
+  import('@pages/login').then((m) => ({ default: m.LoginPage })),
+);
+const RegisterPage = lazy(() =>
+  import('@pages/register').then((m) => ({ default: m.RegisterPage })),
+);
+const ProfilePage = lazy(() =>
+  import('@pages/profile').then((m) => ({ default: m.ProfilePage })),
+);
+const Lesson = lazy(() =>
+  import('@pages/lesson').then((m) => ({ default: m.Lesson })),
+);
+const Lessons = lazy(() =>
+  import('@pages/lessons').then((m) => ({ default: m.Lessons })),
+);
+const Units = lazy(() =>
+  import('@pages/units').then((m) => ({ default: m.Units })),
+);
+const Unit = lazy(() =>
+  import('@pages/unit').then((m) => ({ default: m.Unit })),
+);
+const Courses = lazy(() =>
+  import('@pages/courses').then((m) => ({ default: m.Courses })),
+);
+const Course = lazy(() =>
+  import('@pages/course').then((m) => ({ default: m.Course })),
+);
+const TestHistoryPage = lazy(() =>
+  import('@pages/test-history').then((m) => ({ default: m.TestHistoryPage })),
+);
+const ReviewPage = lazy(() =>
+  import('@pages/review').then((m) => ({ default: m.ReviewPage })),
+);
 
 export const router = createBrowserRouter([
   {

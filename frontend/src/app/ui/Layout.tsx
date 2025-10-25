@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Outlet, useLocation, Link } from 'react-router';
 import { useUnit } from 'effector-react';
 import {
@@ -9,7 +9,7 @@ import {
   Typography,
   Stack,
 } from '@mui/material';
-import { Breadcrumbs, useBreadcrumbs } from '@shared/ui';
+import { Breadcrumbs, useBreadcrumbs, AppLoader } from '@shared/ui';
 import { $isAuthenticated } from '@shared/model/auth';
 import { UserMenu } from '@widgets/user-menu';
 
@@ -57,7 +57,9 @@ export const Layout: React.FC = () => {
           <Breadcrumbs items={breadcrumbs} />
         </Container>
       )}
-      <Outlet />
+      <Suspense fallback={<AppLoader />}>
+        <Outlet />
+      </Suspense>
     </Box>
   );
 };
