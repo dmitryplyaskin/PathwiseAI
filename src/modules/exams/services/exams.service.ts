@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Exam, ExamStatus } from '../entities/exam.entity';
@@ -27,6 +27,8 @@ import { randomUUID } from 'crypto';
 
 @Injectable()
 export class ExamsService {
+  private readonly logger = new Logger(ExamsService.name);
+
   constructor(
     @InjectRepository(Exam)
     private readonly examRepository: Repository<Exam>,
@@ -199,7 +201,7 @@ export class ExamsService {
             ? QuestionType.MULTIPLE_CHOICE
             : QuestionType.OPEN_ENDED,
         options: generatedQuestion.options
-          ? (generatedQuestion.options as Record<string, any>)
+          ? (generatedQuestion.options as unknown as Record<string, unknown>)
           : undefined,
         correct_answer:
           generatedQuestion.type === 'quiz'
@@ -261,7 +263,12 @@ export class ExamsService {
 
       return testData;
     } catch (error) {
-      console.error('Error generating test:', error);
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        { err: errorObj, lessonId: lesson.id, questionCount },
+        'Error generating test',
+      );
       throw new Error('Failed to generate test');
     }
   }
@@ -354,7 +361,10 @@ export class ExamsService {
     });
 
     if (!lesson) {
-      console.warn(`Lesson with title "${lessonTitle}" not found`);
+      this.logger.warn(
+        { lessonTitle, examId: exam.id },
+        `Lesson with title "${lessonTitle}" not found`,
+      );
       return;
     }
 
@@ -413,7 +423,12 @@ export class ExamsService {
 
       return checkingResult;
     } catch (error) {
-      console.error('Error checking text answer:', error);
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        { err: errorObj, questionText, userAnswer },
+        'Error checking text answer',
+      );
 
       // Fallback: простая проверка на основе длины и ключевых слов
       const isCorrect = this.simpleTextCheck(userAnswer, expectedAnswer);

@@ -5,7 +5,7 @@ import { User } from '../modules/users/entities/user.entity';
 import { Course } from '../modules/courses/entities/course.entity';
 import { Unit } from '../modules/courses/entities/unit.entity';
 import { Lesson } from '../modules/courses/entities/lesson.entity';
-import { UserSeedService } from './services/user-seed.service';
+// import { UserSeedService } from './services/user-seed.service';
 import { AccessControlService } from './services/access-control.service';
 
 @Module({
@@ -13,7 +13,7 @@ import { AccessControlService } from './services/access-control.service';
     TypeOrmModule.forFeature([User, Course, Unit, Lesson]),
     ConfigModule,
   ],
-  providers: [UserSeedService, AccessControlService],
-  exports: [UserSeedService, AccessControlService],
+  providers: [AccessControlService],
+  exports: [AccessControlService],
 })
 export class SharedModule {}

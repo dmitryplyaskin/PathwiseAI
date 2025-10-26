@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { Response } from 'express';
@@ -10,6 +10,8 @@ import { OpenRouterService } from './openrouter.service';
 
 @Injectable()
 export class ChatService {
+  private readonly logger = new Logger(ChatService.name);
+
   constructor(
     @InjectRepository(Chat)
     private readonly chatRepository: Repository<Chat>,
@@ -126,7 +128,7 @@ ${lessonContent}
     chatId: string,
     threadId?: string,
   ): Promise<ChatMessage[]> {
-    const where: any = { chatId };
+    const where: { chatId: string; threadId?: string } = { chatId };
     if (threadId) {
       where.threadId = threadId;
     }
@@ -248,7 +250,16 @@ ${lessonContent}
       order: { created_at: 'ASC' },
     });
 
-    const threadsMap = new Map<string, any>();
+    const threadsMap = new Map<
+      string,
+      {
+        threadId: string;
+        messageCount: number;
+        firstMessage: string;
+        createdAt: Date;
+        lastActivity: Date;
+      }
+    >();
 
     messages.forEach((msg) => {
       if (!threadsMap.has(msg.threadId)) {
@@ -261,8 +272,10 @@ ${lessonContent}
         });
       }
       const thread = threadsMap.get(msg.threadId);
-      thread.messageCount++;
-      thread.lastActivity = msg.created_at;
+      if (thread) {
+        thread.messageCount++;
+        thread.lastActivity = msg.created_at;
+      }
     });
 
     return Array.from(threadsMap.values()).sort(
@@ -358,7 +371,9 @@ ${lessonContent}
         })}\n\n`,
       );
     } catch (error) {
-      console.error('Stream error:', error);
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
+      this.logger.error({ err: errorObj, lessonId, userId }, 'Stream error');
       res.write(
         `data: ${JSON.stringify({
           error: 'Произошла ошибка при получении ответа',

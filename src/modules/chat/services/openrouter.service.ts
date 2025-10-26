@@ -1,10 +1,11 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { type ConfigType } from '@nestjs/config';
 import OpenAI from 'openai';
 import openrouterConfig from '../../../config/openrouter.config';
 
 @Injectable()
 export class OpenRouterService {
+  private readonly logger = new Logger(OpenRouterService.name);
   private client: OpenAI;
 
   constructor(
@@ -47,7 +48,12 @@ export class OpenRouterService {
 
       return completion.choices[0]?.message?.content || '';
     } catch (error) {
-      console.error('OpenRouter API Error:', error);
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        { err: errorObj, model: this.config.model },
+        'OpenRouter API Error',
+      );
       if (error instanceof Error) {
         throw new Error(
           `Не удалось получить ответ от AI модели: ${error.message}`,
@@ -72,7 +78,12 @@ export class OpenRouterService {
 
       return stream;
     } catch (error) {
-      console.error('OpenRouter Stream API Error:', error);
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        { err: errorObj, model: this.config.model },
+        'OpenRouter Stream API Error',
+      );
       throw new Error('Не удалось создать поток ответа от AI модели');
     }
   }

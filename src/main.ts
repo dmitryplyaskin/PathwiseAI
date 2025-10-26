@@ -6,6 +6,7 @@ import { join } from 'path';
 import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response, NextFunction } from 'express';
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
   // Валидация критических переменных окружения перед запуском приложения
@@ -16,6 +17,7 @@ async function bootstrap() {
   const jwtSecret = configService.get<string>('JWT_SECRET');
 
   if (!jwtSecret) {
+    // Используем console.error для критических ошибок до инициализации logger
     console.error('ОШИБКА: JWT_SECRET не установлен в переменных окружения');
     console.error('Приложение не может быть запущено без JWT_SECRET');
     await tempApp.close();
@@ -24,7 +26,13 @@ async function bootstrap() {
 
   await tempApp.close();
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+  });
+
+  // Получаем logger из приложения и настраиваем его
+  const logger = app.get(Logger);
+  app.useLogger(logger);
 
   // Подключаем cookie-parser для работы с httpOnly cookies
   app.use(cookieParser());
@@ -58,10 +66,12 @@ async function bootstrap() {
     res.sendFile(join(__dirname, '..', 'frontend', 'dist', 'index.html'));
   });
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
 }
 
-bootstrap().catch((error) => {
+bootstrap().catch((error: Error) => {
+  // Используем console.error для критических ошибок до инициализации logger
   console.error('Failed to start application:', error);
   process.exit(1);
 });

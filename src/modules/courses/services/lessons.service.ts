@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, LessThanOrEqual, In } from 'typeorm';
 import { Lesson, LessonStatus } from '../entities/lesson.entity';
@@ -34,6 +34,8 @@ import * as path from 'path';
 
 @Injectable()
 export class LessonsService {
+  private readonly logger = new Logger(LessonsService.name);
+
   constructor(
     @InjectRepository(Lesson)
     private readonly lessonRepository: Repository<Lesson>,
@@ -208,10 +210,10 @@ export class LessonsService {
 
     return {
       courseId,
-      lessonId: savedLesson.id as string,
+      lessonId: savedLesson.id,
       unitId: unit.id,
-      title: savedLesson.title as string,
-      content: savedLesson.content as string,
+      title: savedLesson.title,
+      content: savedLesson.content,
     };
   }
 
@@ -250,27 +252,23 @@ export class LessonsService {
       // Сохраняем response в JSON файл для отладки
       this.saveDebugResponse(response, topic);
 
-      console.log('response:\n', response);
       // Parse the structured JSON response
       const lessonData = JSON.parse(response) as LessonGenerationResponse;
 
-      // Log the parsed lesson data
-      console.log('Parsed lesson data:', {
-        title: lessonData.title,
-        description: lessonData.description,
-        readingTime: lessonData.readingTime,
-        difficulty: lessonData.difficulty,
-        contentLength: lessonData.content.length,
-      });
-
       return lessonData;
     } catch (error) {
-      console.error('Error generating lesson content:', error);
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        { err: errorObj, topic, details },
+        'Error generating lesson content',
+      );
       throw new Error('Failed to generate lesson content');
     }
   }
 
   private saveDebugResponse(response: string, topic: string): void {
+    let filePath = '';
     try {
       // Создаем папку debug, если её нет
       const debugDir = path.join(process.cwd(), 'debug-responses');
@@ -284,7 +282,7 @@ export class LessonsService {
         .replace(/[^a-zA-Z0-9а-яА-Я]/g, '_')
         .substring(0, 50);
       const fileName = `${timestamp}_${safeTopic}.json`;
-      const filePath = path.join(debugDir, fileName);
+      filePath = path.join(debugDir, fileName);
 
       // Пытаемся распарсить JSON для красивого форматирования
       let formattedContent: string;
@@ -298,10 +296,14 @@ export class LessonsService {
 
       // Сохраняем файл
       fs.writeFileSync(filePath, formattedContent, 'utf-8');
-      console.log(`Debug response saved to: ${filePath}`);
     } catch (error) {
-      // Не бросаем ошибку, чтобы не прерывать основной процесс
-      console.error('Failed to save debug response:', error);
+      // Не бросаем ошибку, чтобы не прерывать основной процесс, но логируем
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
+      this.logger.warn(
+        { err: errorObj, topic, filePath },
+        'Failed to save debug response',
+      );
     }
   }
 
@@ -354,7 +356,7 @@ export class LessonsService {
     userId: string,
   ): Promise<{
     message: string;
-    newMessage: any;
+    newMessage: unknown;
   }> {
     const lesson = await this.findOneLesson(lessonId, userId);
     return this.chatService.regenerateMessage(
@@ -364,7 +366,7 @@ export class LessonsService {
     );
   }
 
-  async getThreads(lessonId: string, userId: string): Promise<any[]> {
+  async getThreads(lessonId: string, userId: string): Promise<unknown[]> {
     await this.findOneLesson(lessonId, userId);
     return this.chatService.getThreads(lessonId);
   }
@@ -373,7 +375,7 @@ export class LessonsService {
     lessonId: string,
     threadId: string,
     userId: string,
-  ): Promise<any[]> {
+  ): Promise<unknown[]> {
     await this.findOneLesson(lessonId, userId);
     return this.chatService.getThreadMessages(lessonId, threadId);
   }
@@ -466,20 +468,17 @@ export class LessonsService {
       // Сохраняем response в JSON файл для отладки
       this.saveDebugResponse(response, `Course_${topic}`);
 
-      console.log('Course generation response:\n', response);
       // Parse the structured JSON response
       const courseData = JSON.parse(response) as CourseGenerationResponse;
 
-      // Log the parsed course data
-      console.log('Parsed course data:', {
-        name: courseData.name,
-        description: courseData.description,
-        lessonsCount: courseData.lessons.length,
-      });
-
       return courseData;
     } catch (error) {
-      console.error('Error generating course outline:', error);
+      const errorObj =
+        error instanceof Error ? error : new Error(String(error));
+      this.logger.error(
+        { err: errorObj, topic },
+        'Error generating course outline',
+      );
       throw new Error('Failed to generate course outline');
     }
   }

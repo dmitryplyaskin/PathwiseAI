@@ -15,6 +15,8 @@ import { ConfigModule } from '@nestjs/config';
 import { SharedModule } from './shared/shared.module';
 import { CsrfTokenMiddleware } from './shared/middleware/csrf-token.middleware';
 import { CsrfGuard } from './shared/guards/csrf.guard';
+import { LoggerModule } from 'nestjs-pino';
+import { loggerConfig } from './config/logger.config';
 
 @Module({
   imports: [
@@ -22,6 +24,7 @@ import { CsrfGuard } from './shared/guards/csrf.guard';
       envFilePath: ['.env', '.env.development'],
       isGlobal: true,
     }),
+    LoggerModule.forRoot(loggerConfig),
     TypeOrmModule.forRoot({
       type: 'postgres',
       driver: new PGliteDriver({
