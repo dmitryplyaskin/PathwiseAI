@@ -18,6 +18,22 @@ export default defineConfig({
   server: {
     open: true,
   },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router',
+      '@mui/material',
+      '@mui/icons-material',
+      '@emotion/react',
+      '@emotion/styled',
+      'effector',
+      'effector-react',
+      'react-markdown',
+      'react-syntax-highlighter',
+      'remark-gfm',
+    ],
+  },
   build: {
     outDir: './dist',
     emptyOutDir: true,

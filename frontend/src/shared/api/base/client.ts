@@ -3,6 +3,8 @@ import type { ApiRequestConfig, ApiClientConfig } from './types';
 export class ApiClient {
   private baseUrl: string;
   private defaultHeaders: Record<string, string>;
+  private csrfToken: string | null = null;
+  private csrfTokenPromise: Promise<string | null> | null = null;
 
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl;
@@ -15,7 +17,7 @@ export class ApiClient {
   /**
    * Получает CSRF токен из cookie
    */
-  private getCsrfToken(): string | null {
+  private getCsrfTokenFromCookie(): string | null {
     if (typeof document === 'undefined') {
       return null;
     }
@@ -31,23 +33,80 @@ export class ApiClient {
   }
 
   /**
-   * Получает CSRF токен с сервера, выполняя GET запрос
+   * Инициализирует CSRF токен, запрашивая его с сервера
+   * Использует кэширование и защиту от race conditions
    */
-  private async fetchCsrfToken(): Promise<string | null> {
-    try {
-      const response = await fetch(`${this.baseUrl}/auth/login`, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          ...this.defaultHeaders,
-        },
-      });
-
-      const token = response.headers.get('X-CSRF-Token');
-      return token;
-    } catch {
-      return null;
+  private async initCsrfToken(): Promise<string | null> {
+    // Если токен уже получен, возвращаем его
+    if (this.csrfToken) {
+      return this.csrfToken;
     }
+
+    // Если уже идет запрос на получение токена, ждем его завершения
+    if (this.csrfTokenPromise) {
+      return this.csrfTokenPromise;
+    }
+
+    // Проверяем cookie перед запросом к серверу
+    const cookieToken = this.getCsrfTokenFromCookie();
+    if (cookieToken) {
+      this.csrfToken = cookieToken;
+      return cookieToken;
+    }
+
+    // Создаем promise для получения токена
+    this.csrfTokenPromise = (async () => {
+      try {
+        // Используем легковесный эндпоинт для получения токена
+        // CSRF middleware добавит токен в заголовок ответа
+        const response = await fetch(`${this.baseUrl}/csrf-token`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            ...this.defaultHeaders,
+          },
+        });
+
+        const token = response.headers.get('X-CSRF-Token');
+        if (token) {
+          this.csrfToken = token;
+        }
+        return token;
+      } catch {
+        // При ошибке пытаемся получить из cookie (на случай если сервер установил cookie)
+        const fallbackToken = this.getCsrfTokenFromCookie();
+        if (fallbackToken) {
+          this.csrfToken = fallbackToken;
+        }
+        return fallbackToken;
+      } finally {
+        // Очищаем promise после завершения
+        this.csrfTokenPromise = null;
+      }
+    })();
+
+    return this.csrfTokenPromise;
+  }
+
+  /**
+   * Получает CSRF токен для использования в запросах
+   * Инициализирует токен при необходимости
+   */
+  private async getCsrfToken(): Promise<string | null> {
+    // Сначала проверяем кэш
+    if (this.csrfToken) {
+      return this.csrfToken;
+    }
+
+    // Проверяем cookie
+    const cookieToken = this.getCsrfTokenFromCookie();
+    if (cookieToken) {
+      this.csrfToken = cookieToken;
+      return cookieToken;
+    }
+
+    // Инициализируем токен с сервера
+    return this.initCsrfToken();
   }
 
   private async request<T>(
@@ -71,13 +130,7 @@ export class ApiClient {
 
     // CSRF защита требуется только для POST, PUT, PATCH, DELETE
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-      let csrfToken = this.getCsrfToken();
-
-      // Если токен отсутствует в cookie, пытаемся получить его с сервера
-      if (!csrfToken) {
-        csrfToken = await this.fetchCsrfToken();
-      }
-
+      const csrfToken = await this.getCsrfToken();
       if (csrfToken) {
         requestHeaders['X-CSRF-Token'] = csrfToken;
       }
@@ -104,37 +157,6 @@ export class ApiClient {
 
       if (timeoutId) {
         clearTimeout(timeoutId);
-      }
-
-      // Если получили 403 из-за отсутствия CSRF токена, пытаемся получить токен и повторить запрос
-      if (response.status === 403 && response.headers.get('X-CSRF-Token')) {
-        const csrfToken = response.headers.get('X-CSRF-Token');
-        if (csrfToken && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
-          // Повторяем запрос с токеном из заголовка ответа
-          requestHeaders['X-CSRF-Token'] = csrfToken;
-          const retryResponse = await fetch(url, {
-            ...requestConfig,
-            headers: requestHeaders,
-            ...(controller && { signal: controller.signal }),
-          });
-
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-
-          if (!retryResponse.ok) {
-            const errorData = await this.parseErrorResponse(retryResponse);
-            throw new ApiError(
-              errorData.message || 'Ошибка запроса',
-              errorData.code,
-              retryResponse.status,
-              errorData.details,
-            );
-          }
-
-          const data = (await retryResponse.json()) as T;
-          return data;
-        }
       }
 
       if (!response.ok) {
