@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {
@@ -226,7 +229,13 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
       const match = /language-(\w+)/.exec(className || '');
       const language = match ? match[1] : '';
-      const codeText = String(children).replace(/\n$/, '');
+      const codeText = (
+        Array.isArray(children)
+          ? children.join('')
+          : typeof children === 'string'
+            ? children
+            : String((children as string) || '')
+      ).replace(/\n$/, '');
       const blockId = `code-${Math.random().toString(36).substr(2, 9)}`;
       const isCopied = copiedBlocks.has(blockId);
 
@@ -268,7 +277,9 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               <Tooltip title={isCopied ? 'Скопировано!' : 'Копировать код'}>
                 <IconButton
                   size="small"
-                  onClick={() => copyToClipboard(codeText, blockId)}
+                  onClick={() => {
+                    void copyToClipboard(codeText, blockId);
+                  }}
                   sx={{
                     ml: 'auto',
                     color: isCopied ? 'success.main' : 'text.secondary',
@@ -458,7 +469,11 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         ...sx,
       }}
     >
-      <ReactMarkdown components={customComponents} remarkPlugins={[remarkGfm]}>
+      <ReactMarkdown
+        components={customComponents}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+      >
         {children}
       </ReactMarkdown>
     </Box>

@@ -38,8 +38,8 @@ JSON SCHEMA:
   "title": "string - lesson title in Russian",
   "description": "string - brief summary (1-2 sentences) explaining what the lesson covers and its main value in Russian",
   "content": "string - full lesson text in Russian with markdown formatting including sections: ## Введение, ## Основной материал, ## Примеры, ## Практические советы, ## Заключение",
-  "readingTime": "number - estimated reading time in minutes (based on average reading speed of 200 words/minute in Russian)",
-  "difficulty": "number - difficulty rating from 1 to 10 based on cognitive load, prerequisites, and concept abstraction. Simple: 1-3, Normal: 4-6, Professional: 7-10"
+  "readingTime": "integer - estimated reading time in minutes as a whole number (based on average reading speed of 200 words/minute in Russian). Must be a positive integer (typical range: 5-30 minutes)",
+  "difficulty": "integer - difficulty rating from 1 to 10 as a whole number based on cognitive load, prerequisites, and concept abstraction. Simple: 1-3, Normal: 4-6, Professional: 7-10. Must be an integer between 1 and 10"
 }
 
 OUTPUT VALIDATION:
@@ -47,8 +47,9 @@ OUTPUT VALIDATION:
 - Description field must be concise (1-2 sentences) and informative
 - Content field must contain well-formatted markdown text in Russian
 - All fields are required and non-empty
-- readingTime must be realistic (5-30 minutes typical range)
-- difficulty must be an integer 1-10 that corresponds to complexity level
+- readingTime must be a positive integer (whole number) in realistic range (5-30 minutes typical range)
+- difficulty must be an integer (whole number) between 1 and 10 that corresponds to complexity level
+- Both readingTime and difficulty MUST be integers, not decimal numbers
 - Content should be comprehensive and educational
 
 Generate the lesson now. Output JSON directly:`,

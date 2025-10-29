@@ -255,6 +255,21 @@ export class LessonsService {
       // Parse the structured JSON response
       const lessonData = JSON.parse(response) as LessonGenerationResponse;
 
+      // Ensure integer values for database fields
+      // Convert to integers to prevent database errors with decimal values
+      lessonData.readingTime = Math.round(lessonData.readingTime);
+      lessonData.difficulty = Math.round(lessonData.difficulty);
+
+      // Validate ranges
+      if (lessonData.readingTime < 1) {
+        lessonData.readingTime = 1;
+      }
+      if (lessonData.difficulty < 1) {
+        lessonData.difficulty = 1;
+      } else if (lessonData.difficulty > 10) {
+        lessonData.difficulty = 10;
+      }
+
       return lessonData;
     } catch (error) {
       const errorObj =

@@ -28,12 +28,12 @@ export const lessonGenerationSchema = {
             'Основной контент урока в формате HTML с подробным объяснением темы',
         },
         readingTime: {
-          type: 'number',
-          description: 'Примерное время чтения урока в минутах',
+          type: 'integer',
+          description: 'Примерное время чтения урока в минутах (целое число)',
         },
         difficulty: {
-          type: 'number',
-          description: 'Уровень сложности урока от 1 до 5',
+          type: 'integer',
+          description: 'Уровень сложности урока от 1 до 10 (целое число)',
         },
       },
       required: [

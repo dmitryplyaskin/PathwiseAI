@@ -17,12 +17,15 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "effector": "^23.4.4",
     "effector-react": "^23.3.0",
+    "katex": "^0.16.25",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-markdown": "^9.0.1",
     "react-router": "^7.9.1",
     "react-syntax-highlighter": "^15.6.6",
-    "remark-gfm": "^4.0.0"
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.0",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
