@@ -153,27 +153,31 @@ export class ExamsService {
       throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
     }
 
-    // Проверяем, есть ли уже тест для этого урока
-    const existingExam = await this.examRepository.findOne({
+    // Ищем последний тест для этого урока (сортировка по дате создания DESC)
+    const existingExams = await this.examRepository.find({
       where: {
         user: { id: userId },
         course: { id: lesson.unit.course.id },
         title: `Тест по уроку: ${lesson.title}`,
       },
       relations: ['results', 'results.question'],
+      order: { started_at: 'DESC' },
     });
 
-    if (existingExam && existingExam.results.length > 0) {
-      // Получаем вопросы для существующего экзамена
+    // Если есть тесты, возвращаем последний
+    if (existingExams.length > 0) {
+      const lastExam = existingExams[0];
+      
+      // Получаем вопросы для последнего экзамена
       const existingQuestions = await this.questionRepository.find({
         where: { lesson: { id: lessonId } },
       });
 
-      // Возвращаем существующий тест
-      return this.formatTestForFrontend(existingExam, existingQuestions);
+      // Возвращаем последний тест
+      return this.formatTestForFrontend(lastExam, existingQuestions);
     }
 
-    // Генерируем новый тест
+    // Если тестов нет, генерируем новый тест
     const generatedTest = await this.generateTestForLesson(
       lesson,
       questionCount || 5,
@@ -196,6 +200,7 @@ export class ExamsService {
       const question = this.questionRepository.create({
         lesson: { id: lessonId },
         question_text: generatedQuestion.question,
+        question_content: generatedQuestion.questionContent || null,
         question_type:
           generatedQuestion.type === 'quiz'
             ? QuestionType.MULTIPLE_CHOICE
@@ -211,7 +216,7 @@ export class ExamsService {
         explanation: generatedQuestion.explanation,
       });
 
-      const savedQuestion = await this.questionRepository.save(question);
+      const savedQuestion: Question = await this.questionRepository.save(question);
       questions.push(savedQuestion);
     }
 
@@ -283,6 +288,7 @@ export class ExamsService {
           type:
             q.question_type === QuestionType.MULTIPLE_CHOICE ? 'quiz' : 'text',
           question: q.question_text,
+          questionContent: q.question_content || undefined,
           options:
             q.question_type === QuestionType.MULTIPLE_CHOICE && q.options
               ? (q.options as Record<string, unknown>[]).map(

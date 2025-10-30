@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { CheckCircle, Cancel } from '@mui/icons-material';
 import type { QuizQuestion as QuizQuestionType } from '../types';
+import { MarkdownRenderer } from '@shared/ui/markdown-renderer';
 
 interface QuizQuestionProps {
   question: QuizQuestionType;
@@ -57,6 +58,14 @@ export const QuizQuestion = ({
       <Typography variant="h5" fontWeight={600} mb={3}>
         {question.question}
       </Typography>
+
+      {question.questionContent && (
+        <Box mb={3}>
+          <MarkdownRenderer showLineNumbers={true} maxCodeHeight="300px">
+            {question.questionContent}
+          </MarkdownRenderer>
+        </Box>
+      )}
 
       <RadioGroup value={selectedOption} onChange={handleOptionChange}>
         {question.options.map((option) => {

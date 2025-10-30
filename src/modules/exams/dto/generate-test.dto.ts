@@ -4,7 +4,6 @@ import {
   IsOptional,
   IsNumber,
   Min,
-  Max,
 } from 'class-validator';
 
 export class GenerateTestDto {
@@ -18,7 +17,6 @@ export class GenerateTestDto {
 
   @IsNumber()
   @IsOptional()
-  @Min(1, { message: 'Количество вопросов должно быть не менее 1' })
-  @Max(50, { message: 'Количество вопросов не может превышать 50' })
+  @Min(5, { message: 'Количество вопросов должно быть не менее 5' })
   questionCount?: number = 5;
 }

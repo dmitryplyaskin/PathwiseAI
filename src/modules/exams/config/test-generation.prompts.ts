@@ -19,7 +19,7 @@ export const testGenerationPrompts: TestGenerationPromptsConfig = {
 \${lessonContent}
 
 ТРЕБОВАНИЯ К ТЕСТУ:
-- Количество вопросов: \${questionCount}
+- Количество вопросов: \${questionCount} (минимум 5, но должно полностью покрывать урок)
 - Язык: Русский
 - Формат: Только валидный JSON
 - Разнообразие: Смешивай типы вопросов (квиз и текстовые)
@@ -37,6 +37,7 @@ export const testGenerationPrompts: TestGenerationPromptsConfig = {
       "id": "uuid",
       "type": "quiz" | "text",
       "question": "Текст вопроса на русском",
+      "questionContent": "Дополнительный контент в формате Markdown (код, формулы и т.д.). Опциональное поле, используй когда нужно показать код или формулы.",
       "options": [{"id": "opt1", "text": "Вариант 1", "isCorrect": true}, ...], // только для quiz
       "expectedAnswer": "Ожидаемый ответ", // только для text
       "explanation": "Объяснение правильного ответа"

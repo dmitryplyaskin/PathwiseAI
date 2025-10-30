@@ -22,8 +22,10 @@ import type {
 import { QuizQuestion } from './QuizQuestion';
 import { TextQuestion } from './TextQuestion';
 import { TestResult } from './TestResult';
+import { ConfirmCloseDialog } from './ConfirmCloseDialog';
 import { testsApi } from '@shared/api/tests';
 import { useCurrentUser } from '@shared/model';
+import { loadLesson } from '@shared/model/lessons';
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {
@@ -50,12 +52,12 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuestionAnswer[]>([]);
   const [isQuestionAnswered, setIsQuestionAnswered] = useState(false);
-  const [showWarning, setShowWarning] = useState(false);
   const [timeSpent, setTimeSpent] = useState(0);
   const [testCompleted, setTestCompleted] = useState(false);
   const [testResult, setTestResult] = useState<TestResultType | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showCloseConfirmDialog, setShowCloseConfirmDialog] = useState(false);
   const { userId } = useCurrentUser();
 
   const currentQuestion = testData.questions[currentQuestionIndex];
@@ -111,12 +113,12 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
       setCurrentQuestionIndex(0);
       setAnswers([]);
       setIsQuestionAnswered(false);
-      setShowWarning(false);
       setTimeSpent(0);
       setTestCompleted(false);
       setTestResult(null);
       setIsSubmitting(false);
       setSubmitError(null);
+      setShowCloseConfirmDialog(false);
     }
   }, [open]);
 
@@ -181,7 +183,7 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
     setSubmitError(null);
 
     try {
-      void testsApi.submitTestResult({
+      await testsApi.submitTestResult({
         examId: testData.id,
         userId: userId ?? '',
         answers: answersToUse.map((answer) => ({
@@ -195,10 +197,12 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
 
       console.log('Test results submitted successfully');
 
-      // НОВОЕ: Обновляем данные урока
+      // Обновляем данные урока через модель и событие
       if (testData.lessonId) {
-        // Можно добавить callback для обновления родительского компонента
-        // или использовать глобальное состояние
+        // Загружаем урок через модель
+        loadLesson(testData.lessonId);
+
+        // Отправляем событие для обновления других компонентов
         window.dispatchEvent(
           new CustomEvent('lessonUpdated', {
             detail: { lessonId: testData.lessonId },
@@ -219,15 +223,19 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
 
   const handleCloseAttempt = () => {
     if (!testCompleted) {
-      setShowWarning(true);
-      setTimeout(() => setShowWarning(false), 5000);
+      setShowCloseConfirmDialog(true);
     } else {
       onClose();
     }
   };
 
-  const handleForceClose = () => {
+  const handleConfirmClose = () => {
+    setShowCloseConfirmDialog(false);
     onClose();
+  };
+
+  const handleCancelClose = () => {
+    setShowCloseConfirmDialog(false);
   };
 
   if (testCompleted && testResult) {
@@ -324,23 +332,6 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
             </IconButton>
           </Stack>
 
-          {/* Предупреждение о закрытии */}
-          {showWarning && (
-            <Alert
-              severity="warning"
-              onClose={handleForceClose}
-              sx={{ mb: 2 }}
-              action={
-                <Button color="inherit" size="small" onClick={handleForceClose}>
-                  Закрыть
-                </Button>
-              }
-            >
-              Если вы закроете тест сейчас, прохождение не будет засчитано.
-              Нажмите "Закрыть" справа, чтобы выйти без сохранения.
-            </Alert>
-          )}
-
           {/* Прогресс */}
           <Box>
             <Stack
@@ -424,6 +415,11 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
           </Stack>
         </DialogContent>
       </Box>
+      <ConfirmCloseDialog
+        open={showCloseConfirmDialog}
+        onClose={handleCancelClose}
+        onConfirm={handleConfirmClose}
+      />
     </Dialog>
   );
 };

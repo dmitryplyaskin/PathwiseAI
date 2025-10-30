@@ -9,6 +9,7 @@ export interface QuizOption {
 export interface BaseQuestion {
   id: string;
   question: string;
+  questionContent?: string;
 }
 
 export interface QuizQuestion extends BaseQuestion {

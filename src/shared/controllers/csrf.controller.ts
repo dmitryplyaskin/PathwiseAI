@@ -11,3 +11,4 @@ export class CsrfController {
     return { success: true };
   }
 }
+

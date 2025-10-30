@@ -10,6 +10,7 @@ import {
 import { CheckCircle, Error } from '@mui/icons-material';
 import type { TextQuestion as TextQuestionType } from '../types';
 import { testsApi } from '@shared/api/tests';
+import { MarkdownRenderer } from '@shared/ui/markdown-renderer';
 
 interface TextQuestionProps {
   question: TextQuestionType;
@@ -79,6 +80,14 @@ export const TextQuestion = ({
         {question.question}
       </Typography>
 
+      {question.questionContent && (
+        <Box mb={3}>
+          <MarkdownRenderer showLineNumbers={true} maxCodeHeight="300px">
+            {question.questionContent}
+          </MarkdownRenderer>
+        </Box>
+      )}
+
       <TextField
         multiline
         rows={6}
@@ -140,3 +149,5 @@ export const TextQuestion = ({
     </Box>
   );
 };
+
+export default TextQuestion;

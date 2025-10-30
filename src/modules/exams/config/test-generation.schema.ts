@@ -7,6 +7,7 @@ export interface GeneratedQuestion {
   id: string;
   type: 'quiz' | 'text';
   question: string;
+  questionContent?: string;
   options?: GeneratedOption[];
   expectedAnswer?: string;
   explanation: string;
@@ -43,7 +44,11 @@ export const testGenerationSchema = {
             },
             question: {
               type: 'string',
-              description: 'Текст вопроса',
+              description: 'Текст вопроса (обычный текст)',
+            },
+            questionContent: {
+              type: 'string',
+              description: 'Дополнительный контент вопроса в формате Markdown (код, формулы и т.д.). Опциональное поле.',
             },
             options: {
               type: 'array',

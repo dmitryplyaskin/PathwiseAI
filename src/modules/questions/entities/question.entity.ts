@@ -26,6 +26,9 @@ export class Question {
   @Column('text')
   question_text: string;
 
+  @Column('text', { nullable: true })
+  question_content: string | null;
+
   @Column({
     type: 'enum',
     enum: QuestionType,
