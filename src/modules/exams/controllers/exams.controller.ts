@@ -8,6 +8,7 @@ import {
   Delete,
   ParseUUIDPipe,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ExamsService } from '../services/exams.service';
 import { CreateExamDto } from '../dto/create-exam.dto';
@@ -18,6 +19,7 @@ import { GenerateTestDto } from '../dto/generate-test.dto';
 import { SubmitTestResultDto } from '../dto/submit-test-result.dto';
 import { CheckTextAnswerDto } from '../dto/check-text-answer.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 
 @Controller('exams')
 @UseGuards(JwtAuthGuard)
@@ -60,6 +62,24 @@ export class ExamsController {
     return this.examsService.updateExam(id, updateExamDto);
   }
 
+  @Delete('lesson/:lessonId/user/:userId')
+  deleteLessonProgress(
+    @Param('lessonId', ParseUUIDPipe) lessonId: string,
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @CurrentUser() user: any,
+  ) {
+    // Проверяем что userId из токена совпадает с userId в запросе
+    if (user.id !== userId) {
+      throw new ForbiddenException('You can only delete your own progress');
+    }
+    return this.examsService.deleteExamsByLesson(lessonId, userId);
+  }
+
+  @Delete('results/:id')
+  removeExamResult(@Param('id', ParseUUIDPipe) id: string) {
+    return this.examsService.removeExamResult(id);
+  }
+
   @Delete(':id')
   removeExam(@Param('id', ParseUUIDPipe) id: string) {
     return this.examsService.removeExam(id);
@@ -86,11 +106,6 @@ export class ExamsController {
     @Body() updateExamResultDto: UpdateExamResultDto,
   ) {
     return this.examsService.updateExamResult(id, updateExamResultDto);
-  }
-
-  @Delete('results/:id')
-  removeExamResult(@Param('id', ParseUUIDPipe) id: string) {
-    return this.examsService.removeExamResult(id);
   }
 
   // New endpoints for test generation and submission

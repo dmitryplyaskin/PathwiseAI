@@ -10,7 +10,7 @@ import { UpdateExamResultDto } from '../dto/update-exam-result.dto';
 import { GenerateTestDto } from '../dto/generate-test.dto';
 import { SubmitTestResultDto } from '../dto/submit-test-result.dto';
 import { CheckTextAnswerDto } from '../dto/check-text-answer.dto';
-import { Lesson } from '../../courses/entities/lesson.entity';
+import { Lesson, LessonStatus } from '../../courses/entities/lesson.entity';
 import { Question } from '../../questions/entities/question.entity';
 import { QuestionType } from '../../questions/entities/question.entity';
 import { OpenRouterService } from '../../chat/services/openrouter.service';
@@ -167,7 +167,7 @@ export class ExamsService {
     // Если есть тесты, возвращаем последний
     if (existingExams.length > 0) {
       const lastExam = existingExams[0];
-      
+
       // Получаем вопросы для последнего экзамена
       const existingQuestions = await this.questionRepository.find({
         where: { lesson: { id: lessonId } },
@@ -216,7 +216,8 @@ export class ExamsService {
         explanation: generatedQuestion.explanation,
       });
 
-      const savedQuestion: Question = await this.questionRepository.save(question);
+      const savedQuestion: Question =
+        await this.questionRepository.save(question);
       questions.push(savedQuestion);
     }
 
@@ -468,5 +469,70 @@ export class ExamsService {
     // Если есть хотя бы 30% совпадений ключевых слов, считаем правильным
     const matchRatio = commonWords.length / Math.max(expectedWords.length, 1);
     return matchRatio >= 0.3;
+  }
+
+  async deleteExamsByLesson(lessonId: string, userId: string) {
+    // Получаем урок для определения курса
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: lessonId },
+      relations: ['unit', 'unit.course'],
+    });
+
+    if (!lesson) {
+      throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
+    }
+
+    // Находим все экзамены для этого урока и пользователя
+    const exams = await this.findExamsByLesson(lessonId, userId);
+
+    // Сначала удаляем все результаты экзаменов, затем сами экзамены
+    // Это необходимо для избежания нарушения внешних ключей
+    for (const exam of exams) {
+      // Находим все результаты экзамена
+      const examResults = await this.examResultRepository.find({
+        where: { exam: { id: exam.id } },
+      });
+
+      // Удаляем все результаты по их ID
+      if (examResults.length > 0) {
+        const resultIds = examResults.map((result) => result.id);
+        await this.examResultRepository.delete(resultIds);
+      }
+
+      // Затем удаляем сам экзамен
+      await this.examRepository.delete(exam.id);
+    }
+
+    // Сбрасываем прогресс урока
+    await this.resetLessonProgress(lessonId);
+
+    return {
+      message: 'Progress reset successfully',
+      deletedExamsCount: exams.length,
+    };
+  }
+
+  async resetLessonProgress(lessonId: string) {
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: lessonId },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
+    }
+
+    // Сбрасываем прогресс урока на начальное состояние
+    // Используем update() для установки null значений
+    await this.lessonRepository.update(lessonId, {
+      status: LessonStatus.NOT_STARTED,
+      interval: 0,
+      ease_factor: 2.5,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - TypeORM обрабатывает null для nullable полей
+      last_reviewed_at: null,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - TypeORM обрабатывает null для nullable полей
+      next_review_at: null,
+    });
   }
 }

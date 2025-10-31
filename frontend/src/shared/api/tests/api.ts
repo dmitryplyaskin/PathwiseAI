@@ -9,6 +9,8 @@ import {
   type ExamHistoryItem,
   type GetUserExamsRequest,
   type GetLessonExamsRequest,
+  type DeleteLessonProgressRequest,
+  type DeleteLessonProgressResponse,
 } from './types';
 
 export const testsApi = {
@@ -46,6 +48,14 @@ export const testsApi = {
     request: GetLessonExamsRequest,
   ): Promise<ExamHistoryItem[]> => {
     return apiClient.get<ExamHistoryItem[]>(
+      `/exams/lesson/${request.lessonId}/user/${request.userId}`,
+    );
+  },
+
+  deleteLessonProgress: async (
+    request: DeleteLessonProgressRequest,
+  ): Promise<DeleteLessonProgressResponse> => {
+    return apiClient.delete<DeleteLessonProgressResponse>(
       `/exams/lesson/${request.lessonId}/user/${request.userId}`,
     );
   },

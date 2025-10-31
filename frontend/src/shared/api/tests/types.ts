@@ -80,3 +80,13 @@ export interface GetLessonExamsRequest {
   lessonId: string;
   userId: string;
 }
+
+export interface DeleteLessonProgressRequest {
+  lessonId: string;
+  userId: string;
+}
+
+export interface DeleteLessonProgressResponse {
+  message: string;
+  deletedExamsCount: number;
+}

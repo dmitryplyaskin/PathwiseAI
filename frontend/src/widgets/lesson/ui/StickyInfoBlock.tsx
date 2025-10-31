@@ -32,7 +32,9 @@ import type { ExamHistoryItem } from '@shared/api/tests/types';
 import { useCurrentUser } from '@shared/model';
 import { LessonManagementMenu } from './LessonManagementMenu';
 import { LessonDeleteDialog } from './LessonDeleteDialog';
+import { ResetProgressDialog } from './ResetProgressDialog';
 import { lessonsApi } from '@shared/api/lessons/api';
+import { loadLesson } from '@shared/model/lessons/lessons-model';
 import { useNavigate } from 'react-router';
 
 interface StickyInfoBlockProps {
@@ -98,6 +100,9 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeletingLesson, setIsDeletingLesson] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isResetProgressDialogOpen, setIsResetProgressDialogOpen] = useState(false);
+  const [isResettingProgress, setIsResettingProgress] = useState(false);
+  const [resetProgressError, setResetProgressError] = useState<string | null>(null);
   const [lessonExams, setLessonExams] = useState<ExamHistoryItem[]>([]);
   const { userId } = useCurrentUser();
   const navigate = useNavigate();
@@ -237,6 +242,56 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
   const handleCloseDeleteDialog = () => {
     setIsDeleteDialogOpen(false);
     setDeleteError(null);
+  };
+
+  const handleResetProgress = () => {
+    setIsResetProgressDialogOpen(true);
+    setResetProgressError(null);
+  };
+
+  const handleConfirmResetProgress = async () => {
+    if (!lesson || !userId) return;
+
+    setIsResettingProgress(true);
+    setResetProgressError(null);
+
+    try {
+      await testsApi.deleteLessonProgress({
+        lessonId: lesson.id,
+        userId,
+      });
+
+      // Перезагружаем урок
+      loadLesson(lesson.id);
+
+      // Перезагружаем экзамены
+      const exams = await testsApi.getLessonExams({
+        lessonId: lesson.id,
+        userId,
+      });
+      setLessonExams(exams);
+
+      // Отправляем событие обновления урока
+      window.dispatchEvent(
+        new CustomEvent('lessonUpdated', {
+          detail: { lessonId: lesson.id },
+        }),
+      );
+
+      setIsResetProgressDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to reset progress:', error);
+      setResetProgressError(
+        error instanceof Error ? error.message : 'Не удалось сбросить прогресс',
+      );
+    } finally {
+      setIsResettingProgress(false);
+    }
+  };
+
+  const handleCloseResetProgressDialog = () => {
+    setIsResetProgressDialogOpen(false);
+    setResetProgressError(null);
   };
 
   return (
@@ -625,6 +680,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
           <LessonManagementMenu
             lesson={lesson}
             onDeleteLesson={handleDeleteLesson}
+            onResetProgress={handleResetProgress}
           />
         </Stack>
       </Box>
@@ -646,6 +702,16 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
         lessonTitle={lesson?.title}
         isLoading={isDeletingLesson}
         error={deleteError}
+      />
+
+      {/* Модальное окно сброса прогресса */}
+      <ResetProgressDialog
+        open={isResetProgressDialogOpen}
+        onClose={handleCloseResetProgressDialog}
+        onConfirm={() => void handleConfirmResetProgress()}
+        lessonTitle={lesson?.title}
+        isLoading={isResettingProgress}
+        error={resetProgressError}
       />
     </>
   );

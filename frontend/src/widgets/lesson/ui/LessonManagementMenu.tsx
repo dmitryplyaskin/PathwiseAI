@@ -19,11 +19,13 @@ import type { Lesson } from '@shared/api/lessons/types';
 interface LessonManagementMenuProps {
   lesson: Lesson | null;
   onDeleteLesson: () => void;
+  onResetProgress: () => void;
 }
 
 export const LessonManagementMenu: React.FC<LessonManagementMenuProps> = ({
   lesson,
   onDeleteLesson,
+  onResetProgress,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -43,6 +45,11 @@ export const LessonManagementMenu: React.FC<LessonManagementMenuProps> = ({
 
   const handleDeleteClick = () => {
     onDeleteLesson();
+    handleClose();
+  };
+
+  const handleResetProgressClick = () => {
+    onResetProgress();
     handleClose();
   };
 
@@ -93,23 +100,25 @@ export const LessonManagementMenu: React.FC<LessonManagementMenuProps> = ({
         }}
       >
         <MenuItem
-          onClick={() => handleMenuItemClick('reset-progress')}
+          onClick={handleResetProgressClick}
+          disabled={!lesson}
           sx={{
             py: 1.5,
             px: 2,
             '&:hover': {
-              backgroundColor: 'primary.50',
+              backgroundColor: 'error.50',
             },
           }}
         >
           <ListItemIcon>
-            <Refresh sx={{ fontSize: 20, color: 'primary.main' }} />
+            <Refresh sx={{ fontSize: 20, color: 'error.main' }} />
           </ListItemIcon>
           <ListItemText
             primary="Сбросить прохождение"
             primaryTypographyProps={{
               fontSize: '0.875rem',
               fontWeight: 500,
+              color: 'error.main',
             }}
           />
         </MenuItem>

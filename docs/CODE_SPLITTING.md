@@ -67,3 +67,5 @@ const Units = lazy(() => import('@pages/units').then((m) => ({ default: m.Units 
 - `frontend/src/app/ui/Layout.tsx` - Layout с Suspense
 - `frontend/vite.config.ts` - конфигурация сборки с manual chunks
 
+
+
