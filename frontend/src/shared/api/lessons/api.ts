@@ -9,11 +9,11 @@ import {
 
 export const lessonsApi = {
   getAllLessons: async (): Promise<Lesson[]> => {
-    return apiClient.get<Lesson[]>('/courses/lessons');
+    return apiClient.get<Lesson[]>('/lessons');
   },
 
   getLessonById: async (id: string): Promise<Lesson> => {
-    return apiClient.get<Lesson>(`/courses/lessons/${id}`);
+    return apiClient.get<Lesson>(`/lessons/${id}`);
   },
 
   askQuestion: async (
@@ -24,7 +24,7 @@ export const lessonsApi = {
     userId?: string,
   ): Promise<LessonQuestionResponse> => {
     return apiClient.post<LessonQuestionResponse>(
-      `/courses/lessons/${lessonId}/ask`,
+      `/lessons/${lessonId}/ask`,
       {
         lessonId,
         question,
@@ -36,7 +36,7 @@ export const lessonsApi = {
   },
 
   getThreads: async (lessonId: string): Promise<Thread[]> => {
-    return apiClient.get<Thread[]>(`/courses/lessons/${lessonId}/threads`);
+    return apiClient.get<Thread[]>(`/lessons/${lessonId}/threads`);
   },
 
   getThreadMessages: async (
@@ -44,7 +44,7 @@ export const lessonsApi = {
     threadId: string,
   ): Promise<ThreadMessage[]> => {
     return apiClient.get<ThreadMessage[]>(
-      `/courses/lessons/${lessonId}/threads/${threadId}`,
+      `/lessons/${lessonId}/threads/${threadId}`,
     );
   },
 
@@ -53,7 +53,7 @@ export const lessonsApi = {
     threadId: string,
   ): Promise<{ message: string; threadId: string }> => {
     return apiClient.delete<{ message: string; threadId: string }>(
-      `/courses/lessons/${lessonId}/threads/${threadId}`,
+      `/lessons/${lessonId}/threads/${threadId}`,
     );
   },
 
@@ -62,19 +62,19 @@ export const lessonsApi = {
     messageId: string,
   ): Promise<{ message: string; newMessage: ThreadMessage }> => {
     return apiClient.post<{ message: string; newMessage: ThreadMessage }>(
-      `/courses/lessons/${lessonId}/regenerate/${messageId}`,
+      `/lessons/${lessonId}/regenerate/${messageId}`,
     );
   },
 
   deleteLesson: async (lessonId: string): Promise<{ message: string }> => {
     return apiClient.delete<{ message: string }>(
-      `/courses/lessons/${lessonId}`,
+      `/lessons/${lessonId}`,
     );
   },
 
   getLessonsForReview: async (userId: string): Promise<LessonForReview[]> => {
     return apiClient.get<LessonForReview[]>(
-      `/courses/lessons/for-review/${userId}`,
+      `/lessons/for-review/${userId}`,
     );
   },
 };

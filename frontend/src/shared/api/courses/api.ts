@@ -17,7 +17,7 @@ export const coursesApi = {
   createModule: async (
     data: CreateModuleRequest,
   ): Promise<CreateModuleResponse> => {
-    return apiClient.post<CreateModuleResponse>('/courses/modules', data);
+    return apiClient.post<CreateModuleResponse>('/lessons/modules', data);
   },
 
   createCourseOutline: async (
@@ -34,7 +34,7 @@ export const coursesApi = {
   },
 
   getLessonDetail: async (lessonId: string): Promise<LessonDetail> => {
-    return apiClient.get<LessonDetail>(`/courses/lessons/${lessonId}`);
+    return apiClient.get<LessonDetail>(`/lessons/${lessonId}`);
   },
 
   getCourseLessons: async (courseId: string): Promise<LessonDetail[]> => {

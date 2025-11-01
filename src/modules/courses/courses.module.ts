@@ -4,6 +4,8 @@ import { CoursesService } from './services/courses.service';
 import { UnitsService } from './services/units.service';
 import { LessonsService } from './services/lessons.service';
 import { CoursesController } from './controllers/courses.controller';
+import { UnitsController } from './controllers/units.controller';
+import { LessonsController } from './controllers/lessons.controller';
 import { Course } from './entities/course.entity';
 import { Unit } from './entities/unit.entity';
 import { Lesson } from './entities/lesson.entity';
@@ -16,7 +18,7 @@ import { SharedModule } from '../../shared/shared.module';
     ChatModule,
     SharedModule,
   ],
-  controllers: [CoursesController],
+  controllers: [CoursesController, UnitsController, LessonsController],
   providers: [CoursesService, UnitsService, LessonsService],
   exports: [CoursesService, UnitsService, LessonsService],
 })
