@@ -11,6 +11,8 @@ export interface GenerateTestRequest {
   lessonId: string;
   userId: string;
   questionCount?: number;
+  mode?: 'normal' | 'detailed';
+  questionTypes?: ('quiz' | 'text')[];
 }
 
 export interface SubmitTestResultRequest {

@@ -11,6 +11,7 @@ import {
   Alert,
   useTheme,
   alpha,
+  Tooltip,
 } from '@mui/material';
 import {
   Quiz,
@@ -23,6 +24,7 @@ import {
   TrendingUp,
   Grade,
   Info,
+  Settings,
 } from '@mui/icons-material';
 import type { Lesson } from '@shared/api/lessons';
 import { TestModal } from '../../test/ui';
@@ -36,6 +38,10 @@ import { ResetProgressDialog } from './ResetProgressDialog';
 import { lessonsApi } from '@shared/api/lessons/api';
 import { loadLesson } from '@shared/model/lessons/lessons-model';
 import { useNavigate } from 'react-router';
+import {
+  TestGenerationSettingsModal,
+  type TestGenerationSettings,
+} from './TestGenerationSettingsModal';
 
 interface StickyInfoBlockProps {
   lesson: Lesson | null;
@@ -123,6 +129,7 @@ const MetaItem = ({
 export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
   const theme = useTheme();
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [testData, setTestData] = useState<TestData | null>(null);
   const [isLoadingTest, setIsLoadingTest] = useState(false);
   const [testError, setTestError] = useState<string | null>(null);
@@ -191,15 +198,23 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
     (exam) => exam.status === 'completed',
   );
 
-  const handleOpenTest = async () => {
+  const handleOpenTest = async (settings?: TestGenerationSettings) => {
     if (!lesson) return;
     setIsLoadingTest(true);
     setTestError(null);
+    
+    // Close settings modal if open
+    if (isSettingsModalOpen) {
+      setIsSettingsModalOpen(false);
+    }
+
     try {
       const generatedTest = await testsApi.generateTestForLesson({
         lessonId: lesson.id,
         userId: userId ?? '',
-        questionCount: 5,
+        questionCount: settings?.mode === 'detailed' ? 10 : 5,
+        mode: settings?.mode,
+        questionTypes: settings?.questionTypes,
       });
       setTestData({ ...generatedTest, lessonId: lesson.id });
       setIsTestModalOpen(true);
@@ -340,39 +355,82 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                 border: 'none',
                 '& .MuiChip-icon': {
                   color: 'inherit',
-                },
+                  },
               }}
             />
           </Box>
 
           {/* Main Actions */}
           <Stack spacing={2} mb={3}>
-            <Button
-              variant="contained"
-              fullWidth
-              size="large"
-              startIcon={
-                isLoadingTest ? <CircularProgress size={20} color="inherit" /> : <Quiz />
-              }
-              disabled={notFound || isLoadingTest}
-              onClick={() => void handleOpenTest()}
+            <Box
               sx={{
-                borderRadius: 3,
-                py: 1.5,
+                display: 'flex',
+                borderRadius: 2.5,
+                overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
                 background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                transition: 'all 0.2s ease',
                 '&:hover': {
                   background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                  boxShadow: '0 8px 16px rgba(59, 130, 246, 0.3)',
+                  boxShadow: '0 6px 16px rgba(59, 130, 246, 0.3)',
+                  transform: 'translateY(-1px)',
                 },
               }}
             >
-              {isLoadingTest
-                ? 'Загрузка...'
-                : latestCompletedExam
-                  ? 'Пройти снова'
-                  : 'Начать тест'}
-            </Button>
+              <Button
+                variant="text"
+                fullWidth
+                size="medium"
+                startIcon={
+                  isLoadingTest ? <CircularProgress size={18} color="inherit" /> : <Quiz sx={{ fontSize: 20 }} />
+                }
+                disabled={notFound || isLoadingTest}
+                onClick={() => void handleOpenTest()}
+                sx={{
+                  py: 1,
+                  color: 'white',
+                  borderRadius: 0,
+                  flex: 1,
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                  '&.Mui-disabled': {
+                    color: 'rgba(255, 255, 255, 0.5)',
+                  },
+                }}
+              >
+                {isLoadingTest
+                  ? 'Загрузка...'
+                  : latestCompletedExam
+                    ? 'Пройти снова'
+                    : 'Начать тест'}
+              </Button>
+              <Box sx={{ width: '1px', bgcolor: 'rgba(255, 255, 255, 0.2)', my: 0.5 }} />
+              <Tooltip title="Настройки теста">
+                <Button
+                  variant="text"
+                  size="medium"
+                  disabled={notFound || isLoadingTest}
+                  onClick={() => setIsSettingsModalOpen(true)}
+                  sx={{
+                    minWidth: '40px',
+                    px: 0,
+                    color: 'white',
+                    borderRadius: 0,
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&.Mui-disabled': {
+                      color: 'rgba(255, 255, 255, 0.5)',
+                    },
+                  }}
+                >
+                  <Settings fontSize="small" />
+                </Button>
+              </Tooltip>
+            </Box>
 
             {testError && (
               <Alert severity="error" sx={{ borderRadius: 2 }}>
@@ -510,6 +568,13 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
           testData={testData}
         />
       )}
+
+      <TestGenerationSettingsModal
+        open={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        onGenerate={(settings) => void handleOpenTest(settings)}
+        isLoading={isLoadingTest}
+      />
 
       <LessonDeleteDialog
         open={isDeleteDialogOpen}

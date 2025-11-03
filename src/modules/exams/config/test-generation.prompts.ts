@@ -6,6 +6,11 @@ export interface TestGenerationPromptsConfig {
     normal: string;
     professional: string;
   };
+  questionTypeInstructions: {
+    quizOnly: string;
+    textOnly: string;
+    mixed: string;
+  };
 }
 
 export const testGenerationPrompts: TestGenerationPromptsConfig = {
@@ -52,5 +57,12 @@ export const testGenerationPrompts: TestGenerationPromptsConfig = {
     normal: 'Вопросы средней сложности на понимание концепций и их применение',
     professional:
       'Сложные вопросы на глубокое понимание, анализ и синтез знаний',
+  },
+  questionTypeInstructions: {
+    quizOnly:
+      'Создавай ТОЛЬКО вопросы с выбором ответа (quiz). Не создавай открытые вопросы.',
+    textOnly:
+      'Создавай ТОЛЬКО открытые вопросы (text). Не создавай вопросы с выбором ответа.',
+    mixed: 'Создавай смешанные вопросы: и с выбором ответа, и открытые.',
   },
 };

@@ -141,7 +141,7 @@ export class ExamsService {
 
   // New methods for test generation and management
   async getOrGenerateTestForLesson(generateTestDto: GenerateTestDto) {
-    const { lessonId, userId, questionCount } = generateTestDto;
+    const { lessonId, userId, questionCount, mode, questionTypes } = generateTestDto;
 
     // Получаем урок для определения курса
     const lesson = await this.lessonRepository.findOne({
@@ -153,34 +153,41 @@ export class ExamsService {
       throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
     }
 
-    // Ищем последний тест для этого урока (сортировка по дате создания DESC)
-    const existingExams = await this.examRepository.find({
-      where: {
-        user: { id: userId },
-        course: { id: lesson.unit.course.id },
-        title: `Тест по уроку: ${lesson.title}`,
-      },
-      relations: ['results', 'results.question'],
-      order: { started_at: 'DESC' },
-    });
-
-    // Если есть тесты, возвращаем последний
-    if (existingExams.length > 0) {
-      const lastExam = existingExams[0];
-
-      // Получаем вопросы для последнего экзамена
-      const existingQuestions = await this.questionRepository.find({
-        where: { lesson: { id: lessonId } },
+    // Если настройки не переданы (обычный запуск или "пройти снова"), ищем существующий тест
+    // Если переданы настройки (запуск из модалки), всегда генерируем новый
+    if (!mode && !questionTypes) {
+      const existingExams = await this.examRepository.find({
+        where: {
+          user: { id: userId },
+          course: { id: lesson.unit.course.id },
+          title: `Тест по уроку: ${lesson.title}`,
+        },
+        relations: ['results', 'results.question'],
+        order: { started_at: 'DESC' },
       });
 
-      // Возвращаем последний тест
-      return this.formatTestForFrontend(lastExam, existingQuestions);
+      // Если есть тесты, возвращаем последний
+      if (existingExams.length > 0) {
+        const lastExam = existingExams[0];
+
+        // Получаем вопросы для последнего экзамена
+        const existingQuestions = await this.questionRepository.find({
+          where: { lesson: { id: lessonId } },
+        });
+
+        // Возвращаем последний тест
+        return this.formatTestForFrontend(lastExam, existingQuestions);
+      }
     }
 
-    // Если тестов нет, генерируем новый тест
+    // Определяем количество вопросов
+    const count = mode === 'detailed' ? 10 : (questionCount || 5);
+
+    // Если тестов нет или запрошен новый, генерируем
     const generatedTest = await this.generateTestForLesson(
       lesson,
-      questionCount || 5,
+      count,
+      questionTypes
     );
 
     // Создаем экзамен
@@ -239,11 +246,24 @@ export class ExamsService {
   private async generateTestForLesson(
     lesson: Lesson,
     questionCount: number,
+    questionTypes?: ('quiz' | 'text')[]
   ): Promise<TestGenerationResponse> {
+    let typeInstruction = '';
+    if (questionTypes && questionTypes.length > 0) {
+      if (questionTypes.includes('quiz') && !questionTypes.includes('text')) {
+        typeInstruction = testGenerationPrompts.questionTypeInstructions.quizOnly;
+      } else if (questionTypes.includes('text') && !questionTypes.includes('quiz')) {
+        typeInstruction = testGenerationPrompts.questionTypeInstructions.textOnly;
+      } else {
+        typeInstruction = testGenerationPrompts.questionTypeInstructions.mixed;
+      }
+    }
+
     const userPrompt = testGenerationPrompts.userPromptTemplate
       .replace('${lessonTitle}', lesson.title)
       .replace('${lessonContent}', lesson.content)
-      .replace('${questionCount}', questionCount.toString());
+      .replace('${questionCount}', questionCount.toString()) + 
+      `\n\n${typeInstruction}`;
 
     const messages = [
       { role: 'system', content: testGenerationPrompts.systemPrompt },

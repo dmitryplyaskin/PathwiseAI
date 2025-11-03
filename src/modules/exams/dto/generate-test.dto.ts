@@ -19,4 +19,10 @@ export class GenerateTestDto {
   @IsOptional()
   @Min(5, { message: 'Количество вопросов должно быть не менее 5' })
   questionCount?: number = 5;
+
+  @IsOptional()
+  mode?: 'normal' | 'detailed' = 'normal';
+
+  @IsOptional()
+  questionTypes?: ('quiz' | 'text')[] = ['quiz', 'text'];
 }
