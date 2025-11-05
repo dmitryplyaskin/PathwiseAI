@@ -136,9 +136,12 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeletingLesson, setIsDeletingLesson] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [isResetProgressDialogOpen, setIsResetProgressDialogOpen] = useState(false);
+  const [isResetProgressDialogOpen, setIsResetProgressDialogOpen] =
+    useState(false);
   const [isResettingProgress, setIsResettingProgress] = useState(false);
-  const [resetProgressError, setResetProgressError] = useState<string | null>(null);
+  const [resetProgressError, setResetProgressError] = useState<string | null>(
+    null,
+  );
   const [lessonExams, setLessonExams] = useState<ExamHistoryItem[]>([]);
   const { userId } = useCurrentUser();
   const navigate = useNavigate();
@@ -202,7 +205,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
     if (!lesson) return;
     setIsLoadingTest(true);
     setTestError(null);
-    
+
     // Close settings modal if open
     if (isSettingsModalOpen) {
       setIsSettingsModalOpen(false);
@@ -215,6 +218,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
         questionCount: settings?.mode === 'detailed' ? 10 : 5,
         mode: settings?.mode,
         questionTypes: settings?.questionTypes,
+        forceNew: !!settings, // If settings are provided, it's a new generation request
       });
       setTestData({ ...generatedTest, lessonId: lesson.id });
       setIsTestModalOpen(true);
@@ -355,7 +359,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                 border: 'none',
                 '& .MuiChip-icon': {
                   color: 'inherit',
-                  },
+                },
               }}
             />
           </Box>
@@ -371,7 +375,8 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                 background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                 transition: 'all 0.2s ease',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                  background:
+                    'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
                   boxShadow: '0 6px 16px rgba(59, 130, 246, 0.3)',
                   transform: 'translateY(-1px)',
                 },
@@ -382,7 +387,11 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                 fullWidth
                 size="medium"
                 startIcon={
-                  isLoadingTest ? <CircularProgress size={18} color="inherit" /> : <Quiz sx={{ fontSize: 20 }} />
+                  isLoadingTest ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    <Quiz sx={{ fontSize: 20 }} />
+                  )
                 }
                 disabled={notFound || isLoadingTest}
                 onClick={() => void handleOpenTest()}
@@ -407,7 +416,13 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                     ? 'Пройти снова'
                     : 'Начать тест'}
               </Button>
-              <Box sx={{ width: '1px', bgcolor: 'rgba(255, 255, 255, 0.2)', my: 0.5 }} />
+              <Box
+                sx={{
+                  width: '1px',
+                  bgcolor: 'rgba(255, 255, 255, 0.2)',
+                  my: 0.5,
+                }}
+              />
               <Tooltip title="Настройки теста">
                 <Button
                   variant="text"
@@ -467,7 +482,9 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                           width: 8,
                           height: 8,
                           borderRadius: '50%',
-                          bgcolor: getDifficultyInfo(lesson.difficulty)?.color + '.main',
+                          bgcolor:
+                            getDifficultyInfo(lesson.difficulty)?.color +
+                            '.main',
                         }}
                       />
                       {getDifficultyInfo(lesson.difficulty)?.label}
@@ -501,7 +518,12 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                 borderColor: alpha(theme.palette.success.main, 0.1),
               }}
             >
-              <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                mb={1}
+              >
                 <Box display="flex" alignItems="center" gap={1}>
                   <Grade sx={{ fontSize: 18, color: 'success.main' }} />
                   <Typography
@@ -513,15 +535,21 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                   </Typography>
                 </Box>
                 <Typography variant="caption" color="success.dark">
-                  {new Date(latestCompletedExam.completed_at!).toLocaleDateString('ru-RU')}
+                  {new Date(
+                    latestCompletedExam.completed_at!,
+                  ).toLocaleDateString('ru-RU')}
                 </Typography>
               </Box>
-              
+
               <Box display="flex" alignItems="baseline" gap={1}>
                 <Typography variant="h4" fontWeight={800} color="success.main">
                   {Math.round(latestCompletedExam.score)}%
                 </Typography>
-                <Typography variant="body2" color="success.dark" fontWeight={500}>
+                <Typography
+                  variant="body2"
+                  color="success.dark"
+                  fontWeight={500}
+                >
                   верно
                 </Typography>
               </Box>
@@ -596,4 +624,3 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
     </>
   );
 };
-

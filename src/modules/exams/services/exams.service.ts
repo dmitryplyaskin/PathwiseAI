@@ -141,7 +141,8 @@ export class ExamsService {
 
   // New methods for test generation and management
   async getOrGenerateTestForLesson(generateTestDto: GenerateTestDto) {
-    const { lessonId, userId, questionCount, mode, questionTypes } = generateTestDto;
+    const { lessonId, userId, questionCount, mode, questionTypes, forceNew } =
+      generateTestDto;
 
     // Получаем урок для определения курса
     const lesson = await this.lessonRepository.findOne({
@@ -155,7 +156,7 @@ export class ExamsService {
 
     // Если настройки не переданы (обычный запуск или "пройти снова"), ищем существующий тест
     // Если переданы настройки (запуск из модалки), всегда генерируем новый
-    if (!mode && !questionTypes) {
+    if (!forceNew) {
       const existingExams = await this.examRepository.find({
         where: {
           user: { id: userId },
@@ -170,10 +171,11 @@ export class ExamsService {
       if (existingExams.length > 0) {
         const lastExam = existingExams[0];
 
-        // Получаем вопросы для последнего экзамена
-        const existingQuestions = await this.questionRepository.find({
-          where: { lesson: { id: lessonId } },
-        });
+        // Получаем вопросы для последнего экзамена из результатов
+        // ВАЖНО: Берем только те вопросы, которые были в этом экзамене, а не все вопросы урока
+        const existingQuestions = lastExam.results.map(
+          (result) => result.question,
+        );
 
         // Возвращаем последний тест
         return this.formatTestForFrontend(lastExam, existingQuestions);
@@ -181,13 +183,13 @@ export class ExamsService {
     }
 
     // Определяем количество вопросов
-    const count = mode === 'detailed' ? 10 : (questionCount || 5);
+    const count = mode === 'detailed' ? 10 : questionCount || 5;
 
     // Если тестов нет или запрошен новый, генерируем
     const generatedTest = await this.generateTestForLesson(
       lesson,
       count,
-      questionTypes
+      questionTypes,
     );
 
     // Создаем экзамен
@@ -246,23 +248,29 @@ export class ExamsService {
   private async generateTestForLesson(
     lesson: Lesson,
     questionCount: number,
-    questionTypes?: ('quiz' | 'text')[]
+    questionTypes?: ('quiz' | 'text')[],
   ): Promise<TestGenerationResponse> {
     let typeInstruction = '';
     if (questionTypes && questionTypes.length > 0) {
       if (questionTypes.includes('quiz') && !questionTypes.includes('text')) {
-        typeInstruction = testGenerationPrompts.questionTypeInstructions.quizOnly;
-      } else if (questionTypes.includes('text') && !questionTypes.includes('quiz')) {
-        typeInstruction = testGenerationPrompts.questionTypeInstructions.textOnly;
+        typeInstruction =
+          testGenerationPrompts.questionTypeInstructions.quizOnly;
+      } else if (
+        questionTypes.includes('text') &&
+        !questionTypes.includes('quiz')
+      ) {
+        typeInstruction =
+          testGenerationPrompts.questionTypeInstructions.textOnly;
       } else {
         typeInstruction = testGenerationPrompts.questionTypeInstructions.mixed;
       }
     }
 
-    const userPrompt = testGenerationPrompts.userPromptTemplate
-      .replace('${lessonTitle}', lesson.title)
-      .replace('${lessonContent}', lesson.content)
-      .replace('${questionCount}', questionCount.toString()) + 
+    const userPrompt =
+      testGenerationPrompts.userPromptTemplate
+        .replace('${lessonTitle}', lesson.title)
+        .replace('${lessonContent}', lesson.content)
+        .replace('${questionCount}', questionCount.toString()) +
       `\n\n${typeInstruction}`;
 
     const messages = [

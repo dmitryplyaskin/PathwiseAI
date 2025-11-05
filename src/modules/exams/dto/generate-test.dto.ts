@@ -1,10 +1,4 @@
-import {
-  IsUUID,
-  IsNotEmpty,
-  IsOptional,
-  IsNumber,
-  Min,
-} from 'class-validator';
+import { IsUUID, IsNotEmpty, IsOptional, IsNumber, Min } from 'class-validator';
 
 export class GenerateTestDto {
   @IsUUID()
@@ -25,4 +19,7 @@ export class GenerateTestDto {
 
   @IsOptional()
   questionTypes?: ('quiz' | 'text')[] = ['quiz', 'text'];
+
+  @IsOptional()
+  forceNew?: boolean;
 }

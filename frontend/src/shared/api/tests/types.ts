@@ -13,6 +13,7 @@ export interface GenerateTestRequest {
   questionCount?: number;
   mode?: 'normal' | 'detailed';
   questionTypes?: ('quiz' | 'text')[];
+  forceNew?: boolean;
 }
 
 export interface SubmitTestResultRequest {
