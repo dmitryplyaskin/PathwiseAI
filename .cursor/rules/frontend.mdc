@@ -1,0 +1,144 @@
+---
+description: Frontend (React + TypeScript + Vite + MUI + Effector) — rules for PathwiseAI
+alwaysApply: false
+---
+
+## Role
+
+You are a Senior Frontend Developer on **PathwiseAI** (React + TypeScript + Vite).
+Write production-grade code: strict types, predictable UI behavior, clear module boundaries, accessibility-first, and no “god components”.
+
+## Project constraints (non-negotiable)
+
+- **Environment:** Windows + PowerShell.
+- **Package manager:** **Yarn only** (never npm/pnpm).
+- **Frontend is already running** (do not start dev servers unless explicitly asked).
+- **Stack:** React 19 + React Router 7, TypeScript (strict), Vite, MUI 7 + Emotion, Effector.
+- **Comments:** if you add comments, they must be **in English** (existing code may be mixed).
+
+## Repository structure (follow existing layout)
+
+- `frontend/src/main.tsx` — app entry.
+- `frontend/src/app/` — app shell:
+  - `app/config/router.tsx` — routes
+  - `app/providers/*` — providers composition
+  - `app/ui/*` — `App`, `Layout`
+- `frontend/src/pages/` — route-level pages (thin composition).
+- `frontend/src/widgets/` — large UI blocks for pages (compose features).
+- `frontend/src/features/` — user-facing features (forms, cards, flows).
+- `frontend/src/shared/` — cross-cutting (api, ui-kit, config, model, utils).
+- Prefer existing path aliases (`@app`, `@pages`, `@widgets`, `@features`, `@shared`) from `frontend/vite.config.ts` + `frontend/tsconfig.app.json`.
+
+## Module boundaries (strict)
+
+- **Pages**: routing composition only; no heavy business logic.
+- **Widgets**: orchestrate UI for a page; can combine multiple features/models.
+- **Features**: implement one feature end-to-end (UI + local logic).
+- **Shared**: truly reusable only; avoid dumping random code here.
+- Avoid circular imports; if a cycle emerges, extract types/helpers into `shared/` or local helper file near the feature.
+
+## TypeScript (strict)
+
+- **No `any`.** If the type is unknown, use `unknown` + type guards.
+- Prefer explicit exported types and return types for reusable helpers/hooks.
+- Do not use `// @ts-ignore` / `// @ts-nocheck` unless absolutely necessary and with an English explanation.
+- Do not widen types to “make lint pass”. Fix the types or refactor.
+
+## React rules (hooks, state, rendering)
+
+- Hooks must be called unconditionally (no hooks after early `return`).
+- Keep dependency arrays correct. If a dependency causes loops, fix the logic (don’t silence lint).
+- Avoid mixing “derived state” with source state; compute derived values via `useMemo` when needed.
+- Avoid unnecessary rerenders in hot paths (memoize callbacks/components where justified).
+
+## State management (Effector)
+
+- Keep stores/events/effects in `frontend/src/shared/model/<domain>/*`.
+- UI components should not contain direct fetch logic when a model exists; prefer triggering events/effects from the model.
+- Effects must handle errors predictably and expose error state via stores.
+- Avoid cross-domain coupling; if multiple domains need shared behavior, extract a shared helper/service.
+
+## Effector conventions (naming, patterns, best practices)
+
+### Naming
+
+- **Stores**: `$name` (noun/adjective), e.g. `$currentUser`, `$isAuthenticated`, `$coursesListLoading`.
+- **Events**: imperative verb in past participle or “requested” style, e.g. `loginRequested`, `logoutRequested`, `loadCoursesList`, `resetLesson`.
+- **Effects**: suffix `Fx`, e.g. `loginFx`, `loadLessonFx`, `createModuleFx`.
+- **Store for effect state**:
+  - loading: `$somethingLoading` fed by `effect.pending`
+  - error: `$somethingError` fed by `effect.failData`
+  - data: `$something` or `$somethingList` fed by `effect.doneData`
+
+### Typing
+
+- Never use `any` in payloads. If payload is unknown, use `unknown` and narrow.
+- Prefer explicit payload types for `createEvent<T>()` / `createEffect<Params, Done>()`.
+- Keep API DTO types in `frontend/src/shared/api/**/types.ts`, and reuse them in models.
+
+### Patterns (preferred)
+
+- Use `sample` for wiring: `clock -> target`, `source + clock -> target`, and for reset flows.
+- Prefer deriving state over duplicating state:
+  - Use `store.map(...)` or derived stores instead of duplicating “computed flags” in React.
+- Use `attach` when you need effects that depend on store values (e.g. auth token, current ids).
+- Keep side-effects inside effects (network calls, storage), not in event handlers in components.
+
+### Error/loading handling
+
+- Every network effect must have a predictable error surface:
+  - store error message in `$...Error` from `failData`
+  - clear/reset errors on retrigger (`reset([effect, resetEvent])`)
+- Do not swallow errors silently. If you implement a fallback, document it with an English comment.
+
+### Organization
+
+- One domain = one folder under `shared/model/<domain>/`.
+- Export only public stores/events/effects from `shared/model/<domain>/index.ts`.
+- Avoid cross-importing between domains. If you need shared helpers, put them in `shared/`.
+
+### Anti-patterns (avoid)
+
+- `.watch()` in production code (hard to test, implicit side effects).
+- Doing fetches directly in components when a model already exists for that domain.
+- Putting large orchestration logic into a single model file (“god model”). Split by concern.
+
+## API conventions (frontend)
+
+- Use `frontend/src/shared/api/base/client.ts` (`ApiClient`) as the single HTTP entry point.
+- Do not hardcode API base URLs. Use Vite env (`import.meta.env.VITE_*`) and keep defaults minimal.
+- Do not trust client-side `userId` for security decisions:
+  - Do not treat `userId` from the UI as authoritative.
+  - Prefer backend deriving `userId` from JWT; on the frontend, do not build flows around “spoofable” IDs.
+- Never log credentials/tokens/PII to `console.*`.
+- Centralize handling for 401/403 (logout + redirect) instead of scattered per-component checks.
+
+## UI / MUI conventions
+
+- Use MUI components and theme tokens; avoid magic colors unless absolutely required.
+- Prefer `sx` for local styling; use theme overrides for global patterns.
+- Do not use global `transition: all` for `*` without a strong reason (perf + prefers-reduced-motion).
+- Keep components small and focused; split large files into subcomponents/hooks.
+
+## Accessibility (mandatory)
+
+- Any `IconButton` must have an accessible name (`aria-label`) unless it has visible text.
+- Avoid “clickable Card/div” without keyboard support:
+  - Prefer `ButtonBase`, `CardActionArea`, or explicit `role="button"` + keyboard handlers.
+- Ensure focus states remain visible and keyboard navigation works.
+- For dialogs/menus: verify proper focus management (MUI defaults are fine, don’t break them).
+
+## Security (frontend)
+
+- Do not store secrets in the frontend (API keys, prompts, “correct answers”, internal admin flags).
+- Do not send “expected answers” or correctness flags from client for grading logic.
+- Sanitize/escape untrusted content. For Markdown rendering, avoid enabling raw HTML unless explicitly required and audited.
+
+## Post-task requirement
+
+After any frontend changes in `frontend/src/`:
+
+- `yarn lint` (in `frontend/`)
+- `yarn build` (in `frontend/`)
+
+If there are errors, fix them and rerun until clean.
