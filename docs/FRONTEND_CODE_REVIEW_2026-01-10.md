@@ -81,6 +81,11 @@
 
 - Лишняя нагрузка на API, нестабильная инициализация, трудные для диагностики баги “мигающей” авторизации.
 
+**Исправлено (2026-01-10):**
+
+- Убран дублирующий вызов `checkAuthRequested()` из `App.tsx`.
+- `InitializedProvider` теперь вызывает `checkAuthRequested()` **один раз на mount** (`useEffect(..., [])`), без зависимости от `appInitialized`.
+
 ### 4) Жёстко заданный URL API
 
 **Файл:** `frontend/src/shared/api/config.ts`
