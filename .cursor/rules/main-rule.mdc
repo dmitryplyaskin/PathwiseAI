@@ -2,7 +2,31 @@
 alwaysApply: true
 ---
 
-- Ты запускаешься на системе windows. У тебя есть только powershell.
-- Для работы с пакетным менеджером используй yarn.
-- Frontend и backend всегда запущены. Их не нужно запускать отдельно.
-- Если в рамках задачи был реализован новый функционал, то напиши документацию в формате md в папке docs в корне проекта. Если в рамках задачи был изменен какой то функционал, то нужно отредактировать предущий вариант документации. Документация должна быть "сухой", без лишних примеров, многословности. Она должна ссылкатся на файлы и функциональность которые содержаться там.
+- **Project:** **PathwiseAI** — an educational platform with AI-assisted content generation.
+  - **Backend:** NestJS (`src/`), TypeORM + `typeorm-pglite`, JWT (cookie + bearer), CSRF protection, logging via `nestjs-pino`.
+  - **Frontend:** React 19 + React Router 7 + Vite, MUI 7 + Emotion, Effector (`frontend/`).
+  - **Core domains:** courses/units/lessons, exams/tests/questions/results, lesson chat/threads, users/auth, shared infrastructure.
+
+- **Environment:** Windows + PowerShell only.
+- **Package manager:** use **Yarn only** (never npm/pnpm).
+- **Frontend and backend are already running** (do not start dev servers unless explicitly asked).
+
+- **Backend conventions (high-level):**
+  - Keep controllers thin; business logic in services.
+  - Validate input via DTO + `class-validator` and pipes (UUID pipes where applicable).
+  - Security: default to JWT-protected endpoints; avoid trusting client-provided `userId`; CSRF is not a replacement for auth.
+  - Prefer strict typing; avoid `any` (use `unknown` + narrowing).
+
+- **Frontend conventions (high-level):**
+  - Follow module boundaries: `pages/` (composition), `widgets/` (page blocks), `features/` (end-to-end feature), `shared/` (reusable).
+  - Prefer Effector models in `frontend/src/shared/model/<domain>/` over fetches in components.
+  - Accessibility is mandatory; avoid “god components”; avoid `any`.
+
+- **Documentation requirement (mandatory):**
+  - If you implement **new functionality**, write a dry `.md` doc in `docs/` (repo root).
+  - If you **change existing functionality**, update the existing doc.
+  - Docs must be concise and reference relevant files/features.
+
+- **Post-task checks (recommended default):**
+  - Backend: `yarn lint` and `yarn build`
+  - Frontend: run in `frontend/` (or `yarn -C frontend ...`): `yarn lint` and `yarn build`
