@@ -2,6 +2,14 @@
 
 import '@mui/material/styles';
 
+interface ImportMetaEnv {
+  readonly VITE_API_BASE_URL?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 declare module '@mui/material/styles' {
   interface TypographyVariants {
     h1Gradient: React.CSSProperties;

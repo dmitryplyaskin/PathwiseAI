@@ -94,6 +94,11 @@
 
 **Последствия:** невозможность нормально разводить dev/staging/prod без правки кода.
 
+**Исправлено (2026-01-10):**
+
+- `baseUrl` берётся из `import.meta.env.VITE_API_BASE_URL` (с fallback на `http://localhost:3000/api`).
+- Добавлен пример переменной: `frontend/env.example` (копировать в `frontend/.env`).
+
 ### 5) Отключенная типизация в типах уроков
 
 **Файл:** `frontend/src/shared/api/lessons/types.ts`
