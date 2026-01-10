@@ -9,6 +9,7 @@ import {
   Stack,
   Avatar,
   Rating,
+  type ChipProps,
 } from '@mui/material';
 import {
   School,
@@ -26,7 +27,9 @@ interface CourseCardProps {
   handleCourseClick: (id: string) => void;
 }
 
-const getDifficultyColor = (difficulty: string) => {
+const getDifficultyColor = (
+  difficulty: CourseListItem['difficulty'],
+): ChipProps['color'] => {
   switch (difficulty) {
     case 'beginner':
       return 'success';
@@ -289,7 +292,7 @@ export const CourseCard: FC<CourseCardProps> = ({
 
             <Chip
               label={getDifficultyLabel(course.difficulty)}
-              color={getDifficultyColor(course.difficulty) as any}
+              color={getDifficultyColor(course.difficulty)}
               size="small"
               sx={{ fontWeight: 500 }}
             />

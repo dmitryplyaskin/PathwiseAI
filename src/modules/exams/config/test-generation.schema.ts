@@ -48,7 +48,8 @@ export const testGenerationSchema = {
             },
             questionContent: {
               type: 'string',
-              description: 'Дополнительный контент вопроса в формате Markdown (код, формулы и т.д.). Опциональное поле.',
+              description:
+                'Дополнительный контент вопроса в формате Markdown (код, формулы и т.д.). Опциональное поле.',
             },
             options: {
               type: 'array',

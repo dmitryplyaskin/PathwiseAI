@@ -11,9 +11,7 @@ export interface LessonFormState extends FormContextProps {
   newCourseName: string;
 }
 
-export interface CourseFormState extends FormContextProps {
-  // Course form may have additional fields in future
-}
+export type CourseFormState = FormContextProps;
 
 export type TabType = 'lesson' | 'course';
 

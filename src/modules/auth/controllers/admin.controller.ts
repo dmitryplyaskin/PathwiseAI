@@ -4,13 +4,14 @@ import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { UserRole } from '../../users/enums/user-role.enum';
 import { CurrentUser } from '../decorators/current-user.decorator';
+import type { User } from '../../users/entities/user.entity';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AdminController {
   @Roles(UserRole.ADMIN)
   @Get('dashboard')
-  getAdminDashboard(@CurrentUser() user: any) {
+  getAdminDashboard(@CurrentUser() user: User) {
     return {
       message: 'Добро пожаловать в админ панель!',
       user: {
@@ -29,7 +30,7 @@ export class AdminController {
 
   @Roles(UserRole.ADMIN, UserRole.USER)
   @Get('info')
-  getAdminInfo(@CurrentUser() user: any) {
+  getAdminInfo(@CurrentUser() user: User) {
     return {
       message: 'Информация доступна всем авторизованным пользователям',
       user: {

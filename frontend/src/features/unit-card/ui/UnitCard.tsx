@@ -6,6 +6,7 @@ import {
   Chip,
   Box,
   Stack,
+  type ChipProps,
 } from '@mui/material';
 import {
   EmojiEvents,
@@ -23,7 +24,9 @@ interface UnitCardProps {
   handleUnitClick: (id: string) => void;
 }
 
-const getDifficultyColor = (difficulty: string) => {
+const getDifficultyColor = (
+  difficulty: Unit['difficulty'],
+): ChipProps['color'] => {
   switch (difficulty) {
     case 'beginner':
       return 'success';
@@ -159,7 +162,7 @@ export const UnitCard: FC<UnitCardProps> = ({ unit, handleUnitClick }) => {
 
             <Chip
               label={getDifficultyLabel(unit.difficulty)}
-              color={getDifficultyColor(unit.difficulty) as any}
+              color={getDifficultyColor(unit.difficulty)}
               size="small"
               sx={{ fontWeight: 500 }}
             />

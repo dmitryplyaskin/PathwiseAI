@@ -5,6 +5,7 @@ import { Course } from '../entities/course.entity';
 import { CreateCourseDto } from '../dto/create-course.dto';
 import { UpdateCourseDto } from '../dto/update-course.dto';
 import { CourseListItemDto } from '../dto/course-list.dto';
+import { LessonStatus } from '../entities/lesson.entity';
 import { AccessControlService } from '../../../shared/services/access-control.service';
 import { AccessDeniedException } from '../../../shared/exceptions/access-denied.exception';
 
@@ -43,8 +44,9 @@ export class CoursesService {
         course.units?.reduce(
           (sum, unit) =>
             sum +
-            (unit.lessons?.filter((lesson) => lesson.status === 'mastered')
-              .length || 0),
+            (unit.lessons?.filter(
+              (lesson) => lesson.status === LessonStatus.MASTERED,
+            ).length || 0),
           0,
         ) || 0;
 
@@ -59,7 +61,9 @@ export class CoursesService {
         unitsCount: course.units?.length || 0,
         completedUnits:
           course.units?.filter((unit) =>
-            unit.lessons?.every((lesson) => lesson.status === 'mastered'),
+            unit.lessons?.every(
+              (lesson) => lesson.status === LessonStatus.MASTERED,
+            ),
           ).length || 0,
         totalLessons,
         completedLessons,

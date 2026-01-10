@@ -60,17 +60,44 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
   const [showCloseConfirmDialog, setShowCloseConfirmDialog] = useState(false);
   const { userId } = useCurrentUser();
 
-  const currentQuestion = testData.questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === testData.questions.length - 1;
-  const progress =
-    ((currentQuestionIndex + 1) / testData.questions.length) * 100;
+  const questions = testData.questions ?? [];
+  const hasQuestions = questions.length > 0;
+  const currentQuestion = hasQuestions ? questions[currentQuestionIndex] : null;
+  const isLastQuestion = hasQuestions
+    ? currentQuestionIndex === questions.length - 1
+    : false;
+  const progress = hasQuestions
+    ? ((currentQuestionIndex + 1) / questions.length) * 100
+    : 0;
+
+  // Таймер
+  useEffect(() => {
+    if (!open || testCompleted || !hasQuestions) return;
+
+    const timer = setInterval(() => {
+      setTimeSpent((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [open, testCompleted, hasQuestions]);
+
+  // Сброс состояния при открытии
+  useEffect(() => {
+    if (open) {
+      setCurrentQuestionIndex(0);
+      setAnswers([]);
+      setIsQuestionAnswered(false);
+      setTimeSpent(0);
+      setTestCompleted(false);
+      setTestResult(null);
+      setIsSubmitting(false);
+      setSubmitError(null);
+      setShowCloseConfirmDialog(false);
+    }
+  }, [open]);
 
   // Проверяем, что вопросы есть и текущий вопрос существует
-  if (
-    !testData.questions ||
-    testData.questions.length === 0 ||
-    !currentQuestion
-  ) {
+  if (!hasQuestions || !currentQuestion) {
     return (
       <Dialog
         open={open}
@@ -96,37 +123,12 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
     );
   }
 
-  // Таймер
-  useEffect(() => {
-    if (!open || testCompleted) return;
-
-    const timer = setInterval(() => {
-      setTimeSpent((prev) => prev + 1);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [open, testCompleted]);
-
-  // Сброс состояния при открытии
-  useEffect(() => {
-    if (open) {
-      setCurrentQuestionIndex(0);
-      setAnswers([]);
-      setIsQuestionAnswered(false);
-      setTimeSpent(0);
-      setTestCompleted(false);
-      setTestResult(null);
-      setIsSubmitting(false);
-      setSubmitError(null);
-      setShowCloseConfirmDialog(false);
-    }
-  }, [open]);
-
   const handleAnswer = (
     isCorrect: boolean,
     answer: string,
     explanation?: string,
   ) => {
+    if (!currentQuestion) return;
     const newAnswer: QuestionAnswer = {
       questionId: currentQuestion.id,
       isCorrect,
@@ -169,7 +171,7 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
     const correctCount = answersToUse.filter((a) => a.isCorrect).length;
 
     const result: TestResultType = {
-      totalQuestions: testData.questions.length,
+      totalQuestions: questions.length,
       correctAnswers: correctCount,
       timeSpent,
       answers: answersToUse,

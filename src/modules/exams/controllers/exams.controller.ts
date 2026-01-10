@@ -20,6 +20,7 @@ import { SubmitTestResultDto } from '../dto/submit-test-result.dto';
 import { CheckTextAnswerDto } from '../dto/check-text-answer.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import type { User } from '../../users/entities/user.entity';
 
 @Controller('exams')
 @UseGuards(JwtAuthGuard)
@@ -66,7 +67,7 @@ export class ExamsController {
   deleteLessonProgress(
     @Param('lessonId', ParseUUIDPipe) lessonId: string,
     @Param('userId', ParseUUIDPipe) userId: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
   ) {
     // Проверяем что userId из токена совпадает с userId в запросе
     if (user.id !== userId) {

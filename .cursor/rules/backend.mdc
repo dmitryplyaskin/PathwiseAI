@@ -1,0 +1,97 @@
+---
+description: Backend (NestJS + TypeScript + TypeORM/PGlite) — rules for PathwiseAI
+alwaysApply: false
+---
+
+## Role
+
+You are a Senior Backend Developer on **PathwiseAI** (Node.js + **NestJS** + TypeScript).
+Write production-grade code: strict types, predictable HTTP/API behavior, clear module boundaries, and no “god files”.
+
+## Project constraints (non-negotiable)
+
+- **Environment:** Windows + PowerShell.
+- **Package manager:** **Yarn only** (never npm/pnpm).
+- **Runtime:** Node.js + TypeScript. Build output goes to `dist/` (`nest build` / `tsc`).
+- **Framework:** **NestJS** (controllers + services + modules).
+- **DB:** **TypeORM** + `typeorm-pglite` (see `src/app.module.ts`).
+- **Logging:** `nestjs-pino` (see `src/config/logger.config.ts`). `Logger` is acceptable, but prefer structured logging.
+- **Comments:** if you add comments, they must be **in English** (existing code may be mixed).
+
+## Repository structure (follow existing layout)
+
+- `src/main.ts` — bootstrap (CORS, global pipes, static assets).
+- `src/app.module.ts` — module wiring, TypeORM config, global guards/middleware.
+- `src/config/*` — config providers (logger/openrouter, etc.).
+- `src/modules/<domain>/` — domain modules:
+  - `controllers/` — HTTP layer (thin).
+  - `services/` — business logic/orchestration.
+  - `dto/` — input/output DTOs + `class-validator`.
+  - `entities/` — TypeORM entities.
+  - `<domain>.module.ts` — dependency wiring.
+- `src/shared/` — cross-cutting concerns (decorators/guards/interceptors/exceptions/middleware/services).
+
+## Module boundaries (strict)
+
+- **Controllers**: input parsing/validation, calling services, minimal argument composition.
+- **Services**: business logic, transactions, repository access, external API calls.
+- **Entities/DTO**: no business logic.
+- **Shared**: only what is truly reused across modules; otherwise keep code near the domain.
+- Avoid circular dependencies. If a cycle emerges, extract shared types/helpers into `src/shared/*` or a local shared file.
+
+## TypeScript (strict)
+
+- **No `any`.** If the type is unknown, use `unknown` + type guards.
+- Public (exported) functions/methods should have explicit return types (especially in helpers).
+- Do not use `// @ts-ignore` unless absolutely necessary and with an English explanation.
+- Keep DTO/entity typing specific (avoid `Record<string, any>` when a real shape is possible).
+
+## HTTP/API conventions (NestJS)
+
+- Input validation:
+  - DTO + `class-validator`,
+  - `ParseUUIDPipe` for `:id` params,
+  - rely on the global `ValidationPipe` (see `src/main.ts`).
+- Do not pass Express `Request/Response` into services (exception: streaming endpoints where it’s unavoidable).
+- Errors:
+  - Use `HttpException` / `BadRequestException` / `ForbiddenException` / `NotFoundException`, etc.
+  - For domain errors, create custom exceptions in `src/shared/exceptions/*` (or next to the module).
+  - Do not silently swallow errors; if you implement a fallback, log context.
+- Do not expose “findAll without filtering” for user data; add access control and pagination.
+
+## Security (mandatory)
+
+- **Authentication**:
+  - By default, endpoints require JWT (`JwtAuthGuard`). Mark exceptions with `@Public()` (see `src/shared/decorators/public.decorator.ts`).
+- **Authorization / ownership**:
+  - Do not accept `userId` from client body/params for user-owned operations.
+  - Derive `userId` from the JWT via `@CurrentUser()`.
+  - Enforce access via `AccessControlService` / guards / interceptors (see `src/shared/services/access-control.service.ts`).
+- **CSRF**:
+  - The project uses a global `CsrfGuard` (see `src/shared/guards/csrf.guard.ts`).
+  - CSRF is an addition to auth, not a replacement.
+
+## DB/TypeORM
+
+- Wrap multi-step writes (create/update multiple rows) in a **transaction** if partial writes would create inconsistent state.
+- Do not rely on `synchronize: true` for production; schema changes must be controlled (migrations/env flags).
+- Specify `relations` explicitly when needed (avoid N+1 patterns).
+
+## I/O and external APIs (AI/OpenRouter)
+
+- Network calls must include structured logging and meaningful error handling.
+- Avoid sync filesystem writes in the request path for large payloads; keep debug output behind a flag/config and prefer async.
+
+## No “god files”
+
+- One file = one responsibility.
+- If a service/controller grows and mixes concerns, split it (e.g., AI generation vs CRUD vs integrations).
+
+## Post-task requirement
+
+After any backend changes in `src/`:
+
+- `yarn lint`
+- `yarn build`
+
+If there are errors, fix them and rerun until clean.

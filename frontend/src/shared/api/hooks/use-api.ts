@@ -9,12 +9,12 @@ export interface UseApiState<T> {
 
 export interface UseApiOptions {
   immediate?: boolean;
-  onSuccess?: (data: any) => void;
+  onSuccess?: (data: unknown) => void;
   onError?: (error: ApiError) => void;
 }
 
-export function useApi<T = any>(
-  apiCall: (...args: any[]) => Promise<T>,
+export function useApi<T = unknown, A extends unknown[] = unknown[]>(
+  apiCall: (...args: A) => Promise<T>,
   options: UseApiOptions = {},
 ) {
   const { immediate = false, onSuccess, onError } = options;
@@ -26,7 +26,7 @@ export function useApi<T = any>(
   });
 
   const execute = useCallback(
-    async (...args: any[]) => {
+    async (...args: A) => {
       setState((prev) => ({ ...prev, loading: true, error: null }));
 
       try {
@@ -59,7 +59,7 @@ export function useApi<T = any>(
 }
 
 // Хук для мутаций (POST, PUT, DELETE)
-export function useApiMutation<T = any, P = any>(
+export function useApiMutation<T = unknown, P = unknown>(
   apiCall: (params: P) => Promise<T>,
   options: UseApiOptions = {},
 ) {
@@ -67,7 +67,7 @@ export function useApiMutation<T = any, P = any>(
 }
 
 // Хук для запросов (GET)
-export function useApiQuery<T = any>(
+export function useApiQuery<T = unknown>(
   apiCall: () => Promise<T>,
   options: UseApiOptions = {},
 ) {

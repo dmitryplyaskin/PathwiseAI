@@ -3,7 +3,7 @@ export interface User {
   username: string;
   email: string;
   role: 'user' | 'admin';
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -18,7 +18,7 @@ export interface RegisterRequest {
   email: string;
   password: string;
   role?: 'user' | 'admin';
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
 }
 
 export interface AuthResponse {

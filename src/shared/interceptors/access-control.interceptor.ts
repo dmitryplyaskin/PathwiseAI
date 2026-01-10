@@ -9,6 +9,13 @@ import { Reflector } from '@nestjs/core';
 import { AccessControlService } from '../services/access-control.service';
 import { AccessDeniedException } from '../exceptions/access-denied.exception';
 
+type ResourceType = 'course' | 'unit' | 'lesson';
+
+interface RequestWithUserAndParams {
+  user?: { id: string };
+  params?: Record<string, string | undefined>;
+}
+
 @Injectable()
 export class AccessControlInterceptor implements NestInterceptor {
   constructor(
@@ -20,19 +27,21 @@ export class AccessControlInterceptor implements NestInterceptor {
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
-    const resourceType = this.reflector.get<string>(
+    const request = context
+      .switchToHttp()
+      .getRequest<RequestWithUserAndParams>();
+    const userId = request.user?.id;
+    const resourceType = this.reflector.get<ResourceType>(
       'resourceType',
       context.getHandler(),
     );
 
-    if (!user || !resourceType) {
+    if (!userId || !resourceType) {
       return next.handle();
     }
 
-    const resourceId = request.params.id;
-    if (!resourceId) {
+    const resourceId = request.params?.['id'];
+    if (typeof resourceId !== 'string' || resourceId.length === 0) {
       return next.handle();
     }
 
@@ -42,19 +51,19 @@ export class AccessControlInterceptor implements NestInterceptor {
       case 'course':
         hasAccess = await this.accessControlService.checkCourseAccess(
           resourceId,
-          user.id,
+          userId,
         );
         break;
       case 'unit':
         hasAccess = await this.accessControlService.checkUnitAccess(
           resourceId,
-          user.id,
+          userId,
         );
         break;
       case 'lesson':
         hasAccess = await this.accessControlService.checkLessonAccess(
           resourceId,
-          user.id,
+          userId,
         );
         break;
     }

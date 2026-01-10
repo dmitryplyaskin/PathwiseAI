@@ -1,4 +1,11 @@
-import type { Lesson } from '@widgets/lessons-list/model/mock';
+export interface Lesson {
+  id: string;
+  title: string;
+  description: string;
+  progress: number;
+  lastStudied: string;
+  status: 'completed' | 'in_progress' | 'not_started';
+}
 
 export interface LessonGroup {
   id: string;

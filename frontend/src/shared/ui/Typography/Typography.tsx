@@ -12,5 +12,5 @@ export const Typography: React.FC<TypographyProps> = ({
   variant,
   ...props
 }) => {
-  return <MuiTypography variant={variant as any} {...props} />;
+  return <MuiTypography variant={variant} {...props} />;
 };

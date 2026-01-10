@@ -19,6 +19,7 @@ import {
   ListItemText,
   Divider,
   Grid,
+  type ChipProps,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router';
 import {
@@ -36,7 +37,7 @@ import {
 import { useState } from 'react';
 import { mockUnitDetail } from '../model/mock';
 
-const getDifficultyColor = (difficulty: string) => {
+const getDifficultyColor = (difficulty: string): ChipProps['color'] => {
   switch (difficulty) {
     case 'beginner':
       return 'success';
@@ -133,7 +134,7 @@ export const UnitPage = () => {
                   <Box display="flex" gap={2} flexWrap="wrap">
                     <Chip
                       label={getDifficultyLabel(unit.difficulty)}
-                      color={getDifficultyColor(unit.difficulty) as any}
+                      color={getDifficultyColor(unit.difficulty)}
                       icon={<Star />}
                     />
                     <Chip
