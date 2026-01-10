@@ -77,7 +77,8 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
                   px: 1,
                   py: 0.5,
                   borderRadius: 1,
-                  transition: 'all 0.2s ease-in-out',
+                  transition:
+                    'color 0.2s ease-in-out, background-color 0.2s ease-in-out, transform 0.2s ease-in-out',
                   '&:hover': {
                     color: 'primary.main',
                     backgroundColor: 'primary.50',

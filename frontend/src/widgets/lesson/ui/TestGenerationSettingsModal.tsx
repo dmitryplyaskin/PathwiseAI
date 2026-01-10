@@ -219,23 +219,23 @@ const PaperOption = ({
         borderRadius: 3,
         border: '2px solid',
         borderColor: selected ? 'primary.main' : 'divider',
-        bgcolor: selected ? alpha(theme.palette.primary.main, 0.04) : 'background.paper',
+        bgcolor: selected
+          ? alpha(theme.palette.primary.main, 0.04)
+          : 'background.paper',
         cursor: 'pointer',
-        transition: 'all 0.2s ease',
+        transition: 'background-color 0.2s ease, border-color 0.2s ease',
         display: 'flex',
         alignItems: 'flex-start',
         gap: 2,
         '&:hover': {
           borderColor: selected ? 'primary.main' : 'divider',
-          bgcolor: selected ? alpha(theme.palette.primary.main, 0.08) : 'action.hover',
+          bgcolor: selected
+            ? alpha(theme.palette.primary.main, 0.08)
+            : 'action.hover',
         },
       }}
     >
-      <Radio
-        checked={selected}
-        sx={{ p: 0, mt: 0.5 }}
-        disableRipple
-      />
+      <Radio checked={selected} sx={{ p: 0, mt: 0.5 }} disableRipple />
       <Box flex={1}>
         <Box display="flex" alignItems="center" gap={1} mb={0.5}>
           <Box sx={{ color: selected ? 'primary.main' : 'text.secondary' }}>
@@ -278,17 +278,21 @@ const TypeCard = ({
         borderRadius: 3,
         border: '2px solid',
         borderColor: selected ? 'primary.main' : 'divider',
-        bgcolor: selected ? alpha(theme.palette.primary.main, 0.04) : 'background.paper',
+        bgcolor: selected
+          ? alpha(theme.palette.primary.main, 0.04)
+          : 'background.paper',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 1.5,
-        transition: 'all 0.2s ease',
+        transition: 'background-color 0.2s ease, border-color 0.2s ease',
         '&:hover': {
           borderColor: selected ? 'primary.main' : 'divider',
-          bgcolor: selected ? alpha(theme.palette.primary.main, 0.08) : 'action.hover',
+          bgcolor: selected
+            ? alpha(theme.palette.primary.main, 0.08)
+            : 'action.hover',
         },
       }}
     >

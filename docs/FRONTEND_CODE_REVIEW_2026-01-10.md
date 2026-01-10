@@ -160,6 +160,12 @@
 - `MuiCssBaseline.styleOverrides['*'] = { transition: 'all ...' }` — риск лишних перерисовок/дорогих анимаций.
 - Нет учёта `prefers-reduced-motion`.
 
+**Исправлено (2026-01-10):**
+
+- Убран глобальный `transition` на `*` (перестал анимироваться layout/стили “везде”).
+- Добавлен `@media (prefers-reduced-motion: reduce)` (отключение transitions/animations).
+- Локальные `transition: all` заменены на точечные свойства в интерактивных элементах (карточки/hover-эффекты).
+
 ### 11) `index.html` не соответствует фактическому языку/брендингу приложения
 
 **Файл:** `frontend/index.html`

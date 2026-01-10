@@ -70,7 +70,8 @@ export const MessageItem = ({
             border: '2px solid',
             borderColor: 'divider',
             borderRadius: 3,
-            transition: 'all 0.3s ease',
+            transition:
+              'border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
             position: 'relative',
             '&:hover': {
               borderColor: 'primary.100',
@@ -169,7 +170,8 @@ export const MessageItem = ({
           border: '2px solid',
           borderColor: 'primary.200',
           borderRadius: 3,
-          transition: 'all 0.3s ease',
+          transition:
+            'border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
           position: 'relative',
           '&:hover': {
             borderColor: 'primary.main',

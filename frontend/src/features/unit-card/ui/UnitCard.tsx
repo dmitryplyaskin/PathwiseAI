@@ -87,7 +87,7 @@ export const UnitCard: FC<UnitCardProps> = ({ unit, handleUnitClick }) => {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'all 0.3s ease',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         position: 'relative',
         '&:hover': {
           transform: 'translateY(-4px)',

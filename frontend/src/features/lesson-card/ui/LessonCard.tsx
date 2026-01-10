@@ -87,10 +87,10 @@ const formatDate = (dateString?: string): string => {
   if (diffTime > 0) {
     if (diffDays <= 1) return 'Завтра';
     if (diffDays <= 7) return `Через ${diffDays} дн.`;
-  } 
+  }
   // Для прошлых дат или "сегодня"
   else if (diffDays === 0) {
-      return 'Сегодня';
+    return 'Сегодня';
   }
 
   return date.toLocaleDateString('ru-RU', {
@@ -101,15 +101,15 @@ const formatDate = (dateString?: string): string => {
 };
 
 const getReviewPriority = (nextReviewAt?: string) => {
-    if (!nextReviewAt) return { color: 'info' as const, text: 'Планово' };
-    
-    const date = new Date(nextReviewAt);
-    const now = new Date();
-    const diffDays = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+  if (!nextReviewAt) return { color: 'info' as const, text: 'Планово' };
 
-    if (diffDays > 3) return { color: 'error' as const, text: 'Критично' };
-    if (diffDays > 0) return { color: 'warning' as const, text: 'Важно' };
-    return { color: 'info' as const, text: 'Планово' };
+  const date = new Date(nextReviewAt);
+  const now = new Date();
+  const diffDays = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+
+  if (diffDays > 3) return { color: 'error' as const, text: 'Критично' };
+  if (diffDays > 0) return { color: 'warning' as const, text: 'Важно' };
+  return { color: 'info' as const, text: 'Планово' };
 };
 
 export const LessonCard: FC<LessonCardProps> = ({
@@ -134,7 +134,9 @@ export const LessonCard: FC<LessonCardProps> = ({
     }
   };
 
-  const reviewPriority = isReview ? getReviewPriority(lesson.next_review_at) : null;
+  const reviewPriority = isReview
+    ? getReviewPriority(lesson.next_review_at)
+    : null;
 
   return (
     <Card
@@ -144,132 +146,170 @@ export const LessonCard: FC<LessonCardProps> = ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'all 0.3s ease',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         '&:hover': {
           transform: onClick ? 'translateY(-4px)' : 'none',
           boxShadow: onClick ? 4 : 1,
         },
       }}
     >
-      <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <CardContent
+        sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 2 }}
+      >
         {/* Header: Icon + Breadcrumbs */}
         <Box display="flex" alignItems="flex-start" gap={1}>
-           <Box
-             sx={{
-               p: 1,
-               borderRadius: 2,
-               bgcolor: isReview ? 'warning.lighter' : 'primary.lighter',
-               color: isReview ? 'warning.main' : 'primary.main',
-               display: 'flex',
-               alignItems: 'center',
-               justifyContent: 'center',
-             }}
-           >
-             {isReview ? <Schedule fontSize="small" /> : <MenuBook fontSize="small" />}
-           </Box>
-           
-           <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Tooltip title={lesson.unit.course.title} arrow>
-                <Typography variant="caption" color="text.secondary" noWrap display="block">
-                   {lesson.unit.course.title}
-                </Typography>
-              </Tooltip>
-              <Tooltip title={lesson.unit.title} arrow>
-                <Typography variant="caption" color="text.primary" fontWeight={500} noWrap display="block">
-                   {lesson.unit.title}
-                </Typography>
-              </Tooltip>
-           </Box>
+          <Box
+            sx={{
+              p: 1,
+              borderRadius: 2,
+              bgcolor: isReview ? 'warning.lighter' : 'primary.lighter',
+              color: isReview ? 'warning.main' : 'primary.main',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {isReview ? (
+              <Schedule fontSize="small" />
+            ) : (
+              <MenuBook fontSize="small" />
+            )}
+          </Box>
+
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Tooltip title={lesson.unit.course.title} arrow>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                noWrap
+                display="block"
+              >
+                {lesson.unit.course.title}
+              </Typography>
+            </Tooltip>
+            <Tooltip title={lesson.unit.title} arrow>
+              <Typography
+                variant="caption"
+                color="text.primary"
+                fontWeight={500}
+                noWrap
+                display="block"
+              >
+                {lesson.unit.title}
+              </Typography>
+            </Tooltip>
+          </Box>
         </Box>
 
         {/* Title & Description */}
         <Box>
           <Tooltip title={lesson.title} arrow>
-            <Typography variant="h6" component="h3" fontWeight={600} sx={{
+            <Typography
+              variant="h6"
+              component="h3"
+              fontWeight={600}
+              sx={{
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
                 lineHeight: 1.3,
-                mb: 1
-            }}>
+                mb: 1,
+              }}
+            >
               {lesson.title}
             </Typography>
           </Tooltip>
-          
+
           {lesson.description && (
-             <Typography variant="body2" color="text.secondary" sx={{
-                 overflow: 'hidden',
-                 textOverflow: 'ellipsis',
-                 display: '-webkit-box',
-                 WebkitLineClamp: 2,
-                 WebkitBoxOrient: 'vertical',
-             }}>
-               {lesson.description}
-             </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+              }}
+            >
+              {lesson.description}
+            </Typography>
           )}
         </Box>
-        
+
         {/* Metadata Stats */}
         <Stack direction="row" spacing={2} alignItems="center" mt="auto" pt={1}>
-            {/* Always show reading time if available */}
-            {lesson.reading_time && (
-                <Tooltip title="Время чтения">
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                        <AccessTime sx={{ fontSize: 16, color: 'text.secondary' }} />
-                        <Typography variant="caption" color="text.secondary">
-                            {lesson.reading_time} мин
-                        </Typography>
-                    </Box>
-                </Tooltip>
-            )}
-            
-            {/* Difficulty */}
-            {lesson.difficulty && (
-                 <Tooltip title="Сложность">
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                        <SignalCellularAlt sx={{ fontSize: 16, color: 'text.secondary' }} />
-                        <Typography variant="caption" color="text.secondary">
-                            {lesson.difficulty}/5
-                        </Typography>
-                    </Box>
-                 </Tooltip>
-            )}
+          {/* Always show reading time if available */}
+          {lesson.reading_time && (
+            <Tooltip title="Время чтения">
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <AccessTime sx={{ fontSize: 16, color: 'text.secondary' }} />
+                <Typography variant="caption" color="text.secondary">
+                  {lesson.reading_time} мин
+                </Typography>
+              </Box>
+            </Tooltip>
+          )}
+
+          {/* Difficulty */}
+          {lesson.difficulty && (
+            <Tooltip title="Сложность">
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <SignalCellularAlt
+                  sx={{ fontSize: 16, color: 'text.secondary' }}
+                />
+                <Typography variant="caption" color="text.secondary">
+                  {lesson.difficulty}/5
+                </Typography>
+              </Box>
+            </Tooltip>
+          )}
         </Stack>
 
         {/* Footer Actions/Status */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" pt={1} borderTop={`1px solid ${theme.palette.divider}`}>
-            {isReview ? (
-                 <>
-                    <Chip 
-                        label={reviewPriority?.text} 
-                        color={reviewPriority?.color} 
-                        size="small" 
-                        variant="outlined"
-                    />
-                    <Button
-                        variant="contained"
-                        size="small"
-                        startIcon={<PlayCircle />}
-                        onClick={handleActionClick}
-                    >
-                        Повторить
-                    </Button>
-                 </>
-            ) : (
-                 <>
-                    <Chip
-                        icon={lesson.status === LessonStatus.MASTERED ? <EmojiEvents sx={{ fontSize: '16px !important' }} /> : undefined}
-                        label={getStatusText(lesson.status)}
-                        color={getStatusColor(lesson.status)}
-                        size="small"
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                        {formatDate(lesson.created_at)}
-                    </Typography>
-                 </>
-            )}
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          pt={1}
+          borderTop={`1px solid ${theme.palette.divider}`}
+        >
+          {isReview ? (
+            <>
+              <Chip
+                label={reviewPriority?.text}
+                color={reviewPriority?.color}
+                size="small"
+                variant="outlined"
+              />
+              <Button
+                variant="contained"
+                size="small"
+                startIcon={<PlayCircle />}
+                onClick={handleActionClick}
+              >
+                Повторить
+              </Button>
+            </>
+          ) : (
+            <>
+              <Chip
+                icon={
+                  lesson.status === LessonStatus.MASTERED ? (
+                    <EmojiEvents sx={{ fontSize: '16px !important' }} />
+                  ) : undefined
+                }
+                label={getStatusText(lesson.status)}
+                color={getStatusColor(lesson.status)}
+                size="small"
+              />
+              <Typography variant="caption" color="text.secondary">
+                {formatDate(lesson.created_at)}
+              </Typography>
+            </>
+          )}
         </Box>
       </CardContent>
     </Card>

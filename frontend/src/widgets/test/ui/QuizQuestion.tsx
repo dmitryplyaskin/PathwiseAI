@@ -91,7 +91,7 @@ export const QuizQuestion = ({
                 borderRadius: 2,
                 cursor: isAnswered ? 'default' : 'pointer',
                 opacity: isAnswered && !showCorrect && !showWrong ? 0.6 : 1,
-                transition: 'all 0.3s ease',
+                transition: 'border-color 0.3s ease, opacity 0.3s ease',
                 '&:hover': {
                   borderColor:
                     isAnswered || showCorrect || showWrong

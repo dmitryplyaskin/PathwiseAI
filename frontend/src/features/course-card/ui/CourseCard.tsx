@@ -108,7 +108,7 @@ export const CourseCard: FC<CourseCardProps> = ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'all 0.3s ease',
+        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
         position: 'relative',
         '&:hover': {
           transform: 'translateY(-4px)',

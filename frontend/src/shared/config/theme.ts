@@ -181,15 +181,21 @@ export const theme = createTheme({
   },
 
   components: {
-    // Глобальные стили для плавных анимаций
+    // Глобальные стили (без глобальных transition, чтобы не анимировать layout)
     MuiCssBaseline: {
       styleOverrides: {
-        '*': {
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        },
         body: {
           background: 'linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%)',
           minHeight: '100vh',
+        },
+        '@media (prefers-reduced-motion: reduce)': {
+          '*, *::before, *::after': {
+            transition: 'none !important',
+            animation: 'none !important',
+          },
+          html: {
+            scrollBehavior: 'auto !important',
+          },
         },
       },
     },
@@ -204,7 +210,8 @@ export const theme = createTheme({
           fontWeight: 600,
           padding: '12px 32px',
           boxShadow: 'none',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition:
+            'background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
             transform: 'translateY(-2px)',
             boxShadow: '0 12px 32px rgba(59, 130, 246, 0.4)',
@@ -239,7 +246,8 @@ export const theme = createTheme({
           borderRadius: 16,
           boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
           border: '1px solid #e2e8f0',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition:
+            'box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
             transform: 'translateY(-4px)',
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',

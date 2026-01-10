@@ -57,7 +57,7 @@ export const QuestionInput = ({
                 boxShadow: '0 6px 20px rgba(59, 130, 246, 0.35)',
                 transform: 'translateY(-2px)',
               },
-              transition: 'all 0.3s ease',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
             }}
           >
             Задать вопрос ИИ-помощнику

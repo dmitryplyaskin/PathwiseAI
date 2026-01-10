@@ -322,7 +322,8 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
           border: '2px solid',
           borderColor: 'divider',
           background: '#ffffff',
-          transition: 'all 0.3s ease',
+          transition:
+            'border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
           '&:hover': {
             borderColor: 'primary.100',
             boxShadow: '0 8px 24px rgba(59, 130, 246, 0.12)',
@@ -373,7 +374,8 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                 overflow: 'hidden',
                 boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
                 background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                transition: 'all 0.2s ease',
+                transition:
+                  'background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease',
                 '&:hover': {
                   background:
                     'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
