@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   Container,
   Button,
@@ -7,38 +7,39 @@ import {
   Stack,
   AppBar,
   Toolbar,
-  Tooltip,
-  IconButton,
   Grid,
-  Card,
-  CardContent,
   Chip,
+  Alert,
+  CircularProgress,
+  Paper,
+  Fab,
 } from '@mui/material';
 import {
   Add,
   MenuBook,
   AccessTime,
-  ChevronLeft,
-  ChevronRight,
+  TrendingDown,
+  AutoAwesome,
 } from '@mui/icons-material';
 import { ContentCreationModal } from '@features/education-module/ui';
-import { LessonsList } from '@widgets/lessons-list';
-import { ReviewLessonsList } from '@widgets/review-lessons';
 import { lessonsApi } from '@shared/api/lessons/api';
-import type { Lesson } from '@shared/api/lessons/types';
+import type { Lesson, LessonForReview } from '@shared/api/lessons/types';
 import { useNavigate } from 'react-router';
+import { LessonStatus } from '@shared/api/lessons/types';
+import { LessonCard } from '@features/lesson-card/ui/LessonCard';
+import { useCurrentUser } from '@shared/model/users';
+import { testsApi } from '@shared/api/tests/api';
+import type { ExamHistoryItem } from '@shared/api/tests/types';
 
 export const HomePage = () => {
   const navigate = useNavigate();
-  const [isNewModuleModalOpen, setIsNewModuleModalOpen] = useState(false);
+  const { userId } = useCurrentUser();
+  const [creationTab, setCreationTab] = useState<'lesson' | 'course'>('lesson');
+  const [isCreationModalOpen, setIsCreationModalOpen] = useState(false);
+
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [lessonsLoading, setLessonsLoading] = useState(true);
   const [lessonsError, setLessonsError] = useState<string | null>(null);
-  const [reviewSliderIndex, setReviewSliderIndex] = useState(0);
-
-  const handleNewModule = () => {
-    setIsNewModuleModalOpen(true);
-  };
 
   const handleLessonClick = (lesson: Lesson) => {
     const courseId = lesson.unit.course.id;
@@ -49,55 +50,21 @@ export const HomePage = () => {
     navigate(`/courses/${courseId}/units/${unitId}/lessons/${lessonId}`);
   };
 
-  // Фильтрация уроков для повторения (лимит 5 дней)
-  const getLessonsForReview = (lessons: Lesson[]): Lesson[] => {
-    const now = new Date();
-    const fiveDaysFromNow = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000);
-
-    return lessons
-      .filter((lesson) => {
-        if (!lesson.next_review_at) return false;
-        const reviewDate = new Date(lesson.next_review_at);
-        return reviewDate <= fiveDaysFromNow && reviewDate >= now;
-      })
-      .sort((a, b) => {
-        const dateA = new Date(a.next_review_at!);
-        const dateB = new Date(b.next_review_at!);
-        return dateA.getTime() - dateB.getTime();
-      });
+  const openCreation = (tab: 'lesson' | 'course' = 'lesson') => {
+    setCreationTab(tab);
+    setIsCreationModalOpen(true);
   };
 
-  const lessonsForReview = getLessonsForReview(lessons);
+  // Повторение (SM-2): источник истины — endpoint /lessons/for-review/:userId
+  const [reviewLessons, setReviewLessons] = useState<LessonForReview[]>([]);
+  const [reviewLoading, setReviewLoading] = useState(true);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
-  // Функции для слайдера
-  const itemsPerSlide = 3;
-  const maxSlides = Math.ceil(lessonsForReview.length / itemsPerSlide) - 1;
+  // История тестов — используем для подсчёта "слабых мест"
+  const [exams, setExams] = useState<ExamHistoryItem[]>([]);
+  const [examsLoading, setExamsLoading] = useState(true);
+  const [examsError, setExamsError] = useState<string | null>(null);
 
-  const handlePrevSlide = () => {
-    setReviewSliderIndex((prev) => Math.max(0, prev - 1));
-  };
-
-  const handleNextSlide = () => {
-    setReviewSliderIndex((prev) => Math.min(maxSlides, prev + 1));
-  };
-
-  const getCurrentSlideLessons = () => {
-    const startIndex = reviewSliderIndex * itemsPerSlide;
-    return lessonsForReview.slice(startIndex, startIndex + itemsPerSlide);
-  };
-
-  // Форматирование даты для отображения
-  const formatReviewDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = date.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return 'Сегодня';
-    if (diffDays === 1) return 'Завтра';
-    if (diffDays === 2) return 'Послезавтра';
-    return `Через ${diffDays} дней`;
-  };
   useEffect(() => {
     const fetchLessons = async () => {
       try {
@@ -117,6 +84,175 @@ export const HomePage = () => {
     void fetchLessons();
   }, []);
 
+  useEffect(() => {
+    const fetchReview = async () => {
+      if (!userId) return;
+      try {
+        setReviewLoading(true);
+        setReviewError(null);
+        const data = await lessonsApi.getLessonsForReview(userId);
+        setReviewLessons(data);
+      } catch (error) {
+        setReviewError(
+          error instanceof Error
+            ? error.message
+            : 'Ошибка загрузки уроков для повторения',
+        );
+      } finally {
+        setReviewLoading(false);
+      }
+    };
+
+    void fetchReview();
+  }, [userId]);
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      if (!userId) return;
+      try {
+        setExamsLoading(true);
+        setExamsError(null);
+        const data = await testsApi.getUserExams({ userId });
+        setExams(data);
+      } catch (error) {
+        setExamsError(
+          error instanceof Error
+            ? error.message
+            : 'Ошибка загрузки истории тестов',
+        );
+      } finally {
+        setExamsLoading(false);
+      }
+    };
+
+    void fetchExams();
+  }, [userId]);
+
+  useEffect(() => {
+    const handleLessonUpdate = () => {
+      // Обновляем данные, которые зависят от результатов тестов
+      const refresh = async () => {
+        if (!userId) return;
+        try {
+          const [reviewData, lessonsData, examsData] = await Promise.all([
+            lessonsApi.getLessonsForReview(userId),
+            lessonsApi.getAllLessons(),
+            testsApi.getUserExams({ userId }),
+          ]);
+          setReviewLessons(reviewData);
+          setLessons(lessonsData);
+          setExams(examsData);
+        } catch {
+          // Ошибки уже покрыты отдельными экранами/алертами — здесь тихо обновляем
+        }
+      };
+
+      void refresh();
+    };
+
+    window.addEventListener('lessonUpdated', handleLessonUpdate);
+    return () => window.removeEventListener('lessonUpdated', handleLessonUpdate);
+  }, [userId]);
+
+  const reviewSorted = useMemo(() => {
+    return [...reviewLessons].sort((a, b) => {
+      return new Date(a.next_review_at).getTime() - new Date(b.next_review_at).getTime();
+    });
+  }, [reviewLessons]);
+
+  const reviewCounters = useMemo(() => {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfTomorrow = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+    );
+    const startOfSoon = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 7,
+    );
+
+    let overdue = 0;
+    let today = 0;
+    let soon = 0;
+
+    for (const lesson of reviewLessons) {
+      const d = new Date(lesson.next_review_at);
+      if (d < startOfToday) overdue += 1;
+      else if (d >= startOfToday && d < startOfTomorrow) today += 1;
+      else if (d >= startOfTomorrow && d < startOfSoon) soon += 1;
+    }
+
+    return { overdue, today, soon };
+  }, [reviewLessons]);
+
+  type WeakLesson = { lesson: Lesson; avgScore: number; lastCompletedAt?: string };
+
+  const weakLessons = useMemo<WeakLesson[]>(() => {
+    // Собираем индекс уроков, чтобы связать экзамены с уроками.
+    // На бэке связь хранится в заголовке экзамена: "Тест по уроку: {название урока}"
+    const byCourseAndTitle = new Map<string, Lesson>();
+    for (const l of lessons) {
+      byCourseAndTitle.set(`${l.unit.course.id}::${l.title}`, l);
+    }
+
+    const prefix = 'Тест по уроку: ';
+    const scoresByLessonId = new Map<
+      string,
+      { scores: number[]; lastCompletedAt?: string }
+    >();
+
+    for (const exam of exams) {
+      if (exam.status !== 'completed' || !exam.completed_at) continue;
+      if (!exam.title.startsWith(prefix)) continue;
+      const lessonTitle = exam.title.slice(prefix.length);
+      const lesson = byCourseAndTitle.get(`${exam.course.id}::${lessonTitle}`);
+      if (!lesson) continue;
+
+      const existing = scoresByLessonId.get(lesson.id) ?? { scores: [] };
+      existing.scores.push(exam.score);
+      // exams приходят отсортированными DESC по completed_at на бэке, но не полагаемся
+      if (!existing.lastCompletedAt) existing.lastCompletedAt = exam.completed_at;
+      scoresByLessonId.set(lesson.id, existing);
+    }
+
+    const items: WeakLesson[] = [];
+    for (const [lessonId, s] of scoresByLessonId.entries()) {
+      const lesson = lessons.find((l) => l.id === lessonId);
+      if (!lesson) continue;
+      const last3 = s.scores.slice(0, 3);
+      const avg = last3.reduce((acc, v) => acc + v, 0) / Math.max(1, last3.length);
+      items.push({ lesson, avgScore: avg, lastCompletedAt: s.lastCompletedAt });
+    }
+
+    // “Слабые места”: низкий средний балл по последним попыткам
+    const threshold = 70;
+    return items
+      .filter((x) => x.avgScore < threshold)
+      .sort((a, b) => a.avgScore - b.avgScore)
+      .slice(0, 6);
+  }, [exams, lessons]);
+
+  const notStudiedLessons = useMemo(() => {
+    return lessons
+      .filter((l) => l.status === LessonStatus.NOT_STARTED)
+      .slice(0, 9);
+  }, [lessons]);
+
+  const userReady = Boolean(userId);
+  const weakLoading = examsLoading || lessonsLoading;
+  const weakError = examsError || lessonsError;
+
+  const handleStartReview = () => {
+    const first = reviewSorted[0];
+    if (!first) return;
+    void navigate(`/courses/${first.unit.course.id}/lessons/${first.id}`);
+  };
+
+  const handleOpenReview = () => void navigate('/review');
+
   return (
     <Box sx={{ minHeight: '100vh' }}>
       {/* Заголовок */}
@@ -132,193 +268,271 @@ export const HomePage = () => {
       </AppBar>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        {/* Секция создания нового модуля */}
-        <Box display="flex" justifyContent="center" mb={6}>
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<Add />}
-            onClick={handleNewModule}
-            sx={{ py: 2, px: 4 }}
-          >
-            Начать изучать
-          </Button>
-        </Box>
-
-        {/* Блок "Нужно повторить" */}
-        {lessonsForReview.length > 0 && (
-          <Stack spacing={3} mb={6}>
-            <Box display="flex" alignItems="center" gap={1}>
+        <Stack spacing={6}>
+          {/* 1) Повторить */}
+          <Stack spacing={2}>
+            <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
               <AccessTime color="primary" />
-              <Typography variant="h2">Нужно повторить</Typography>
+              <Typography variant="h2">Повторить</Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Button
+                variant="contained"
+                onClick={handleStartReview}
+                disabled={reviewSorted.length === 0 || reviewLoading}
+              >
+                Начать
+              </Button>
+              <Button variant="text" onClick={handleOpenReview}>
+                Все
+              </Button>
             </Box>
 
-            <Box sx={{ position: 'relative' }}>
-              <Grid container spacing={3}>
-                {getCurrentSlideLessons().map((lesson) => (
+            <Box display="flex" gap={1} flexWrap="wrap">
+              <Chip
+                label={`Просрочено: ${reviewCounters.overdue}`}
+                color={reviewCounters.overdue > 0 ? 'error' : 'default'}
+                variant={reviewCounters.overdue > 0 ? 'filled' : 'outlined'}
+                size="small"
+              />
+              <Chip
+                label={`Сегодня: ${reviewCounters.today}`}
+                color={reviewCounters.today > 0 ? 'warning' : 'default'}
+                variant={reviewCounters.today > 0 ? 'filled' : 'outlined'}
+                size="small"
+              />
+              <Chip
+                label={`Скоро: ${reviewCounters.soon}`}
+                color="default"
+                variant="outlined"
+                size="small"
+              />
+            </Box>
+
+            {(!userReady || reviewLoading) && (
+              <Box display="flex" justifyContent="center" py={2}>
+                <CircularProgress />
+              </Box>
+            )}
+            {reviewError && <Alert severity="error">{reviewError}</Alert>}
+            {userReady && !reviewLoading && !reviewError && reviewSorted.length === 0 && (
+              <Paper
+                variant="outlined"
+                sx={{ p: 3, borderRadius: 3, textAlign: 'center' }}
+              >
+                <Typography variant="body1" color="text.secondary">
+                  Сейчас нет уроков для повторения
+                </Typography>
+              </Paper>
+            )}
+
+            {userReady && !reviewLoading && !reviewError && reviewSorted.length > 0 && (
+              <Grid container spacing={2}>
+                {reviewSorted.slice(0, 9).map((lesson) => (
                   <Grid key={lesson.id} size={{ xs: 12, sm: 6, lg: 4 }}>
-                    <Card
-                      onClick={() => handleLessonClick(lesson)}
-                      sx={{
-                        cursor: 'pointer',
-                        height: '100%',
-                        transition:
-                          'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                        '&:hover': {
-                          transform: 'translateY(-4px)',
-                          boxShadow: 4,
-                        },
-                      }}
-                    >
-                      <CardContent>
-                        <Stack spacing={2}>
-                          <Box display="flex" alignItems="center" gap={1}>
-                            <MenuBook color="primary" />
-                            <Box sx={{ minWidth: 0, flex: 1 }}>
-                              <Tooltip title={lesson.title} arrow>
-                                <Typography
-                                  variant="h6"
-                                  component="h3"
-                                  sx={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  {lesson.title}
-                                </Typography>
-                              </Tooltip>
-                              <Tooltip
-                                title={`${lesson.unit.course.title} → ${lesson.unit.title}`}
-                                arrow
-                              >
-                                <Typography
-                                  variant="caption"
-                                  color="text.secondary"
-                                  sx={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap',
-                                    display: 'block',
-                                  }}
-                                >
-                                  {lesson.unit.course.title} →{' '}
-                                  {lesson.unit.title}
-                                </Typography>
-                              </Tooltip>
-                            </Box>
-                          </Box>
-
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 3,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
-                            }}
-                          >
-                            {lesson.description}
-                          </Typography>
-
-                          <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                          >
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                            >
-                              {lesson.next_review_at &&
-                                formatReviewDate(lesson.next_review_at)}
-                            </Typography>
-
-                            <Chip
-                              label="Повторить"
-                              color="warning"
-                              size="small"
-                            />
-                          </Box>
-                        </Stack>
-                      </CardContent>
-                    </Card>
+                    <LessonCard
+                      lesson={lesson}
+                      variant="review"
+                      onClick={() =>
+                        void navigate(
+                          `/courses/${lesson.unit.course.id}/lessons/${lesson.id}`,
+                        )
+                      }
+                      onAction={() =>
+                        void navigate(
+                          `/courses/${lesson.unit.course.id}/lessons/${lesson.id}`,
+                        )
+                      }
+                    />
                   </Grid>
                 ))}
               </Grid>
-
-              {/* Кнопки навигации слайдера */}
-              {maxSlides > 0 && (
-                <>
-                  <IconButton
-                    onClick={handlePrevSlide}
-                    disabled={reviewSliderIndex === 0}
-                    sx={{
-                      position: 'absolute',
-                      left: -16,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      backgroundColor: 'background.paper',
-                      boxShadow: 2,
-                      '&:hover': {
-                        backgroundColor: 'background.paper',
-                      },
-                    }}
-                  >
-                    <ChevronLeft />
-                  </IconButton>
-
-                  <IconButton
-                    onClick={handleNextSlide}
-                    disabled={reviewSliderIndex === maxSlides}
-                    sx={{
-                      position: 'absolute',
-                      right: -16,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      backgroundColor: 'background.paper',
-                      boxShadow: 2,
-                      '&:hover': {
-                        backgroundColor: 'background.paper',
-                      },
-                    }}
-                  >
-                    <ChevronRight />
-                  </IconButton>
-                </>
-              )}
-            </Box>
+            )}
           </Stack>
-        )}
 
-        {/* Все доступные уроки */}
-        <Stack spacing={3} mb={6}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <MenuBook color="primary" />
-            <Typography variant="h2">Все доступные уроки</Typography>
-          </Box>
+          {/* 2) Слабые места */}
+          <Stack spacing={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <TrendingDown color="primary" />
+              <Typography variant="h2">Слабые места</Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Button variant="text" onClick={() => void navigate('/test-history')}>
+                История тестов
+              </Button>
+            </Box>
 
-          <LessonsList
-            lessons={lessons}
-            loading={lessonsLoading}
-            error={lessonsError}
-          />
-        </Stack>
+            {weakLoading && (
+              <Box display="flex" justifyContent="center" py={2}>
+                <CircularProgress />
+              </Box>
+            )}
+            {weakError && <Alert severity="error">{weakError}</Alert>}
+            {!weakLoading && !weakError && weakLessons.length === 0 && (
+              <Paper
+                variant="outlined"
+                sx={{ p: 3, borderRadius: 3, textAlign: 'center' }}
+              >
+                <Typography variant="body1" color="text.secondary">
+                  Пока нет “слабых мест” по результатам тестов — так держать
+                </Typography>
+              </Paper>
+            )}
 
-        {/* Модули для повторения */}
-        <Stack spacing={3}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <AccessTime color="primary" />
-            <Typography variant="h2">Требуют повторения</Typography>
-          </Box>
+            {!weakLoading && !weakError && weakLessons.length > 0 && (
+              <Grid container spacing={2}>
+                {weakLessons.map(({ lesson, avgScore }) => (
+                  <Grid key={lesson.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                    <Box sx={{ position: 'relative', height: '100%' }}>
+                      <LessonCard
+                        lesson={lesson}
+                        variant="default"
+                        onClick={() => handleLessonClick(lesson)}
+                      />
 
-          <ReviewLessonsList maxItems={6} />
+                      <Chip
+                        label={`${Math.round(avgScore)}%`}
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: 12,
+                          right: 12,
+                          fontWeight: 700,
+                          color: avgScore < 50 ? 'error.main' : 'warning.main',
+                          bgcolor:
+                            avgScore < 50 ? 'error.50' : 'warning.50',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                        }}
+                      />
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Stack>
+
+          {/* 3) Не изучал */}
+          <Stack spacing={2}>
+            <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+              <MenuBook color="primary" />
+              <Typography variant="h2">Не изучал</Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Button variant="text" onClick={() => void navigate('/courses')}>
+                Открыть курсы
+              </Button>
+            </Box>
+
+            {lessonsLoading && (
+              <Box display="flex" justifyContent="center" py={2}>
+                <CircularProgress />
+              </Box>
+            )}
+            {lessonsError && <Alert severity="error">{lessonsError}</Alert>}
+            {!lessonsLoading && !lessonsError && notStudiedLessons.length === 0 && (
+              <Paper
+                variant="outlined"
+                sx={{ p: 3, borderRadius: 3, textAlign: 'center' }}
+              >
+                <Typography variant="body1" color="text.secondary">
+                  Похоже, новых уроков не осталось — можно создать следующий
+                </Typography>
+              </Paper>
+            )}
+
+            {!lessonsLoading && !lessonsError && notStudiedLessons.length > 0 && (
+              <Grid container spacing={2}>
+                {notStudiedLessons.map((lesson) => (
+                  <Grid key={lesson.id} size={{ xs: 12, sm: 6, lg: 4 }}>
+                    <LessonCard
+                      lesson={lesson}
+                      variant="default"
+                      onClick={() => handleLessonClick(lesson)}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Stack>
+
+          {/* 4) Открыть новое */}
+          <Stack spacing={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <AutoAwesome color="primary" />
+              <Typography variant="h2">Открыть новое</Typography>
+            </Box>
+
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Paper
+                  variant="outlined"
+                  sx={{ p: 3, borderRadius: 3, height: '100%' }}
+                >
+                  <Stack spacing={1.5}>
+                    <Typography variant="h3">Быстрый урок</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Сформулируй тему — система создаст урок и тест, а дальше
+                      возьмёт повторения на себя.
+                    </Typography>
+                    <Box>
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => openCreation('lesson')}
+                      >
+                        Создать урок
+                      </Button>
+                    </Box>
+                  </Stack>
+                </Paper>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Paper
+                  variant="outlined"
+                  sx={{ p: 3, borderRadius: 3, height: '100%' }}
+                >
+                  <Stack spacing={1.5}>
+                    <Typography variant="h3">Новый курс</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Если хочешь системно освоить тему — создай курс-скелет и
+                      пополняй его уроками.
+                    </Typography>
+                    <Box>
+                      <Button
+                        variant="outlined"
+                        startIcon={<Add />}
+                        onClick={() => openCreation('course')}
+                      >
+                        Создать курс
+                      </Button>
+                    </Box>
+                  </Stack>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Stack>
         </Stack>
       </Container>
+
+      {/* Всегда видимая кнопка создания */}
+      <Fab
+        variant="extended"
+        color="primary"
+        onClick={() => openCreation('lesson')}
+        sx={{
+          position: 'fixed',
+          right: 24,
+          bottom: 24,
+          zIndex: (t) => t.zIndex.drawer + 2,
+        }}
+        aria-label="Создать урок или курс"
+      >
+        <Add sx={{ mr: 1 }} />
+        Создать
+      </Fab>
+
       <ContentCreationModal
-        open={isNewModuleModalOpen}
-        onClose={() => setIsNewModuleModalOpen(false)}
+        open={isCreationModalOpen}
+        onClose={() => setIsCreationModalOpen(false)}
+        initialTab={creationTab}
       />
     </Box>
   );

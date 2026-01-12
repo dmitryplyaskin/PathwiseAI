@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Alert, Box, Button, Stack, Tab, Tabs } from '@mui/material';
 import { useUnit } from 'effector-react';
 import { Modal } from '@shared/ui/modal';
@@ -18,13 +18,20 @@ import type { TabType } from './types';
 interface ContentCreationModalProps {
   open: boolean;
   onClose: () => void;
+  initialTab?: TabType;
 }
 
 export const ContentCreationModal = ({
   open,
   onClose,
+  initialTab = 'lesson',
 }: ContentCreationModalProps) => {
-  const [activeTab, setActiveTab] = useState<TabType>('lesson');
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+
+  useEffect(() => {
+    if (!open) return;
+    setActiveTab(initialTab);
+  }, [open, initialTab]);
 
   // Get shared state and errors
   const { coursesListError } = useUnit({
