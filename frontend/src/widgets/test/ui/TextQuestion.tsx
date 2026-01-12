@@ -7,7 +7,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { CheckCircle, Error } from '@mui/icons-material';
+import { CheckCircle, Error, Info } from '@mui/icons-material';
 import type { TextQuestion as TextQuestionType } from '../types';
 import { testsApi } from '@shared/api/tests';
 import { MarkdownRenderer } from '@shared/ui/markdown-renderer';
@@ -61,18 +61,33 @@ export const TextQuestion = ({
         err instanceof Error ? err.message : 'Не удалось проверить ответ',
       );
 
-      // Fallback: считаем ответ правильным при ошибке
-      setIsCorrect(true);
-      setScore(70);
-      setLlmExplanation('Ответ принят. Произошла ошибка при проверке.');
-      setFeedback('Ваш ответ был принят.');
+      // Fallback: НЕ засчитываем ответ при ошибке проверки,
+      // чтобы не искажать итог теста и интервальное повторение.
+      setIsCorrect(false);
+      setScore(0);
+      setLlmExplanation(
+        'Не удалось проверить ответ сейчас. Ответ не засчитан. Попробуйте отправить ещё раз.',
+      );
+      setFeedback('Попробуйте повторить попытку или проверьте соединение.');
       setShowResult(true);
 
-      onAnswer(true, answer, 'Ответ принят. Произошла ошибка при проверке.');
+      onAnswer(
+        false,
+        answer,
+        'Не удалось проверить ответ сейчас. Ответ не засчитан.',
+      );
     } finally {
       setIsLoading(false);
     }
   };
+
+  const verdictLabel = isCorrect
+    ? '(Правильно)'
+    : score >= 50
+      ? '(Частично правильно)'
+      : '(Неправильно)';
+
+  const resultSeverity = isCorrect ? 'success' : score >= 50 ? 'warning' : 'error';
 
   return (
     <Box>
@@ -116,13 +131,21 @@ export const TextQuestion = ({
 
       {showResult && llmExplanation && (
         <Alert
-          severity={isCorrect ? 'success' : 'info'}
-          icon={isCorrect ? <CheckCircle /> : undefined}
+          severity={resultSeverity}
+          icon={
+            isCorrect ? (
+              <CheckCircle />
+            ) : score >= 50 ? (
+              <Info />
+            ) : (
+              <Error />
+            )
+          }
           sx={{ mb: 2, borderRadius: 2 }}
         >
           <Typography variant="body2" fontWeight={600} mb={1}>
             Оценка: {score}%{' '}
-            {isCorrect ? '(Правильно)' : '(Частично правильно)'}
+            {verdictLabel}
           </Typography>
           <Typography variant="body2" mb={1}>
             <strong>Объяснение:</strong> {llmExplanation}

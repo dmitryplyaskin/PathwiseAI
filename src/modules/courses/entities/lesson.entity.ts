@@ -16,6 +16,7 @@ export enum LessonStatus {
   NOT_STARTED = 'not_started',
   LEARNING = 'learning',
   MASTERED = 'mastered',
+  FAILED = 'failed',
 }
 
 @Entity({ name: 'lessons' })
@@ -65,6 +66,11 @@ export class Lesson {
 
   @Column('int', { default: 0 })
   interval: number;
+
+  // Количество успешных повторений подряд (SM-2).
+  // Используется для расчёта первых интервалов (1 день, затем 6 дней) и дальнейшего роста.
+  @Column('int', { default: 0 })
+  repetitions: number;
 
   @Column({ type: 'boolean', default: false })
   shared: boolean;

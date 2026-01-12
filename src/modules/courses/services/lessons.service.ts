@@ -505,7 +505,11 @@ export class LessonsService {
       where: {
         user: { id: userId },
         next_review_at: LessThanOrEqual(now),
-        status: In([LessonStatus.LEARNING, LessonStatus.MASTERED]),
+        status: In([
+          LessonStatus.LEARNING,
+          LessonStatus.MASTERED,
+          LessonStatus.FAILED,
+        ]),
       },
       relations: ['unit', 'unit.course'],
       order: {

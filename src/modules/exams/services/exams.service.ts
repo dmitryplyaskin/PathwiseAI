@@ -375,7 +375,12 @@ export class ExamsService {
     await this.examRepository.save(exam);
 
     // НОВОЕ: Обновляем прогресс урока
-    await this.updateLessonProgress(exam, score);
+    await this.updateLessonProgress(
+      exam,
+      score,
+      totalQuestions,
+      correctAnswers,
+    );
 
     return {
       examId,
@@ -387,7 +392,12 @@ export class ExamsService {
     };
   }
 
-  private async updateLessonProgress(exam: Exam, score: number) {
+  private async updateLessonProgress(
+    exam: Exam,
+    score: number,
+    totalQuestions?: number,
+    correctAnswers?: number,
+  ) {
     // Получаем урок по названию экзамена (формат: "Тест по уроку: {название урока}")
     const lessonTitle = exam.title.replace('Тест по уроку: ', '');
 
@@ -404,12 +414,19 @@ export class ExamsService {
       return;
     }
 
+    // Если количество вопросов не передано, получаем из результатов экзамена
+    const questionCount = totalQuestions || exam.results?.length || 5;
+
     // Рассчитываем новые параметры по SM-2
     const sm2Result = this.sm2Service.calculateNextReview(
       lesson.status,
       lesson.interval,
       lesson.ease_factor,
+      lesson.repetitions ?? 0,
       score,
+      questionCount,
+      lesson.last_reviewed_at || undefined,
+      correctAnswers,
     );
 
     // Обновляем урок
@@ -417,6 +434,7 @@ export class ExamsService {
       status: sm2Result.status,
       interval: sm2Result.interval,
       ease_factor: sm2Result.easeFactor,
+      repetitions: sm2Result.repetitions,
       last_reviewed_at: new Date(),
       next_review_at: sm2Result.nextReviewAt,
     });
@@ -426,6 +444,17 @@ export class ExamsService {
     checkTextAnswerDto: CheckTextAnswerDto,
   ): Promise<TextCheckingResponse> {
     const { userAnswer, expectedAnswer, questionText } = checkTextAnswerDto;
+
+    // Быстрый кейс: ответ из пробелов/переводов строк
+    if (userAnswer.trim().length === 0) {
+      return {
+        isCorrect: false,
+        score: 0,
+        explanation:
+          'Ответ пустой или содержит только пробелы. Это не является ответом на вопрос.',
+        feedback: 'Пожалуйста, напишите содержательный ответ по теме вопроса.',
+      };
+    }
 
     const userPrompt = textCheckingPrompts.userPromptTemplate
       .replace('${questionText}', questionText)
@@ -446,7 +475,7 @@ export class ExamsService {
 
       // Валидация результата
       if (typeof checkingResult.isCorrect !== 'boolean') {
-        checkingResult.isCorrect = checkingResult.score >= 70;
+        checkingResult.isCorrect = false;
       }
 
       if (
@@ -456,6 +485,11 @@ export class ExamsService {
       ) {
         checkingResult.score = checkingResult.isCorrect ? 85 : 30;
       }
+
+      // Нормализация: приводим score и isCorrect к согласованному виду.
+      // isCorrect определяется по порогу score >= 70, а score ограничивается 0..100.
+      checkingResult.score = Math.max(0, Math.min(100, checkingResult.score));
+      checkingResult.isCorrect = checkingResult.score >= 70;
 
       return checkingResult;
     } catch (error) {
@@ -556,6 +590,7 @@ export class ExamsService {
       status: LessonStatus.NOT_STARTED,
       interval: 0,
       ease_factor: 2.5,
+      repetitions: 0,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - TypeORM обрабатывает null для nullable полей
       last_reviewed_at: null,
