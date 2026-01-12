@@ -25,7 +25,7 @@ export const lessonGenerationSchema = {
         content: {
           type: 'string',
           description:
-            'Основной контент урока в формате HTML с подробным объяснением темы',
+            'Основной контент урока в формате Markdown (не HTML). Используй заголовки ##/###, списки, выделения и примеры. Весь текст — на русском.',
         },
         readingTime: {
           type: 'integer',
