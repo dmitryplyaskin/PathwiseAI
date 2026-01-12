@@ -14,9 +14,11 @@ export class QuestionAnswerDto {
   @IsNotEmpty()
   questionId: string;
 
+  // Может быть пустым/отсутствовать, если вопрос пропущен.
+  // В этом случае считается неправильным ответом (isCorrect=false).
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  answer: string;
+  answer?: string;
 
   @IsBoolean()
   @IsNotEmpty()

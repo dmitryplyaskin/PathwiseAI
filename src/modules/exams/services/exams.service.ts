@@ -356,7 +356,8 @@ export class ExamsService {
         (r) => r.question.id === answer.questionId,
       );
       if (examResult) {
-        examResult.user_answer = answer.answer;
+        // Пустой/отсутствующий ответ (пропуск) сохраняем как пустую строку.
+        examResult.user_answer = answer.answer ?? '';
         examResult.is_correct = answer.isCorrect;
         await this.examResultRepository.save(examResult);
       }

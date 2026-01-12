@@ -25,7 +25,8 @@ export interface SubmitTestResultRequest {
 
 export interface QuestionAnswerDto {
   questionId: string;
-  answer: string;
+  // Может быть пустой строкой, если вопрос пропущен
+  answer?: string;
   isCorrect: boolean;
   explanation?: string;
 }
