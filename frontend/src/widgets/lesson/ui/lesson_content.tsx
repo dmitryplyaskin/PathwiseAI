@@ -1,4 +1,4 @@
-import { Paper, Box, Typography, Fade } from '@mui/material';
+import { Paper, Box, Typography, Fade, Divider } from '@mui/material';
 import { AutoAwesome } from '@mui/icons-material';
 import { MarkdownRenderer } from '@shared/ui';
 
@@ -7,6 +7,9 @@ interface LessonContentProps {
 }
 
 export const LessonContent = ({ content }: LessonContentProps) => {
+  const aiDisclaimerText =
+    'Материал урока сгенерирован/сформирован с помощью ИИ в образовательных целях и может содержать неточности или ошибки. Пожалуйста, перепроверяйте важную информацию по первоисточникам.';
+
   return (
     <Fade in timeout={300}>
       <Paper
@@ -51,6 +54,15 @@ export const LessonContent = ({ content }: LessonContentProps) => {
         <MarkdownRenderer showLineNumbers={true} maxCodeHeight="500px">
           {content}
         </MarkdownRenderer>
+        <Divider sx={{ mt: 3, mb: 1.5 }} />
+        <Typography
+          variant="caption"
+          component="p"
+          color="text.secondary"
+          sx={{ fontSize: '0.75rem', lineHeight: 1.4 }}
+        >
+          {aiDisclaimerText}
+        </Typography>
       </Paper>
     </Fade>
   );
