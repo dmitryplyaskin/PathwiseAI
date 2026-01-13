@@ -139,6 +139,57 @@ export const LessonCard: FC<LessonCardProps> = ({
     ? getReviewPriority(lesson.next_review_at)
     : null;
 
+  const topBadge = (() => {
+    if (isReview && reviewPriority) {
+      const main = theme.palette[reviewPriority.color].main;
+      return (
+        <Chip
+          label={reviewPriority.text}
+          size="small"
+          sx={{
+            position: 'absolute',
+            top: 12,
+            right: 12,
+            height: 24,
+            fontWeight: 700,
+            bgcolor: alpha(main, 0.12),
+            color: main,
+            border: `1px solid ${alpha(main, 0.22)}`,
+          }}
+        />
+      );
+    }
+
+    const statusTone = getStatusColor(lesson.status);
+    const main =
+      statusTone === 'default'
+        ? theme.palette.text.secondary
+        : theme.palette[statusTone].main;
+
+    return (
+      <Chip
+        icon={
+          lesson.status === LessonStatus.MASTERED ? (
+            <EmojiEvents sx={{ fontSize: '16px !important' }} />
+          ) : undefined
+        }
+        label={getStatusText(lesson.status)}
+        size="small"
+        sx={{
+          position: 'absolute',
+          top: 12,
+          right: 12,
+          height: 24,
+          fontWeight: 700,
+          bgcolor: alpha(main, 0.1),
+          color: main,
+          border: `1px solid ${alpha(main, 0.18)}`,
+          '& .MuiChip-icon': { color: 'inherit' },
+        }}
+      />
+    );
+  })();
+
   return (
     <Card
       onClick={handleCardClick}
@@ -157,10 +208,13 @@ export const LessonCard: FC<LessonCardProps> = ({
           display: 'flex',
           flexDirection: 'column',
           gap: 1.75,
+          position: 'relative',
         }}
       >
+        {topBadge}
+
         {/* Header: Icon + Breadcrumbs */}
-        <Box display="flex" alignItems="flex-start" gap={1}>
+        <Box display="flex" alignItems="flex-start" gap={1} sx={{ pr: 7 }}>
           <Box
             sx={{
               p: 0.75,
@@ -210,7 +264,7 @@ export const LessonCard: FC<LessonCardProps> = ({
         </Box>
 
         {/* Title & Description */}
-        <Box>
+        <Box sx={{ pr: 7 }}>
           <Tooltip title={lesson.title} arrow>
             <Typography
               variant="h6"
@@ -291,40 +345,23 @@ export const LessonCard: FC<LessonCardProps> = ({
           pt={1}
           borderTop={`1px solid ${theme.palette.divider}`}
         >
+          <Typography variant="caption" color="text.secondary">
+            {isReview
+              ? formatDate(lesson.next_review_at)
+              : formatDate(lesson.created_at)}
+          </Typography>
+
           {isReview ? (
-            <>
-              <Chip
-                label={reviewPriority?.text}
-                color={reviewPriority?.color}
-                size="small"
-                variant="outlined"
-              />
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<PlayCircle />}
-                onClick={handleActionClick}
-              >
-                Повторить
-              </Button>
-            </>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<PlayCircle />}
+              onClick={handleActionClick}
+            >
+              Повторить
+            </Button>
           ) : (
-            <>
-              <Chip
-                icon={
-                  lesson.status === LessonStatus.MASTERED ? (
-                    <EmojiEvents sx={{ fontSize: '16px !important' }} />
-                  ) : undefined
-                }
-                label={getStatusText(lesson.status)}
-                color={getStatusColor(lesson.status)}
-                size="small"
-                variant="outlined"
-              />
-              <Typography variant="caption" color="text.secondary">
-                {formatDate(lesson.created_at)}
-              </Typography>
-            </>
+            <Box />
           )}
         </Box>
       </CardContent>

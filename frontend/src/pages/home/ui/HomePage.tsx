@@ -431,8 +431,12 @@ export const HomePage = () => {
                         size="small"
                         sx={{
                           position: 'absolute',
-                          top: 10,
-                          right: 10,
+                          // В LessonCard появился бейдж в правом верхнем углу.
+                          // Сдвигаем процент ниже, чтобы не перекрывать статус.
+                          top: 44,
+                          right: 12,
+                          zIndex: 1,
+                          pointerEvents: 'none',
                           fontWeight: 700,
                           color: avgScore < 50 ? 'error.main' : 'warning.main',
                           bgcolor: (t) =>
