@@ -18,25 +18,15 @@ export const LessonHeader = ({
       sx={{
         background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
         color: 'white',
-        py: 6,
-        px: 3,
+        py: { xs: 3, md: 4 },
+        px: { xs: 2, md: 3 },
         position: 'relative',
         overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background:
-            'radial-gradient(circle at 20% 50%, rgba(96, 165, 250, 0.3) 0%, transparent 50%)',
-          pointerEvents: 'none',
-        },
+        // Меньше декоративных слоёв — меньше визуального шума и “гигантизма”.
       }}
     >
       <Container maxWidth="lg">
-        <Stack spacing={2} alignItems="center" sx={{ position: 'relative' }}>
+        <Stack spacing={1.5} alignItems="center" sx={{ position: 'relative' }}>
           {notFound && (
             <Fade in>
               <Chip
@@ -57,22 +47,21 @@ export const LessonHeader = ({
             component="h1"
             color="white"
             sx={{
-              fontSize: { xs: '2rem', md: '2.5rem' },
+              fontSize: { xs: '1.6rem', md: '2.1rem' },
               fontWeight: 700,
               textAlign: 'center',
-              textShadow: '0 2px 10px rgba(0,0,0,0.1)',
+              textShadow: '0 1px 6px rgba(0,0,0,0.10)',
             }}
           >
             {lessonTitle}
           </Typography>
           <Typography
-            variant="body1"
+            variant="body2"
             color="white"
             sx={{
               textAlign: 'center',
-              maxWidth: '700px',
-              opacity: 0.95,
-              fontSize: '1.1rem',
+              maxWidth: 760,
+              opacity: 0.92,
             }}
           >
             {lesson

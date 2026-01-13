@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -7,9 +7,10 @@ import {
   Button,
   Typography,
   Box,
-  Radio,
-  Stack,
   IconButton,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -47,6 +48,13 @@ export const TestGenerationSettingsModal = ({
   const [mode, setMode] = useState<'normal' | 'detailed'>('normal');
   const [questionType, setQuestionType] = useState<QuestionTypeOption>('mixed');
 
+  const questionTypeHint =
+    questionType === 'quiz'
+      ? 'Только тестовые вопросы с выбором ответа.'
+      : questionType === 'mixed'
+        ? 'Смешанный режим: будут тестовые и письменные вопросы.'
+        : 'Только письменные вопросы (развёрнутые ответы).';
+
   const handleGenerate = () => {
     let types: ('quiz' | 'text')[];
     switch (questionType) {
@@ -73,13 +81,13 @@ export const TestGenerationSettingsModal = ({
       PaperProps={{
         sx: {
           borderRadius: 3,
-          boxShadow: '0 24px 48px rgba(0, 0, 0, 0.2)',
+          boxShadow: '0 18px 44px rgba(15, 23, 42, 0.18)',
         },
       }}
     >
       <DialogTitle
         sx={{
-          p: 3,
+          p: 2.5,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -88,16 +96,16 @@ export const TestGenerationSettingsModal = ({
         <Box display="flex" alignItems="center" gap={1.5}>
           <Box
             sx={{
-              p: 1,
+              p: 0.75,
               borderRadius: 2,
               bgcolor: alpha(theme.palette.primary.main, 0.1),
               color: 'primary.main',
               display: 'flex',
             }}
           >
-            <AutoAwesome />
+            <AutoAwesome fontSize="small" />
           </Box>
-          <Typography variant="h6" fontWeight={700}>
+          <Typography variant="h6" fontWeight={800}>
             Настройки теста
           </Typography>
         </Box>
@@ -106,213 +114,185 @@ export const TestGenerationSettingsModal = ({
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ p: 3 }}>
-        <Stack spacing={4}>
-          {/* Mode Selection */}
+      <DialogContent sx={{ p: 2.5 }}>
+        <Stack spacing={2.5}>
           <Box>
-            <Typography
-              variant="subtitle2"
-              color="text.secondary"
-              fontWeight={600}
-              mb={2}
-              textTransform="uppercase"
-              letterSpacing={0.5}
-            >
+            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
               Режим генерации
             </Typography>
-            <Stack spacing={2}>
-              <PaperOption
-                selected={mode === 'normal'}
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+              <Box
+                role="button"
+                tabIndex={0}
                 onClick={() => setMode('normal')}
-                icon={<Speed />}
-                title="Обычный"
-                description="Стандартный тест из 5 вопросов для быстрой проверки знаний."
-              />
-              <PaperOption
-                selected={mode === 'detailed'}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') setMode('normal');
+                }}
+                sx={{
+                  flex: 1,
+                  p: 2,
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: mode === 'normal' ? 'primary.main' : 'divider',
+                  bgcolor:
+                    mode === 'normal'
+                      ? alpha(theme.palette.primary.main, 0.06)
+                      : 'background.paper',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  '&:hover': {
+                    bgcolor:
+                      mode === 'normal'
+                        ? alpha(theme.palette.primary.main, 0.08)
+                        : alpha(theme.palette.text.primary, 0.02),
+                  },
+                }}
+              >
+                <Box display="flex" alignItems="flex-start" gap={1.5}>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 2,
+                      display: 'grid',
+                      placeItems: 'center',
+                      bgcolor: alpha(theme.palette.primary.main, 0.1),
+                      color: mode === 'normal' ? 'primary.main' : 'text.secondary',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Speed fontSize="small" />
+                  </Box>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography fontWeight={800} sx={{ lineHeight: 1.2 }}>
+                      Обычный
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      5 вопросов • быстрая проверка
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+
+              <Box
+                role="button"
+                tabIndex={0}
                 onClick={() => setMode('detailed')}
-                icon={<School />}
-                title="Подробный"
-                description="Углубленный тест из 10 вопросов для детальной проработки материала."
-              />
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') setMode('detailed');
+                }}
+                sx={{
+                  flex: 1,
+                  p: 2,
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: mode === 'detailed' ? 'primary.main' : 'divider',
+                  bgcolor:
+                    mode === 'detailed'
+                      ? alpha(theme.palette.primary.main, 0.06)
+                      : 'background.paper',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  '&:hover': {
+                    bgcolor:
+                      mode === 'detailed'
+                        ? alpha(theme.palette.primary.main, 0.08)
+                        : alpha(theme.palette.text.primary, 0.02),
+                  },
+                }}
+              >
+                <Box display="flex" alignItems="flex-start" gap={1.5}>
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 2,
+                      display: 'grid',
+                      placeItems: 'center',
+                      bgcolor: alpha(theme.palette.primary.main, 0.1),
+                      color:
+                        mode === 'detailed' ? 'primary.main' : 'text.secondary',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <School fontSize="small" />
+                  </Box>
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography fontWeight={800} sx={{ lineHeight: 1.2 }}>
+                      Подробный
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      10 вопросов • глубокая проработка
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
             </Stack>
           </Box>
 
-          {/* Question Types */}
           <Box>
-            <Typography
-              variant="subtitle2"
-              color="text.secondary"
-              fontWeight={600}
-              mb={2}
-              textTransform="uppercase"
-              letterSpacing={0.5}
-            >
+            <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
               Типы вопросов
             </Typography>
-            <Stack direction="row" spacing={2}>
-              <TypeCard
-                icon={<FormatListBulleted />}
-                label="Выбор ответа"
-                selected={questionType === 'quiz'}
-                onClick={() => setQuestionType('quiz')}
-              />
-              <TypeCard
-                icon={<Shuffle />}
-                label="Смешанный"
-                selected={questionType === 'mixed'}
-                onClick={() => setQuestionType('mixed')}
-              />
-              <TypeCard
-                icon={<Create />}
-                label="Письменный"
-                selected={questionType === 'text'}
-                onClick={() => setQuestionType('text')}
-              />
-            </Stack>
+            <ToggleButtonGroup
+              fullWidth
+              exclusive
+              value={questionType}
+              onChange={(_, value: QuestionTypeOption | null) => {
+                if (value) setQuestionType(value);
+              }}
+              sx={{
+                '& .MuiToggleButton-root': {
+                  py: 1.2,
+                  borderColor: 'divider',
+                  textTransform: 'none',
+                  fontWeight: 700,
+                },
+              }}
+            >
+              <ToggleButton value="quiz">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <FormatListBulleted fontSize="small" />
+                  Выбор ответа
+                </Box>
+              </ToggleButton>
+              <ToggleButton value="mixed">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Shuffle fontSize="small" />
+                  Смешанный
+                </Box>
+              </ToggleButton>
+              <ToggleButton value="text">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Create fontSize="small" />
+                  Письменный
+                </Box>
+              </ToggleButton>
+            </ToggleButtonGroup>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              {questionTypeHint}
+            </Typography>
           </Box>
         </Stack>
       </DialogContent>
 
-      <DialogActions sx={{ p: 3 }}>
-        <Button onClick={onClose} color="inherit" sx={{ borderRadius: 2 }}>
+      <DialogActions sx={{ p: 2.5 }}>
+        <Button
+          onClick={onClose}
+          color="inherit"
+          sx={{ color: 'text.secondary' }}
+        >
           Отмена
         </Button>
         <Button
           variant="contained"
           onClick={handleGenerate}
           disabled={isLoading}
-          sx={{
-            borderRadius: 2,
-            px: 4,
-            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
-          }}
+          size="small"
         >
           {isLoading ? 'Генерация...' : 'Сгенерировать тест'}
         </Button>
       </DialogActions>
     </Dialog>
-  );
-};
-
-// Helper components
-const PaperOption = ({
-  selected,
-  onClick,
-  icon,
-  title,
-  description,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) => {
-  const theme = useTheme();
-  return (
-    <Box
-      onClick={onClick}
-      sx={{
-        p: 2,
-        borderRadius: 3,
-        border: '2px solid',
-        borderColor: selected ? 'primary.main' : 'divider',
-        bgcolor: selected
-          ? alpha(theme.palette.primary.main, 0.04)
-          : 'background.paper',
-        cursor: 'pointer',
-        transition: 'background-color 0.2s ease, border-color 0.2s ease',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: 2,
-        '&:hover': {
-          borderColor: selected ? 'primary.main' : 'divider',
-          bgcolor: selected
-            ? alpha(theme.palette.primary.main, 0.08)
-            : 'action.hover',
-        },
-      }}
-    >
-      <Radio checked={selected} sx={{ p: 0, mt: 0.5 }} disableRipple />
-      <Box flex={1}>
-        <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-          <Box sx={{ color: selected ? 'primary.main' : 'text.secondary' }}>
-            {icon}
-          </Box>
-          <Typography
-            variant="subtitle1"
-            fontWeight={700}
-            color={selected ? 'primary.main' : 'text.primary'}
-          >
-            {title}
-          </Typography>
-        </Box>
-        <Typography variant="body2" color="text.secondary" lineHeight={1.4}>
-          {description}
-        </Typography>
-      </Box>
-    </Box>
-  );
-};
-
-const TypeCard = ({
-  icon,
-  label,
-  selected,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  selected: boolean;
-  onClick: () => void;
-}) => {
-  const theme = useTheme();
-  return (
-    <Box
-      onClick={onClick}
-      sx={{
-        flex: 1,
-        p: 2,
-        borderRadius: 3,
-        border: '2px solid',
-        borderColor: selected ? 'primary.main' : 'divider',
-        bgcolor: selected
-          ? alpha(theme.palette.primary.main, 0.04)
-          : 'background.paper',
-        cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 1.5,
-        transition: 'background-color 0.2s ease, border-color 0.2s ease',
-        '&:hover': {
-          borderColor: selected ? 'primary.main' : 'divider',
-          bgcolor: selected
-            ? alpha(theme.palette.primary.main, 0.08)
-            : 'action.hover',
-        },
-      }}
-    >
-      <Box
-        sx={{
-          color: selected ? 'primary.main' : 'text.secondary',
-          display: 'flex',
-          '& svg': { fontSize: 28 },
-        }}
-      >
-        {icon}
-      </Box>
-      <Typography
-        variant="body2"
-        fontWeight={700}
-        color={selected ? 'primary.main' : 'text.primary'}
-        align="center"
-      >
-        {label}
-      </Typography>
-    </Box>
   );
 };

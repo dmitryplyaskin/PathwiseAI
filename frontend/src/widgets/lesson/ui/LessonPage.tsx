@@ -68,8 +68,15 @@ export const LessonPage = () => {
         lessonTitle={lessonTitle}
       />
 
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: { xs: 3, md: 4 },
+            alignItems: 'flex-start',
+            flexDirection: { xs: 'column', md: 'row' },
+          }}
+        >
           <Box sx={{ flex: 1 }}>
             <Stack spacing={3}>
               {/* Материал урока - всегда сверху */}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Box,
   Button,
+  IconButton,
   Paper,
   Typography,
   Stack,
@@ -25,6 +26,7 @@ import {
   Grade,
   Info,
   Settings,
+  School,
 } from '@mui/icons-material';
 import type { Lesson } from '@shared/api/lessons';
 import { TestModal } from '../../test/ui';
@@ -313,40 +315,58 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
         elevation={0}
         sx={{
           position: 'sticky',
-          top: '24px',
-          width: '320px',
+          top: 16,
+          width: { xs: '100%', md: 320 },
           flexShrink: 0,
           alignSelf: 'flex-start',
           borderRadius: 3,
           overflow: 'hidden',
-          border: '2px solid',
+          border: '1px solid',
           borderColor: 'divider',
           background: '#ffffff',
-          transition:
-            'border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
-          '&:hover': {
-            borderColor: 'primary.100',
-            boxShadow: '0 8px 24px rgba(59, 130, 246, 0.12)',
-            transform: 'translateY(-2px)',
-          },
         }}
       >
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: 2.5 }}>
           {/* Header Section */}
           <Box
             display="flex"
             justifyContent="space-between"
             alignItems="flex-start"
-            mb={3}
+            mb={2}
           >
             <Box>
               <Typography variant="h6" fontWeight={800} color="text.primary">
                 Детали урока
               </Typography>
               {lesson && (
-                <Typography variant="caption" color="text.secondary">
-                  #{lesson.order} в курсе
-                </Typography>
+                <Stack spacing={0.25} sx={{ mt: 0.25 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    #{lesson.order} в курсе
+                  </Typography>
+                  {lesson.unit?.course && (
+                    <Button
+                      variant="text"
+                      size="small"
+                      startIcon={<School fontSize="small" />}
+                      onClick={() =>
+                        void navigate(`/courses/${lesson.unit.course.id}`)
+                      }
+                      sx={{
+                        p: 0,
+                        minHeight: 0,
+                        justifyContent: 'flex-start',
+                        textTransform: 'none',
+                        color: 'text.secondary',
+                        '&:hover': {
+                          bgcolor: 'transparent',
+                          color: 'text.primary',
+                        },
+                      }}
+                    >
+                      {lesson.unit.course.title}
+                    </Button>
+                  )}
+                </Stack>
               )}
             </Box>
             <Chip
@@ -354,10 +374,11 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
               label={statusInfo.label}
               size="small"
               sx={{
-                bgcolor: statusInfo.bg,
+                bgcolor: alpha(theme.palette.text.primary, 0.04),
                 color: statusInfo.text,
-                fontWeight: 600,
-                border: 'none',
+                fontWeight: 700,
+                border: '1px solid',
+                borderColor: 'divider',
                 '& .MuiChip-icon': {
                   color: 'inherit',
                 },
@@ -366,51 +387,21 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
           </Box>
 
           {/* Main Actions */}
-          <Stack spacing={2} mb={3}>
-            <Box
-              sx={{
-                display: 'flex',
-                borderRadius: 2.5,
-                overflow: 'hidden',
-                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)',
-                background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                transition:
-                  'background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease',
-                '&:hover': {
-                  background:
-                    'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                  boxShadow: '0 6px 16px rgba(59, 130, 246, 0.3)',
-                  transform: 'translateY(-1px)',
-                },
-              }}
-            >
+          <Stack spacing={1.5} mb={2.5}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <Button
-                variant="text"
+                variant="contained"
                 fullWidth
-                size="medium"
+                size="small"
                 startIcon={
                   isLoadingTest ? (
-                    <CircularProgress size={18} color="inherit" />
+                    <CircularProgress size={16} color="inherit" />
                   ) : (
-                    <Quiz sx={{ fontSize: 20 }} />
+                    <Quiz sx={{ fontSize: 18 }} />
                   )
                 }
                 disabled={notFound || isLoadingTest}
                 onClick={() => void handleOpenTest()}
-                sx={{
-                  py: 1,
-                  color: 'white',
-                  borderRadius: 0,
-                  flex: 1,
-                  fontSize: '0.9375rem',
-                  fontWeight: 600,
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                  '&.Mui-disabled': {
-                    color: 'rgba(255, 255, 255, 0.5)',
-                  },
-                }}
               >
                 {isLoadingTest
                   ? 'Загрузка...'
@@ -418,34 +409,16 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
                     ? 'Пройти снова'
                     : 'Начать тест'}
               </Button>
-              <Box
-                sx={{
-                  width: '1px',
-                  bgcolor: 'rgba(255, 255, 255, 0.2)',
-                  my: 0.5,
-                }}
-              />
+
               <Tooltip title="Настройки теста">
-                <Button
-                  variant="text"
-                  size="medium"
+                <IconButton
+                  size="small"
                   disabled={notFound || isLoadingTest}
                   onClick={() => setIsSettingsModalOpen(true)}
-                  sx={{
-                    minWidth: '40px',
-                    px: 0,
-                    color: 'white',
-                    borderRadius: 0,
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    },
-                    '&.Mui-disabled': {
-                      color: 'rgba(255, 255, 255, 0.5)',
-                    },
-                  }}
+                  sx={{ border: '1px solid', borderColor: 'divider' }}
                 >
                   <Settings fontSize="small" />
-                </Button>
+                </IconButton>
               </Tooltip>
             </Box>
 
@@ -456,15 +429,15 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
             )}
           </Stack>
 
-          <Divider sx={{ my: 3, borderStyle: 'dashed' }} />
+          <Divider sx={{ my: 2.5 }} />
 
           {/* Meta Grid */}
           {lesson && (
             <Box
               display="grid"
               gridTemplateColumns="1fr 1fr"
-              gap={3}
-              sx={{ mb: 3 }}
+              gap={2.25}
+              sx={{ mb: 2.5 }}
             >
               {lesson.reading_time && (
                 <MetaItem
@@ -515,7 +488,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
               sx={{
                 p: 2,
                 borderRadius: 3,
-                bgcolor: alpha(theme.palette.success.main, 0.04),
+                bgcolor: alpha(theme.palette.success.main, 0.05),
                 border: '1px solid',
                 borderColor: alpha(theme.palette.success.main, 0.1),
               }}

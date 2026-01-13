@@ -18,11 +18,10 @@ export const MessageList = ({
 }: MessageListProps) => {
   return (
     <Stack spacing={3}>
-      {messages.map((msg: Message, index: number) => (
+      {messages.map((msg: Message) => (
         <MessageItem
           key={msg.id}
           message={msg}
-          index={index}
           regeneratingMessageId={regeneratingMessageId}
           onOpenMessageMenu={onOpenMessageMenu}
         />
