@@ -1,6 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 
-// Создаем светло бело-голубую тему с закруглениями и плавными анимациями
+// Светлая, “воздушная” тема без избыточных анимаций и гигантизма
 export const theme = createTheme({
   palette: {
     mode: 'light',
@@ -73,7 +73,7 @@ export const theme = createTheme({
       'sans-serif',
     ].join(','),
     h1: {
-      fontSize: '2.5rem',
+      fontSize: '2.1rem',
       fontWeight: 700,
       lineHeight: 1.2,
       background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
@@ -82,7 +82,7 @@ export const theme = createTheme({
       backgroundClip: 'text',
     },
     h1Gradient: {
-      fontSize: '2.5rem',
+      fontSize: '2.1rem',
       fontWeight: 700,
       lineHeight: 1.2,
       background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
@@ -91,47 +91,47 @@ export const theme = createTheme({
       backgroundClip: 'text',
     },
     h1Solid: {
-      fontSize: '2.5rem',
+      fontSize: '2.1rem',
       fontWeight: 700,
       lineHeight: 1.2,
       color: '#1e3a8a',
     },
     h2: {
-      fontSize: '1.5rem',
+      fontSize: '1.25rem',
       fontWeight: 600,
       lineHeight: 1.3,
       color: '#1e3a8a',
     },
     h3: {
-      fontSize: '1.25rem',
-      fontWeight: 600,
-      lineHeight: 1.4,
-      color: '#1e3a8a',
-    },
-    h4: {
       fontSize: '1.1rem',
       fontWeight: 600,
       lineHeight: 1.4,
       color: '#1e3a8a',
     },
-    body1: {
+    h4: {
       fontSize: '1rem',
+      fontWeight: 600,
+      lineHeight: 1.4,
+      color: '#1e3a8a',
+    },
+    body1: {
+      fontSize: '0.95rem',
       lineHeight: 1.5,
       color: '#64748b',
     },
     body2: {
-      fontSize: '0.9rem',
+      fontSize: '0.875rem',
       lineHeight: 1.5,
       color: '#64748b',
     },
     caption: {
-      fontSize: '0.85rem',
+      fontSize: '0.75rem',
       color: '#94a3b8',
     },
   },
 
   shape: {
-    borderRadius: 12,
+    borderRadius: 10,
   },
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -164,13 +164,13 @@ export const theme = createTheme({
 
   transitions: {
     duration: {
-      shortest: 150,
-      shorter: 200,
-      short: 250,
-      standard: 300,
-      complex: 375,
-      enteringScreen: 225,
-      leavingScreen: 195,
+      shortest: 120,
+      shorter: 160,
+      short: 200,
+      standard: 240,
+      complex: 280,
+      enteringScreen: 180,
+      leavingScreen: 160,
     },
     easing: {
       easeInOut: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -200,34 +200,34 @@ export const theme = createTheme({
       },
     },
 
-    // Кнопки с красивыми градиентами и анимациями
     MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
       styleOverrides: {
         root: {
-          borderRadius: 28,
+          borderRadius: 12,
           textTransform: 'none',
-          fontSize: '1rem',
+          fontSize: '0.9rem',
           fontWeight: 600,
-          padding: '12px 32px',
+          padding: '8px 16px',
           boxShadow: 'none',
-          transition:
-            'background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
           '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: '0 12px 32px rgba(59, 130, 246, 0.4)',
+            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.08)',
           },
         },
         sizeLarge: {
-          padding: '16px 40px',
-          fontSize: '1.1rem',
+          padding: '10px 20px',
+          fontSize: '0.95rem',
         },
         sizeSmall: {
-          padding: '8px 24px',
-          fontSize: '0.9rem',
+          padding: '6px 12px',
+          fontSize: '0.85rem',
         },
         containedPrimary: {
           background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-          boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)',
+          boxShadow: '0 1px 2px rgba(15, 23, 42, 0.12)',
           '&:hover': {
             background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
           },
@@ -236,21 +236,24 @@ export const theme = createTheme({
             background: '#e2e8f0',
           },
         },
+        outlined: {
+          '&:hover': {
+            backgroundColor: 'rgba(59, 130, 246, 0.06)',
+          },
+        },
       },
     },
 
-    // Карточки с красивыми тенями и закруглениями
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+          borderRadius: 12,
+          boxShadow: '0 1px 2px rgba(15, 23, 42, 0.06)',
           border: '1px solid #e2e8f0',
-          transition:
-            'box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
           '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+            boxShadow: '0 6px 18px rgba(15, 23, 42, 0.08)',
+            borderColor: '#dbeafe',
           },
         },
       },
@@ -260,11 +263,11 @@ export const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 10,
           fontSize: '0.75rem',
           fontWeight: 600,
-          height: 'auto',
-          padding: '6px 12px',
+          height: 24,
+          padding: '0 6px',
           border: 'none',
         },
         colorSuccess: {
@@ -304,8 +307,8 @@ export const theme = createTheme({
     MuiContainer: {
       styleOverrides: {
         root: {
-          paddingLeft: 24,
-          paddingRight: 24,
+          paddingLeft: 16,
+          paddingRight: 16,
         },
       },
     },
@@ -315,16 +318,35 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: '#ffffff',
-          borderRadius: 16,
+          borderRadius: 12,
         },
         elevation1: {
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
+          boxShadow: '0 1px 2px rgba(15, 23, 42, 0.06)',
         },
         elevation2: {
-          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+          boxShadow: '0 6px 18px rgba(15, 23, 42, 0.08)',
         },
         elevation3: {
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+          boxShadow: '0 10px 28px rgba(15, 23, 42, 0.10)',
+        },
+      },
+    },
+
+    MuiFab: {
+      defaultProps: {
+        size: 'medium',
+      },
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          textTransform: 'none',
+          boxShadow: '0 10px 24px rgba(59, 130, 246, 0.18)',
+          '&:hover': {
+            boxShadow: '0 14px 30px rgba(59, 130, 246, 0.22)',
+          },
+        },
+        extended: {
+          padding: '0 14px',
         },
       },
     },

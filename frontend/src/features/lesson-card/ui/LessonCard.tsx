@@ -9,6 +9,7 @@ import {
   Tooltip,
   useTheme,
 } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import {
   AccessTime,
   PlayCircle,
@@ -146,23 +147,30 @@ export const LessonCard: FC<LessonCardProps> = ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-        '&:hover': {
-          transform: onClick ? 'translateY(-4px)' : 'none',
-          boxShadow: onClick ? 4 : 1,
-        },
+        // Не дублируем глобальные hover-эффекты темы (иначе получается “прыгающий” UI)
+        transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
       }}
     >
       <CardContent
-        sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 2 }}
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1.75,
+        }}
       >
         {/* Header: Icon + Breadcrumbs */}
         <Box display="flex" alignItems="flex-start" gap={1}>
           <Box
             sx={{
-              p: 1,
+              p: 0.75,
               borderRadius: 2,
-              bgcolor: isReview ? 'warning.lighter' : 'primary.lighter',
+              bgcolor: alpha(
+                isReview
+                  ? theme.palette.warning.main
+                  : theme.palette.primary.main,
+                0.12,
+              ),
               color: isReview ? 'warning.main' : 'primary.main',
               display: 'flex',
               alignItems: 'center',
@@ -215,7 +223,7 @@ export const LessonCard: FC<LessonCardProps> = ({
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
                 lineHeight: 1.3,
-                mb: 1,
+                mb: 0.75,
               }}
             >
               {lesson.title}
@@ -240,7 +248,13 @@ export const LessonCard: FC<LessonCardProps> = ({
         </Box>
 
         {/* Metadata Stats */}
-        <Stack direction="row" spacing={2} alignItems="center" mt="auto" pt={1}>
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          mt="auto"
+          pt={0.75}
+        >
           {/* Always show reading time if available */}
           {lesson.reading_time && (
             <Tooltip title="Время чтения">
@@ -273,6 +287,7 @@ export const LessonCard: FC<LessonCardProps> = ({
           display="flex"
           justifyContent="space-between"
           alignItems="center"
+          mt={0.25}
           pt={1}
           borderTop={`1px solid ${theme.palette.divider}`}
         >
@@ -285,7 +300,7 @@ export const LessonCard: FC<LessonCardProps> = ({
                 variant="outlined"
               />
               <Button
-                variant="contained"
+                variant="outlined"
                 size="small"
                 startIcon={<PlayCircle />}
                 onClick={handleActionClick}
@@ -304,6 +319,7 @@ export const LessonCard: FC<LessonCardProps> = ({
                 label={getStatusText(lesson.status)}
                 color={getStatusColor(lesson.status)}
                 size="small"
+                variant="outlined"
               />
               <Typography variant="caption" color="text.secondary">
                 {formatDate(lesson.created_at)}
