@@ -102,7 +102,7 @@ export class LessonsService {
     if (!lesson.isCreated) {
       const lessonContent = await this.generateLessonContent(
         lesson.title,
-        lesson.description,
+        lesson.description ?? undefined,
         'normal', // Можно добавить поле complexity в Lesson entity позже
       );
 
@@ -150,7 +150,7 @@ export class LessonsService {
     return this.accessControlService.getSharedLessons();
   }
 
-  async createModule(createModuleDto: CreateModuleDto) {
+  async createModule(createModuleDto: CreateModuleDto, userId: string) {
     let courseId = createModuleDto.courseId;
 
     // Если выбран новый курс, создаем его
@@ -158,8 +158,7 @@ export class LessonsService {
       const newCourse = await this.coursesService.createCourse({
         title: createModuleDto.newCourseName,
         description: `Курс создан автоматически для урока: ${createModuleDto.topic}`,
-        userId: createModuleDto.userId,
-      });
+      }, userId);
       courseId = newCourse.id;
     }
 
@@ -174,7 +173,7 @@ export class LessonsService {
       unit = await this.unitsService.createUnitForCourse(
         courseId,
         1,
-        createModuleDto.userId,
+        userId,
       );
     }
 
@@ -193,7 +192,7 @@ export class LessonsService {
     // Создаем урок
     const lesson = this.lessonRepository.create({
       unit: { id: unit.id },
-      user: { id: createModuleDto.userId },
+      user: { id: userId },
       title: lessonContent.title,
       description: lessonContent.description,
       content: lessonContent.content,
@@ -322,15 +321,18 @@ export class LessonsService {
     }
   }
 
-  async askLessonQuestion(askLessonQuestionDto: AskLessonQuestionDto): Promise<{
+  async askLessonQuestion(
+    lessonId: string,
+    userId: string,
+    askLessonQuestionDto: AskLessonQuestionDto,
+  ): Promise<{
     question: string;
     answer: string;
     lessonTitle: string;
     messageId: string;
     threadId: string;
   }> {
-    const { lessonId, userId, question, threadId, lessonContent } =
-      askLessonQuestionDto;
+    const { question, threadId, lessonContent } = askLessonQuestionDto;
 
     // Проверяем, что урок существует
     const lesson = await this.findOneLesson(lessonId, userId);
@@ -338,11 +340,10 @@ export class LessonsService {
     // Используем ChatService для обработки вопроса
     const result = await this.chatService.sendMessage({
       lessonId,
-      userId,
       content: question,
       threadId,
       lessonContent: lessonContent || lesson.content,
-    });
+    }, userId);
 
     return {
       question,
@@ -362,7 +363,7 @@ export class LessonsService {
     threadId: string;
   }> {
     await this.findOneLesson(lessonId, userId);
-    return this.chatService.deleteThread(lessonId, threadId);
+    return this.chatService.deleteThread(lessonId, threadId, userId);
   }
 
   async regenerateMessage(
@@ -377,13 +378,14 @@ export class LessonsService {
     return this.chatService.regenerateMessage(
       lessonId,
       messageId,
+      userId,
       lesson.content,
     );
   }
 
   async getThreads(lessonId: string, userId: string): Promise<unknown[]> {
     await this.findOneLesson(lessonId, userId);
-    return this.chatService.getThreads(lessonId);
+    return this.chatService.getThreads(lessonId, userId);
   }
 
   async getThreadMessages(
@@ -392,10 +394,13 @@ export class LessonsService {
     userId: string,
   ): Promise<unknown[]> {
     await this.findOneLesson(lessonId, userId);
-    return this.chatService.getThreadMessages(lessonId, threadId);
+    return this.chatService.getThreadMessages(lessonId, threadId, userId);
   }
 
-  async createCourseOutline(createCourseOutlineDto: CreateCourseOutlineDto) {
+  async createCourseOutline(
+    createCourseOutlineDto: CreateCourseOutlineDto,
+    userId: string,
+  ) {
     // Генерируем структуру курса через AI
     const courseOutline = await this.generateCourseOutline(
       createCourseOutlineDto.topic,
@@ -407,14 +412,13 @@ export class LessonsService {
     const course = await this.coursesService.createCourse({
       title: courseOutline.name,
       description: courseOutline.description,
-      userId: createCourseOutlineDto.userId,
-    });
+    }, userId);
 
     // Создаем Unit для курса
     const unit = await this.unitsService.createUnitForCourse(
       course.id,
       1,
-      createCourseOutlineDto.userId,
+      userId,
     );
 
     // Создаем уроки-заглушки (без контента)
@@ -423,7 +427,7 @@ export class LessonsService {
       const lessonData = courseOutline.lessons[i];
       const lesson = this.lessonRepository.create({
         unit: { id: unit.id },
-        user: { id: createCourseOutlineDto.userId },
+        user: { id: userId },
         title: lessonData.name,
         description: lessonData.description,
         content: '', // Пустой контент - будет сгенерирован при открытии урока

@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-02-20T19-40-03-402Z",
+  "backupPath": "C:\\pet_projects\\PathwiseAI\\pglite-backups\\2026-02-20T19-40-03-402Z",
+  "totals": {
+    "totalExams": 17,
+    "migrated": 13,
+    "alreadyLinked": 0,
+    "ambiguous": 4
+  },
+  "ambiguousRecords": [
+    {
+      "examId": "43ad6e73-2615-4df1-991c-8454eeed9618",
+      "title": "Тест по уроку: Глубокое погружение в базовые типы данных Javascript",
+      "userId": "8a8a87da-fec6-4bc5-a0d9-9b8a379cc4b5",
+      "courseId": "e004849c-4235-4ae5-b7b9-7a85046377cb",
+      "reason": "no_lesson_match",
+      "matchedLessonIds": []
+    },
+    {
+      "examId": "1c6cc527-712a-49ee-a5bf-35df14b34b4f",
+      "title": "Тест по уроку: Глубокое погружение в базовые типы данных Javascript",
+      "userId": "8a8a87da-fec6-4bc5-a0d9-9b8a379cc4b5",
+      "courseId": "e004849c-4235-4ae5-b7b9-7a85046377cb",
+      "reason": "no_lesson_match",
+      "matchedLessonIds": []
+    },
+    {
+      "examId": "4604f30f-95d3-486e-8d97-e3b97c89eeb0",
+      "title": "Тест по уроку: Глубокое погружение в базовые типы данных Javascript",
+      "userId": "8a8a87da-fec6-4bc5-a0d9-9b8a379cc4b5",
+      "courseId": "e004849c-4235-4ae5-b7b9-7a85046377cb",
+      "reason": "no_lesson_match",
+      "matchedLessonIds": []
+    },
+    {
+      "examId": "da843486-3089-44e2-9145-a5d62edd57ee",
+      "title": "Тест по уроку: Типы данных, примитивы и управление памятью в JavaScript",
+      "userId": "8a8a87da-fec6-4bc5-a0d9-9b8a379cc4b5",
+      "courseId": "de1b063c-673a-4607-8fa9-da8b96e92fc4",
+      "reason": "no_lesson_match",
+      "matchedLessonIds": []
+    }
+  ]
+}

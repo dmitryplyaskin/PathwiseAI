@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { Response } from 'express';
@@ -7,6 +12,8 @@ import { ChatMessage, MessageRole } from '../entities/chat-message.entity';
 import { CreateChatMessageDto } from '../dto/create-chat-message.dto';
 import { GetChatMessagesDto } from '../dto/get-chat-messages.dto';
 import { OpenRouterService } from './openrouter.service';
+import { AccessControlService } from '../../../shared/services/access-control.service';
+import { Lesson } from '../../courses/entities/lesson.entity';
 
 @Injectable()
 export class ChatService {
@@ -17,7 +24,10 @@ export class ChatService {
     private readonly chatRepository: Repository<Chat>,
     @InjectRepository(ChatMessage)
     private readonly chatMessageRepository: Repository<ChatMessage>,
+    @InjectRepository(Lesson)
+    private readonly lessonRepository: Repository<Lesson>,
     private readonly openRouterService: OpenRouterService,
+    private readonly accessControlService: AccessControlService,
   ) {}
 
   async getOrCreateChat(lessonId: string): Promise<Chat> {
@@ -34,19 +44,18 @@ export class ChatService {
     return chat;
   }
 
-  async sendMessage(createChatMessageDto: CreateChatMessageDto) {
+  async sendMessage(createChatMessageDto: CreateChatMessageDto, userId: string) {
     const {
       lessonId,
-      userId,
       content,
       threadId = 'main',
       lessonContent,
     } = createChatMessageDto;
 
-    // Получить или создать чат для урока
+    await this.assertLessonAccess(lessonId, userId);
+
     const chat = await this.getOrCreateChat(lessonId);
 
-    // Сохранить сообщение пользователя
     const userMessage = this.chatMessageRepository.create({
       chatId: chat.id,
       userId,
@@ -56,24 +65,10 @@ export class ChatService {
     });
     await this.chatMessageRepository.save(userMessage);
 
-    // Получить историю сообщений для контекста (только текущая ветка)
     const messages = await this.getChatHistory(chat.id, threadId);
 
-    // Подготовить системный промпт с контекстом урока
-    const systemPrompt = lessonContent
-      ? `Ты - AI-помощник в образовательной платформе PathwiseAI. Студент изучает урок и задает вопросы, чтобы лучше понять материал.
+    const systemPrompt = this.buildSystemPrompt(lessonContent);
 
-КОНТЕКСТ УРОКА:
-${lessonContent}
-
-Твоя задача:
-- Отвечай на вопросы студента, основываясь на контексте урока
-- Объясняй понятно и с примерами
-- Помогай углубить понимание темы
-- Если вопрос выходит за рамки урока, мягко верни к теме`
-      : 'Ты - AI-помощник в образовательной платформе PathwiseAI. Помогай студентам понять материал урока, отвечай на их вопросы четко и понятно.';
-
-    // Подготовить сообщения для OpenRouter
     const openRouterMessages = [
       {
         role: 'system',
@@ -85,11 +80,9 @@ ${lessonContent}
       })),
     ];
 
-    // Получить ответ от AI
     const aiResponse =
       await this.openRouterService.generateResponse(openRouterMessages);
 
-    // Сохранить ответ AI
     const aiMessage = this.chatMessageRepository.create({
       chatId: chat.id,
       role: MessageRole.ASSISTANT,
@@ -106,8 +99,9 @@ ${lessonContent}
     };
   }
 
-  async getChatMessages(getChatMessagesDto: GetChatMessagesDto) {
+  async getChatMessages(getChatMessagesDto: GetChatMessagesDto, userId: string) {
     const { lessonId } = getChatMessagesDto;
+    await this.assertLessonAccess(lessonId, userId);
 
     const chat = await this.chatRepository.findOne({
       where: { lessonId },
@@ -138,7 +132,9 @@ ${lessonContent}
     });
   }
 
-  async deleteChat(lessonId: string) {
+  async deleteChat(lessonId: string, userId: string) {
+    await this.assertLessonOwner(lessonId, userId);
+
     const chat = await this.chatRepository.findOne({ where: { lessonId } });
 
     if (!chat) {
@@ -149,7 +145,9 @@ ${lessonContent}
     return { message: 'Чат успешно удален' };
   }
 
-  async clearChatHistory(lessonId: string) {
+  async clearChatHistory(lessonId: string, userId: string) {
+    await this.assertLessonOwner(lessonId, userId);
+
     const chat = await this.chatRepository.findOne({ where: { lessonId } });
 
     if (!chat) {
@@ -160,7 +158,9 @@ ${lessonContent}
     return { message: 'История чата очищена' };
   }
 
-  async deleteThread(lessonId: string, threadId: string) {
+  async deleteThread(lessonId: string, threadId: string, userId: string) {
+    await this.assertLessonOwner(lessonId, userId);
+
     const chat = await this.chatRepository.findOne({ where: { lessonId } });
 
     if (!chat) {
@@ -174,15 +174,17 @@ ${lessonContent}
   async regenerateMessage(
     lessonId: string,
     messageId: string,
+    userId: string,
     lessonContent?: string,
   ) {
+    await this.assertLessonOwner(lessonId, userId);
+
     const chat = await this.chatRepository.findOne({ where: { lessonId } });
 
     if (!chat) {
       throw new NotFoundException('Чат не найден');
     }
 
-    // Найти сообщение для регенерации
     const messageToRegenerate = await this.chatMessageRepository.findOne({
       where: { id: messageId, chatId: chat.id, role: MessageRole.ASSISTANT },
     });
@@ -193,24 +195,11 @@ ${lessonContent}
 
     const threadId = messageToRegenerate.threadId;
 
-    // Получить все сообщения до этого в ветке
     const allMessages = await this.getChatHistory(chat.id, threadId);
     const messageIndex = allMessages.findIndex((msg) => msg.id === messageId);
     const messagesBeforeRegeneration = allMessages.slice(0, messageIndex);
 
-    // Подготовить системный промпт
-    const systemPrompt = lessonContent
-      ? `Ты - AI-помощник в образовательной платформе PathwiseAI. Студент изучает урок и задает вопросы, чтобы лучше понять материал.
-
-КОНТЕКСТ УРОКА:
-${lessonContent}
-
-Твоя задача:
-- Отвечай на вопросы студента, основываясь на контексте урока
-- Объясняй понятно и с примерами
-- Помогай углубить понимание темы
-- Если вопрос выходит за рамки урока, мягко верни к теме`
-      : 'Ты - AI-помощник в образовательной платформе PathwiseAI. Помогай студентам понять материал урока, отвечай на их вопросы четко и понятно.';
+    const systemPrompt = this.buildSystemPrompt(lessonContent);
 
     const openRouterMessages = [
       {
@@ -223,11 +212,9 @@ ${lessonContent}
       })),
     ];
 
-    // Получить новый ответ от AI
     const newResponse =
       await this.openRouterService.generateResponse(openRouterMessages);
 
-    // Обновить сообщение
     messageToRegenerate.content = newResponse;
     await this.chatMessageRepository.save(messageToRegenerate);
 
@@ -237,14 +224,15 @@ ${lessonContent}
     };
   }
 
-  async getThreads(lessonId: string) {
+  async getThreads(lessonId: string, userId: string) {
+    await this.assertLessonAccess(lessonId, userId);
+
     const chat = await this.chatRepository.findOne({ where: { lessonId } });
 
     if (!chat) {
       return [];
     }
 
-    // Получить все уникальные threadId
     const messages = await this.chatMessageRepository.find({
       where: { chatId: chat.id },
       order: { created_at: 'ASC' },
@@ -284,7 +272,9 @@ ${lessonContent}
     );
   }
 
-  async getThreadMessages(lessonId: string, threadId: string) {
+  async getThreadMessages(lessonId: string, threadId: string, userId: string) {
+    await this.assertLessonAccess(lessonId, userId);
+
     const chat = await this.chatRepository.findOne({ where: { lessonId } });
 
     if (!chat) {
@@ -299,31 +289,30 @@ ${lessonContent}
 
   async sendMessageStream(
     createChatMessageDto: CreateChatMessageDto,
+    userId: string,
     res: Response,
   ) {
-    const { lessonId, userId, content } = createChatMessageDto;
+    const { lessonId, content, threadId = 'main', lessonContent } = createChatMessageDto;
 
-    // Получить или создать чат для урока
+    await this.assertLessonAccess(lessonId, userId);
+
     const chat = await this.getOrCreateChat(lessonId);
 
-    // Сохранить сообщение пользователя
     const userMessage = this.chatMessageRepository.create({
       chatId: chat.id,
       userId,
       role: MessageRole.USER,
       content,
+      threadId,
     });
     await this.chatMessageRepository.save(userMessage);
 
-    // Получить историю сообщений для контекста
-    const messages = await this.getChatHistory(chat.id);
+    const messages = await this.getChatHistory(chat.id, threadId);
 
-    // Подготовить сообщения для OpenRouter
     const openRouterMessages = [
       {
         role: 'system',
-        content:
-          'Ты - AI-помощник в образовательной платформе PathwiseAI. Помогай студентам понять материал урока, отвечай на их вопросы четко и понятно. Если вопрос не связан с учебой, вежливо переведи разговор на образовательную тему.',
+        content: this.buildSystemPrompt(lessonContent),
       },
       ...messages.map((msg) => ({
         role: msg.role === MessageRole.ASSISTANT ? 'assistant' : 'user',
@@ -331,38 +320,36 @@ ${lessonContent}
       })),
     ];
 
-    // Настроить заголовки для SSE
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       Connection: 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
     });
 
     let fullResponse = '';
 
     try {
-      // Получить стрим ответа от AI
       const stream =
         await this.openRouterService.generateStreamResponse(openRouterMessages);
 
       for await (const chunk of stream) {
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          fullResponse += content;
-          res.write(`data: ${JSON.stringify({ content, type: 'chunk' })}\n\n`);
+        const contentChunk = chunk.choices[0]?.delta?.content || '';
+        if (contentChunk) {
+          fullResponse += contentChunk;
+          res.write(
+            `data: ${JSON.stringify({ content: contentChunk, type: 'chunk' })}\n\n`,
+          );
         }
       }
 
-      // Сохранить полный ответ AI
       const aiMessage = this.chatMessageRepository.create({
         chatId: chat.id,
         role: MessageRole.ASSISTANT,
         content: fullResponse,
+        threadId,
       });
       await this.chatMessageRepository.save(aiMessage);
 
-      // Отправить финальное сообщение
       res.write(
         `data: ${JSON.stringify({
           content: '',
@@ -383,5 +370,48 @@ ${lessonContent}
     }
 
     res.end();
+  }
+
+  private buildSystemPrompt(lessonContent?: string): string {
+    if (lessonContent) {
+      return `Ты - AI-помощник в образовательной платформе PathwiseAI. Студент изучает урок и задает вопросы, чтобы лучше понять материал.
+
+КОНТЕКСТ УРОКА:
+${lessonContent}
+
+Твоя задача:
+- Отвечай на вопросы студента, основываясь на контексте урока
+- Объясняй понятно и с примерами
+- Помогай углубить понимание темы
+- Если вопрос выходит за рамки урока, мягко верни к теме`;
+    }
+
+    return 'Ты - AI-помощник в образовательной платформе PathwiseAI. Помогай студентам понять материал урока, отвечай на их вопросы четко и понятно.';
+  }
+
+  private async assertLessonAccess(lessonId: string, userId: string): Promise<void> {
+    const hasAccess = await this.accessControlService.checkLessonAccess(
+      lessonId,
+      userId,
+    );
+
+    if (!hasAccess) {
+      throw new ForbiddenException('Нет доступа к этому уроку');
+    }
+  }
+
+  private async assertLessonOwner(lessonId: string, userId: string): Promise<void> {
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: lessonId },
+      relations: ['user'],
+    });
+
+    if (!lesson) {
+      throw new NotFoundException('Урок не найден');
+    }
+
+    if (lesson.user.id !== userId) {
+      throw new ForbiddenException('Доступ разрешен только владельцу урока');
+    }
   }
 }

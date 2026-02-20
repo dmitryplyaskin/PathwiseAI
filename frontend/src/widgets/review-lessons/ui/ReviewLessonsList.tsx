@@ -9,7 +9,6 @@ import {
 import { useNavigate } from 'react-router';
 import { lessonsApi } from '@shared/api/lessons/api';
 import type { LessonForReview } from '@shared/api/lessons/types';
-import { useCurrentUser } from '@shared/model/users';
 import { LessonCard } from '@features/lesson-card/ui/LessonCard';
 
 interface ReviewLessonsListProps {
@@ -22,17 +21,14 @@ export const ReviewLessonsList: React.FC<ReviewLessonsListProps> = ({
   const [lessons, setLessons] = useState<LessonForReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { userId } = useCurrentUser();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchLessons = async () => {
-      if (!userId) return;
-
       try {
         setLoading(true);
         setError(null);
-        const lessonsData = await lessonsApi.getLessonsForReview(userId);
+        const lessonsData = await lessonsApi.getLessonsForReview();
         setLessons(lessonsData.slice(0, maxItems));
       } catch (err) {
         console.error('Failed to fetch review lessons:', err);
@@ -58,7 +54,7 @@ export const ReviewLessonsList: React.FC<ReviewLessonsListProps> = ({
     return () => {
       window.removeEventListener('lessonUpdated', handleLessonUpdate);
     };
-  }, [userId, maxItems]);
+  }, [maxItems]);
 
   if (loading) {
     return (

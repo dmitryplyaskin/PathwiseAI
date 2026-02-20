@@ -7,7 +7,6 @@ import {
   type CheckTextAnswerRequest,
   type CheckTextAnswerResponse,
   type ExamHistoryItem,
-  type GetUserExamsRequest,
   type GetLessonExamsRequest,
   type DeleteLessonProgressRequest,
   type DeleteLessonProgressResponse,
@@ -38,17 +37,15 @@ export const testsApi = {
     );
   },
 
-  getUserExams: async (
-    request: GetUserExamsRequest,
-  ): Promise<ExamHistoryItem[]> => {
-    return apiClient.get<ExamHistoryItem[]>(`/exams/user/${request.userId}`);
+  getUserExams: async (): Promise<ExamHistoryItem[]> => {
+    return apiClient.get<ExamHistoryItem[]>('/exams/me');
   },
 
   getLessonExams: async (
     request: GetLessonExamsRequest,
   ): Promise<ExamHistoryItem[]> => {
     return apiClient.get<ExamHistoryItem[]>(
-      `/exams/lesson/${request.lessonId}/user/${request.userId}`,
+      `/exams/lesson/${request.lessonId}`,
     );
   },
 
@@ -56,7 +53,7 @@ export const testsApi = {
     request: DeleteLessonProgressRequest,
   ): Promise<DeleteLessonProgressResponse> => {
     return apiClient.delete<DeleteLessonProgressResponse>(
-      `/exams/lesson/${request.lessonId}/user/${request.userId}`,
+      `/exams/lesson/${request.lessonId}/progress`,
     );
   },
 };

@@ -124,14 +124,12 @@ export const ContentCreationModal = ({
           lessonForm.courseId === 'new' ? undefined : lessonForm.courseId,
         newCourseName:
           lessonForm.courseId === 'new' ? lessonForm.newCourseName : undefined,
-        userId,
       });
     } else {
       createCourseOutline({
         topic: currentForm.topic,
         details: currentForm.details || undefined,
         complexity: currentForm.complexity as ModuleComplexity,
-        userId,
       });
     }
   }, [activeTab, currentForm, userId, lessonForm]);

@@ -34,16 +34,16 @@ export class Lesson {
   title: string;
 
   @Column('text', { nullable: true })
-  description: string;
+  description: string | null;
 
   @Column('text')
   content: string;
 
   @Column('int', { nullable: true })
-  reading_time: number;
+  reading_time: number | null;
 
   @Column('int', { nullable: true })
-  difficulty: number;
+  difficulty: number | null;
 
   @Column('int')
   order: number;
@@ -55,11 +55,11 @@ export class Lesson {
   })
   status: LessonStatus;
 
-  @Column({ nullable: true })
-  last_reviewed_at: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  last_reviewed_at: Date | null;
 
-  @Column({ nullable: true })
-  next_review_at: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  next_review_at: Date | null;
 
   @Column('float', { default: 2.5 })
   ease_factor: number;

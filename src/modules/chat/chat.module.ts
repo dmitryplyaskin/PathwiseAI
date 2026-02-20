@@ -8,11 +8,14 @@ import { Chat } from './entities/chat.entity';
 import { ChatMessage } from './entities/chat-message.entity';
 import { ClarificationMessage } from './entities/clarification-message.entity';
 import openrouterConfig from '../../config/openrouter.config';
+import { Lesson } from '../courses/entities/lesson.entity';
+import { SharedModule } from '../../shared/shared.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Chat, ChatMessage, ClarificationMessage]),
+    TypeOrmModule.forFeature([Chat, ChatMessage, ClarificationMessage, Lesson]),
     ConfigModule.forFeature(openrouterConfig),
+    SharedModule,
   ],
   controllers: [ChatController],
   providers: [ChatService, OpenRouterService],

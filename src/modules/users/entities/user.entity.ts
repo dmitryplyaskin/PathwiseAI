@@ -34,7 +34,7 @@ export class User {
   role: UserRole;
 
   @Column({ type: 'jsonb', nullable: true })
-  settings: Record<string, any>;
+  settings: Record<string, any> | null;
 
   @OneToMany(() => Course, (course) => course.user)
   courses: Course[];

@@ -8,7 +8,6 @@ import {
   Delete,
   ParseUUIDPipe,
   UseGuards,
-  ForbiddenException,
 } from '@nestjs/common';
 import { ExamsService } from '../services/exams.service';
 import { CreateExamDto } from '../dto/create-exam.dto';
@@ -28,100 +27,108 @@ export class ExamsController {
   constructor(private readonly examsService: ExamsService) {}
 
   @Post()
-  createExam(@Body() createExamDto: CreateExamDto) {
-    return this.examsService.createExam(createExamDto);
+  createExam(@Body() createExamDto: CreateExamDto, @CurrentUser() user: User) {
+    return this.examsService.createExam(createExamDto, user.id);
   }
 
-  @Get()
-  findAllExams() {
-    return this.examsService.findAllExams();
+  @Get('me')
+  findMyExams(@CurrentUser() user: User) {
+    return this.examsService.findExamsByUser(user.id);
   }
 
-  @Get('lesson/:lessonId/user/:userId')
+  @Get('lesson/:lessonId')
   findExamsByLesson(
     @Param('lessonId', ParseUUIDPipe) lessonId: string,
-    @Param('userId', ParseUUIDPipe) userId: string,
-  ) {
-    return this.examsService.findExamsByLesson(lessonId, userId);
-  }
-
-  @Get('user/:userId')
-  findExamsByUser(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.examsService.findExamsByUser(userId);
-  }
-
-  @Get(':id')
-  findOneExam(@Param('id', ParseUUIDPipe) id: string) {
-    return this.examsService.findOneExam(id);
-  }
-
-  @Patch(':id')
-  updateExam(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateExamDto: UpdateExamDto,
-  ) {
-    return this.examsService.updateExam(id, updateExamDto);
-  }
-
-  @Delete('lesson/:lessonId/user/:userId')
-  deleteLessonProgress(
-    @Param('lessonId', ParseUUIDPipe) lessonId: string,
-    @Param('userId', ParseUUIDPipe) userId: string,
     @CurrentUser() user: User,
   ) {
-    // Проверяем что userId из токена совпадает с userId в запросе
-    if (user.id !== userId) {
-      throw new ForbiddenException('You can only delete your own progress');
-    }
-    return this.examsService.deleteExamsByLesson(lessonId, userId);
+    return this.examsService.findExamsByLesson(lessonId, user.id);
   }
 
-  @Delete('results/:id')
-  removeExamResult(@Param('id', ParseUUIDPipe) id: string) {
-    return this.examsService.removeExamResult(id);
-  }
-
-  @Delete(':id')
-  removeExam(@Param('id', ParseUUIDPipe) id: string) {
-    return this.examsService.removeExam(id);
+  @Delete('lesson/:lessonId/progress')
+  deleteLessonProgress(
+    @Param('lessonId', ParseUUIDPipe) lessonId: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.examsService.deleteExamsByLesson(lessonId, user.id);
   }
 
   @Post('results')
-  createExamResult(@Body() createExamResultDto: CreateExamResultDto) {
-    return this.examsService.createExamResult(createExamResultDto);
+  createExamResult(
+    @Body() createExamResultDto: CreateExamResultDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.examsService.createExamResult(createExamResultDto, user.id);
   }
 
   @Get('results')
-  findAllExamResults() {
-    return this.examsService.findAllExamResults();
+  findAllExamResults(@CurrentUser() user: User) {
+    return this.examsService.findAllExamResults(user.id);
   }
 
   @Get('results/:id')
-  findOneExamResult(@Param('id', ParseUUIDPipe) id: string) {
-    return this.examsService.findOneExamResult(id);
+  findOneExamResult(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.examsService.findOneExamResult(id, user.id);
   }
 
   @Patch('results/:id')
   updateExamResult(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateExamResultDto: UpdateExamResultDto,
+    @CurrentUser() user: User,
   ) {
-    return this.examsService.updateExamResult(id, updateExamResultDto);
+    return this.examsService.updateExamResult(id, updateExamResultDto, user.id);
   }
 
-  // New endpoints for test generation and submission
+  @Delete('results/:id')
+  removeExamResult(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
+    return this.examsService.removeExamResult(id, user.id);
+  }
+
   @Post('generate-for-lesson')
-  generateTestForLesson(@Body() generateTestDto: GenerateTestDto) {
-    return this.examsService.getOrGenerateTestForLesson(generateTestDto);
+  generateTestForLesson(
+    @Body() generateTestDto: GenerateTestDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.examsService.getOrGenerateTestForLesson(generateTestDto, user.id);
   }
 
   @Post('submit-result')
-  submitTestResult(@Body() submitTestResultDto: SubmitTestResultDto) {
-    return this.examsService.submitTestResult(submitTestResultDto);
+  submitTestResult(
+    @Body() submitTestResultDto: SubmitTestResultDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.examsService.submitTestResult(submitTestResultDto, user.id);
   }
 
   @Post('check-text-answer')
   checkTextAnswer(@Body() checkTextAnswerDto: CheckTextAnswerDto) {
     return this.examsService.checkTextAnswer(checkTextAnswerDto);
+  }
+
+  @Get()
+  findAllExams(@CurrentUser() user: User) {
+    return this.examsService.findAllExams(user.id);
+  }
+
+  @Get(':id')
+  findOneExam(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
+    return this.examsService.findOneExam(id, user.id);
+  }
+
+  @Patch(':id')
+  updateExam(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateExamDto: UpdateExamDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.examsService.updateExam(id, updateExamDto, user.id);
+  }
+
+  @Delete(':id')
+  removeExam(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: User) {
+    return this.examsService.removeExam(id, user.id);
   }
 }

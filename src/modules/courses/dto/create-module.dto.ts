@@ -24,15 +24,11 @@ export class CreateModuleDto {
   @IsEnum(ModuleComplexity)
   complexity: ModuleComplexity;
 
-  @IsString()
+  @IsUUID()
   @IsOptional()
   courseId?: string;
 
   @IsString()
   @IsOptional()
   newCourseName?: string;
-
-  @IsUUID()
-  @IsNotEmpty()
-  userId: string;
 }

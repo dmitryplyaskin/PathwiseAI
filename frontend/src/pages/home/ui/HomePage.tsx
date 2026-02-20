@@ -59,7 +59,7 @@ export const HomePage = () => {
     setIsCreationModalOpen(true);
   };
 
-  // Повторение (SM-2): источник истины — endpoint /lessons/for-review/:userId
+  // Повторение (SM-2): источник истины — endpoint /lessons/for-review
   const [reviewLessons, setReviewLessons] = useState<LessonForReview[]>([]);
   const [reviewLoading, setReviewLoading] = useState(true);
   const [reviewError, setReviewError] = useState<string | null>(null);
@@ -94,7 +94,7 @@ export const HomePage = () => {
       try {
         setReviewLoading(true);
         setReviewError(null);
-        const data = await lessonsApi.getLessonsForReview(userId);
+        const data = await lessonsApi.getLessonsForReview();
         setReviewLessons(data);
       } catch (error) {
         setReviewError(
@@ -116,7 +116,7 @@ export const HomePage = () => {
       try {
         setExamsLoading(true);
         setExamsError(null);
-        const data = await testsApi.getUserExams({ userId });
+        const data = await testsApi.getUserExams();
         setExams(data);
       } catch (error) {
         setExamsError(
@@ -139,9 +139,9 @@ export const HomePage = () => {
         if (!userId) return;
         try {
           const [reviewData, lessonsData, examsData] = await Promise.all([
-            lessonsApi.getLessonsForReview(userId),
+            lessonsApi.getLessonsForReview(),
             lessonsApi.getAllLessons(),
-            testsApi.getUserExams({ userId }),
+            testsApi.getUserExams(),
           ]);
           setReviewLessons(reviewData);
           setLessons(lessonsData);

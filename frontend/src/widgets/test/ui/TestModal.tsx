@@ -24,7 +24,6 @@ import { TextQuestion } from './TextQuestion';
 import { TestResult } from './TestResult';
 import { ConfirmCloseDialog } from './ConfirmCloseDialog';
 import { testsApi } from '@shared/api/tests';
-import { useCurrentUser } from '@shared/model';
 import { loadLesson } from '@shared/model/lessons';
 
 const Transition = forwardRef(function Transition(
@@ -58,7 +57,6 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showCloseConfirmDialog, setShowCloseConfirmDialog] = useState(false);
-  const { userId } = useCurrentUser();
 
   const questions = testData.questions ?? [];
   const hasQuestions = questions.length > 0;
@@ -187,14 +185,13 @@ export const TestModal = ({ open, onClose, testData }: TestModalProps) => {
     try {
       await testsApi.submitTestResult({
         examId: testData.id,
-        userId: userId ?? '',
         answers: answersToUse.map((answer) => ({
           questionId: answer.questionId,
           answer: answer.answer || '',
           isCorrect: answer.isCorrect,
           explanation: answer.llmExplanation,
         })),
-        timeSpent: timeSpent.toString(),
+        timeSpent,
       });
 
       console.log('Test results submitted successfully');

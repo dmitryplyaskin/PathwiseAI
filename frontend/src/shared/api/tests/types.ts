@@ -9,7 +9,6 @@ export type {
 
 export interface GenerateTestRequest {
   lessonId: string;
-  userId: string;
   questionCount?: number;
   mode?: 'normal' | 'detailed';
   questionTypes?: ('quiz' | 'text')[];
@@ -18,9 +17,8 @@ export interface GenerateTestRequest {
 
 export interface SubmitTestResultRequest {
   examId: string;
-  userId: string;
   answers: QuestionAnswerDto[];
-  timeSpent: string;
+  timeSpent: number;
 }
 
 export interface QuestionAnswerDto {
@@ -76,18 +74,12 @@ export interface ExamHistoryItem {
   }[];
 }
 
-export interface GetUserExamsRequest {
-  userId: string;
-}
-
 export interface GetLessonExamsRequest {
   lessonId: string;
-  userId: string;
 }
 
 export interface DeleteLessonProgressRequest {
   lessonId: string;
-  userId: string;
 }
 
 export interface DeleteLessonProgressResponse {

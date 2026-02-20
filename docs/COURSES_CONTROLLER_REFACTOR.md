@@ -38,7 +38,7 @@
    - Отвечает за операции с уроками.
    - Эндпоинты (prefix: `/lessons`):
      - `GET /` - Получение всех уроков (ранее `GET /courses/lessons`)
-     - `GET /for-review/:userId` - Уроки на проверке (ранее `GET /courses/lessons/for-review/:userId`)
+     - `GET /for-review` - Уроки на проверке (user context из JWT; ранее `GET /courses/lessons/for-review/:userId`)
      - `GET /:id` - Получение урока (ранее `GET /courses/lessons/:id`)
      - `POST /` - Создание урока (ранее `POST /courses/lessons`)
      - `PATCH /:id` - Обновление урока (ранее `PATCH /courses/lessons/:id`)
@@ -62,4 +62,3 @@ API клиенты на фронтенде были обновлены для с
 - **Чистота кода**: Каждый контроллер отвечает за свою сущность.
 - **RESTful**: Маршруты стали более логичными (например, `/lessons/:id` вместо `/courses/lessons/:id` для прямого доступа).
 - **Поддержка**: Легче находить и модифицировать методы.
-

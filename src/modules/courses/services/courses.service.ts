@@ -17,20 +17,17 @@ export class CoursesService {
     private readonly accessControlService: AccessControlService,
   ) {}
 
-  createCourse(createCourseDto: CreateCourseDto) {
+  createCourse(createCourseDto: CreateCourseDto, userId: string) {
     const course = this.courseRepository.create({
       ...createCourseDto,
-      user: { id: createCourseDto.userId },
+      user: { id: userId },
     });
     return this.courseRepository.save(course);
   }
 
-  findAllCourses() {
-    return this.courseRepository.find();
-  }
-
-  async findCoursesForList(): Promise<CourseListItemDto[]> {
+  async findCoursesForList(userId: string): Promise<CourseListItemDto[]> {
     const courses = await this.courseRepository.find({
+      where: [{ user: { id: userId } }, { shared: true }],
       relations: ['units', 'units.lessons'],
     });
 

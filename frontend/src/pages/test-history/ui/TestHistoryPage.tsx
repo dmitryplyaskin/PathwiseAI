@@ -94,7 +94,7 @@ export const TestHistoryPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const examsData = await testsApi.getUserExams({ userId });
+        const examsData = await testsApi.getUserExams();
         setExams(examsData);
       } catch (err) {
         console.error('Failed to fetch exam history:', err);

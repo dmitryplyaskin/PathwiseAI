@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { randomUUID } from 'crypto';
 import { Exam, ExamStatus } from '../entities/exam.entity';
 import { ExamResult } from '../entities/exam-result.entity';
 import { CreateExamDto } from '../dto/create-exam.dto';
@@ -11,19 +12,20 @@ import { GenerateTestDto } from '../dto/generate-test.dto';
 import { SubmitTestResultDto } from '../dto/submit-test-result.dto';
 import { CheckTextAnswerDto } from '../dto/check-text-answer.dto';
 import { Lesson, LessonStatus } from '../../courses/entities/lesson.entity';
-import { Question } from '../../questions/entities/question.entity';
-import { QuestionType } from '../../questions/entities/question.entity';
+import { Question, QuestionType } from '../../questions/entities/question.entity';
 import { OpenRouterService } from '../../chat/services/openrouter.service';
 import { SM2SpacedRepetitionService } from '../../courses/services/sm2-spaced-repetition.service';
 import { testGenerationPrompts } from '../config/test-generation.prompts';
-import { testGenerationSchema } from '../config/test-generation.schema';
-import { TestGenerationResponse } from '../config/test-generation.schema';
+import {
+  testGenerationSchema,
+  TestGenerationResponse,
+} from '../config/test-generation.schema';
 import { textCheckingPrompts } from '../config/text-checking.prompts';
 import {
   textCheckingSchema,
   TextCheckingResponse,
 } from '../config/text-checking.schema';
-import { randomUUID } from 'crypto';
+import { AccessControlService } from '../../../shared/services/access-control.service';
 
 @Injectable()
 export class ExamsService {
@@ -40,209 +42,209 @@ export class ExamsService {
     private readonly questionRepository: Repository<Question>,
     private readonly openRouterService: OpenRouterService,
     private readonly sm2Service: SM2SpacedRepetitionService,
+    private readonly accessControlService: AccessControlService,
+    private readonly dataSource: DataSource,
   ) {}
 
-  // Exam methods
-  createExam(createExamDto: CreateExamDto) {
+  async createExam(createExamDto: CreateExamDto, userId: string) {
+    await this.assertLessonAccess(createExamDto.lessonId, userId);
+
     const exam = this.examRepository.create({
       ...createExamDto,
-      user: { id: createExamDto.userId },
+      user: { id: userId },
       course: { id: createExamDto.courseId },
+      lesson: { id: createExamDto.lessonId },
+      lessonId: createExamDto.lessonId,
     });
     return this.examRepository.save(exam);
   }
 
-  findAllExams() {
-    return this.examRepository.find();
+  findAllExams(userId: string) {
+    return this.findExamsByUser(userId);
   }
 
   async findExamsByUser(userId: string) {
     return this.examRepository.find({
       where: { user: { id: userId } },
-      relations: ['results', 'results.question', 'course'],
+      relations: ['results', 'results.question', 'course', 'lesson'],
       order: { completed_at: 'DESC' },
     });
   }
 
   async findExamsByLesson(lessonId: string, userId: string) {
-    // Получаем урок для определения курса
-    const lesson = await this.lessonRepository.findOne({
-      where: { id: lessonId },
-      relations: ['unit', 'unit.course'],
-    });
+    await this.assertLessonAccess(lessonId, userId);
 
-    if (!lesson) {
-      throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
-    }
-
-    // Ищем экзамены для этого курса с названием, содержащим название урока
     return this.examRepository.find({
       where: {
         user: { id: userId },
-        course: { id: lesson.unit.course.id },
-        title: `Тест по уроку: ${lesson.title}`,
+        lesson: { id: lessonId },
       },
-      relations: ['results', 'results.question', 'course'],
+      relations: ['results', 'results.question', 'course', 'lesson'],
       order: { completed_at: 'DESC' },
     });
   }
 
-  async findOneExam(id: string) {
-    const exam = await this.examRepository.findOneBy({ id });
+  async findOneExam(id: string, userId: string) {
+    const exam = await this.examRepository.findOne({
+      where: {
+        id,
+        user: { id: userId },
+      },
+      relations: ['results', 'results.question', 'course', 'lesson'],
+    });
+
     if (!exam) {
       throw new NotFoundException(`Exam with ID "${id}" not found`);
     }
+
     return exam;
   }
 
-  async updateExam(id: string, updateExamDto: UpdateExamDto) {
-    await this.findOneExam(id); // Проверка существования
+  async updateExam(id: string, updateExamDto: UpdateExamDto, userId: string) {
+    await this.findOneExam(id, userId);
     await this.examRepository.update(id, updateExamDto);
-    return this.findOneExam(id);
+    return this.findOneExam(id, userId);
   }
 
-  async removeExam(id: string) {
-    await this.findOneExam(id); // Проверка существования
+  async removeExam(id: string, userId: string) {
+    await this.findOneExam(id, userId);
     return this.examRepository.delete(id);
   }
 
-  // ExamResult methods
-  createExamResult(createExamResultDto: CreateExamResultDto) {
+  async createExamResult(createExamResultDto: CreateExamResultDto, userId: string) {
+    const exam = await this.findOneExam(createExamResultDto.examId, userId);
+
     const examResult = this.examResultRepository.create({
       ...createExamResultDto,
-      exam: { id: createExamResultDto.examId },
+      exam: { id: exam.id },
       question: { id: createExamResultDto.questionId },
     });
     return this.examResultRepository.save(examResult);
   }
 
-  findAllExamResults() {
-    return this.examResultRepository.find();
+  findAllExamResults(userId: string) {
+    return this.examResultRepository.find({
+      where: {
+        exam: { user: { id: userId } },
+      },
+      relations: ['exam', 'question'],
+    });
   }
 
-  async findOneExamResult(id: string) {
-    const examResult = await this.examResultRepository.findOneBy({ id });
+  async findOneExamResult(id: string, userId: string) {
+    const examResult = await this.examResultRepository.findOne({
+      where: {
+        id,
+        exam: { user: { id: userId } },
+      },
+      relations: ['exam', 'question'],
+    });
+
     if (!examResult) {
       throw new NotFoundException(`ExamResult with ID "${id}" not found`);
     }
+
     return examResult;
   }
 
-  async updateExamResult(id: string, updateExamResultDto: UpdateExamResultDto) {
-    await this.findOneExamResult(id); // Проверка существования
+  async updateExamResult(
+    id: string,
+    updateExamResultDto: UpdateExamResultDto,
+    userId: string,
+  ) {
+    await this.findOneExamResult(id, userId);
     await this.examResultRepository.update(id, updateExamResultDto);
-    return this.findOneExamResult(id);
+    return this.findOneExamResult(id, userId);
   }
 
-  async removeExamResult(id: string) {
-    await this.findOneExamResult(id); // Проверка существования
+  async removeExamResult(id: string, userId: string) {
+    await this.findOneExamResult(id, userId);
     return this.examResultRepository.delete(id);
   }
 
-  // New methods for test generation and management
-  async getOrGenerateTestForLesson(generateTestDto: GenerateTestDto) {
-    const { lessonId, userId, questionCount, mode, questionTypes, forceNew } =
+  async getOrGenerateTestForLesson(generateTestDto: GenerateTestDto, userId: string) {
+    const { lessonId, questionCount, mode, questionTypes, forceNew } =
       generateTestDto;
 
-    // Получаем урок для определения курса
-    const lesson = await this.lessonRepository.findOne({
-      where: { id: lessonId },
-      relations: ['unit', 'unit.course'],
-    });
+    const lesson = await this.getLessonForExamGeneration(lessonId, userId);
 
-    if (!lesson) {
-      throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
-    }
-
-    // Если настройки не переданы (обычный запуск или "пройти снова"), ищем существующий тест
-    // Если переданы настройки (запуск из модалки), всегда генерируем новый
     if (!forceNew) {
       const existingExams = await this.examRepository.find({
         where: {
           user: { id: userId },
-          course: { id: lesson.unit.course.id },
-          title: `Тест по уроку: ${lesson.title}`,
+          lesson: { id: lesson.id },
         },
         relations: ['results', 'results.question'],
         order: { started_at: 'DESC' },
       });
 
-      // Если есть тесты, возвращаем последний
       if (existingExams.length > 0) {
         const lastExam = existingExams[0];
-
-        // Получаем вопросы для последнего экзамена из результатов
-        // ВАЖНО: Берем только те вопросы, которые были в этом экзамене, а не все вопросы урока
-        const existingQuestions = lastExam.results.map(
-          (result) => result.question,
-        );
-
-        // Возвращаем последний тест
+        const existingQuestions = lastExam.results.map((result) => result.question);
         return this.formatTestForFrontend(lastExam, existingQuestions);
       }
     }
 
-    // Определяем количество вопросов
     const count = mode === 'detailed' ? 10 : questionCount || 5;
-
-    // Если тестов нет или запрошен новый, генерируем
     const generatedTest = await this.generateTestForLesson(
       lesson,
       count,
       questionTypes,
     );
 
-    // Создаем экзамен
-    const exam = this.examRepository.create({
-      user: { id: userId },
-      course: { id: lesson.unit.course.id },
-      title: generatedTest.title,
-      status: ExamStatus.IN_PROGRESS,
-      started_at: new Date(),
+    return this.dataSource.transaction(async (manager) => {
+      const examRepository = manager.getRepository(Exam);
+      const questionRepository = manager.getRepository(Question);
+      const examResultRepository = manager.getRepository(ExamResult);
+
+      const exam = examRepository.create({
+        user: { id: userId },
+        course: { id: lesson.unit.course.id },
+        lesson: { id: lesson.id },
+        lessonId: lesson.id,
+        title: generatedTest.title,
+        status: ExamStatus.IN_PROGRESS,
+        started_at: new Date(),
+      });
+
+      const savedExam = await examRepository.save(exam);
+
+      const questions: Question[] = [];
+      for (const generatedQuestion of generatedTest.questions) {
+        const question = questionRepository.create({
+          lesson: { id: lessonId },
+          question_text: generatedQuestion.question,
+          question_content: generatedQuestion.questionContent || null,
+          question_type:
+            generatedQuestion.type === 'quiz'
+              ? QuestionType.MULTIPLE_CHOICE
+              : QuestionType.OPEN_ENDED,
+          options: generatedQuestion.options
+            ? (generatedQuestion.options as unknown as Record<string, unknown>)
+            : undefined,
+          correct_answer:
+            generatedQuestion.type === 'quiz'
+              ? generatedQuestion.options?.find((opt) => opt.isCorrect)?.text || ''
+              : generatedQuestion.expectedAnswer || '',
+          explanation: generatedQuestion.explanation,
+        });
+
+        const savedQuestion = await questionRepository.save(question);
+        questions.push(savedQuestion);
+      }
+
+      for (const question of questions) {
+        const examResult = examResultRepository.create({
+          exam: { id: savedExam.id },
+          question: { id: question.id },
+          user_answer: '',
+          is_correct: false,
+        });
+        await examResultRepository.save(examResult);
+      }
+
+      return this.formatTestForFrontend(savedExam, questions);
     });
-
-    const savedExam = await this.examRepository.save(exam);
-
-    // Создаем вопросы и сохраняем их
-    const questions: Question[] = [];
-    for (const generatedQuestion of generatedTest.questions) {
-      const question = this.questionRepository.create({
-        lesson: { id: lessonId },
-        question_text: generatedQuestion.question,
-        question_content: generatedQuestion.questionContent || null,
-        question_type:
-          generatedQuestion.type === 'quiz'
-            ? QuestionType.MULTIPLE_CHOICE
-            : QuestionType.OPEN_ENDED,
-        options: generatedQuestion.options
-          ? (generatedQuestion.options as unknown as Record<string, unknown>)
-          : undefined,
-        correct_answer:
-          generatedQuestion.type === 'quiz'
-            ? generatedQuestion.options?.find((opt) => opt.isCorrect)?.text ||
-              ''
-            : generatedQuestion.expectedAnswer || '',
-        explanation: generatedQuestion.explanation,
-      });
-
-      const savedQuestion: Question =
-        await this.questionRepository.save(question);
-      questions.push(savedQuestion);
-    }
-
-    // Создаем результаты экзамена (пустые)
-    for (const question of questions) {
-      const examResult = this.examResultRepository.create({
-        exam: { id: savedExam.id },
-        question: { id: question.id },
-        user_answer: '',
-        is_correct: false,
-      });
-      await this.examResultRepository.save(examResult);
-    }
-
-    // Возвращаем форматированный тест
-    return this.formatTestForFrontend(savedExam, questions);
   }
 
   private async generateTestForLesson(
@@ -285,7 +287,6 @@ export class ExamsService {
 
       const testData = JSON.parse(response) as TestGenerationResponse;
 
-      // Добавляем уникальные ID к вопросам
       testData.questions = testData.questions.map((q) => ({
         ...q,
         id: randomUUID(),
@@ -337,57 +338,63 @@ export class ExamsService {
     };
   }
 
-  async submitTestResult(submitTestResultDto: SubmitTestResultDto) {
+  async submitTestResult(submitTestResultDto: SubmitTestResultDto, userId: string) {
     const { examId, answers, timeSpent } = submitTestResultDto;
 
-    // Проверяем существование экзамена
     const exam = await this.examRepository.findOne({
-      where: { id: examId },
-      relations: ['results', 'results.question'],
+      where: { id: examId, user: { id: userId } },
+      relations: ['results', 'results.question', 'lesson'],
     });
 
     if (!exam) {
       throw new NotFoundException(`Exam with ID "${examId}" not found`);
     }
 
-    // Обновляем результаты экзамена
-    for (const answer of answers) {
-      const examResult = exam.results.find(
-        (r) => r.question.id === answer.questionId,
-      );
-      if (examResult) {
-        // Пустой/отсутствующий ответ (пропуск) сохраняем как пустую строку.
-        examResult.user_answer = answer.answer ?? '';
-        examResult.is_correct = answer.isCorrect;
-        await this.examResultRepository.save(examResult);
+    const submittedAnswersByQuestionId = new Map(
+      answers.map((answer) => [answer.questionId, answer]),
+    );
+
+    let correctAnswers = 0;
+    for (const examResult of exam.results) {
+      const submitted = submittedAnswersByQuestionId.get(examResult.question.id);
+      examResult.user_answer = submitted?.answer ?? '';
+
+      // Для quiz/true_false проверяем корректность на сервере, чтобы не доверять флагу клиента.
+      if (
+        examResult.question.question_type === QuestionType.MULTIPLE_CHOICE ||
+        examResult.question.question_type === QuestionType.TRUE_FALSE
+      ) {
+        const normalizedUserAnswer = examResult.user_answer.trim().toLowerCase();
+        const normalizedCorrectAnswer =
+          examResult.question.correct_answer.trim().toLowerCase();
+        examResult.is_correct = normalizedUserAnswer === normalizedCorrectAnswer;
+      } else {
+        examResult.is_correct = submitted?.isCorrect ?? false;
       }
+
+      if (examResult.is_correct) {
+        correctAnswers++;
+      }
+
+      await this.examResultRepository.save(examResult);
     }
 
-    // Вычисляем общий балл
-    const correctAnswers = answers.filter((a) => a.isCorrect).length;
-    const totalQuestions = answers.length;
-    const score = (correctAnswers / totalQuestions) * 100;
+    const totalQuestions = exam.results.length;
+    const score = totalQuestions === 0 ? 0 : (correctAnswers / totalQuestions) * 100;
 
-    // Обновляем экзамен
     exam.score = score;
     exam.status = ExamStatus.COMPLETED;
     exam.completed_at = new Date();
     await this.examRepository.save(exam);
 
-    // НОВОЕ: Обновляем прогресс урока
-    await this.updateLessonProgress(
-      exam,
-      score,
-      totalQuestions,
-      correctAnswers,
-    );
+    await this.updateLessonProgress(exam, score, totalQuestions, correctAnswers);
 
     return {
       examId,
       score,
       correctAnswers,
       totalQuestions,
-      timeSpent: parseInt(timeSpent),
+      timeSpent,
       completedAt: exam.completed_at,
     };
   }
@@ -398,26 +405,25 @@ export class ExamsService {
     totalQuestions?: number,
     correctAnswers?: number,
   ) {
-    // Получаем урок по названию экзамена (формат: "Тест по уроку: {название урока}")
-    const lessonTitle = exam.title.replace('Тест по уроку: ', '');
+    if (!exam.lessonId) {
+      this.logger.warn({ examId: exam.id }, 'Exam lesson_id is missing');
+      return;
+    }
 
     const lesson = await this.lessonRepository.findOne({
-      where: { title: lessonTitle },
-      relations: ['unit', 'unit.course'],
+      where: { id: exam.lessonId },
     });
 
     if (!lesson) {
       this.logger.warn(
-        { lessonTitle, examId: exam.id },
-        `Lesson with title "${lessonTitle}" not found`,
+        { lessonId: exam.lessonId, examId: exam.id },
+        'Lesson for exam not found',
       );
       return;
     }
 
-    // Если количество вопросов не передано, получаем из результатов экзамена
     const questionCount = totalQuestions || exam.results?.length || 5;
 
-    // Рассчитываем новые параметры по SM-2
     const sm2Result = this.sm2Service.calculateNextReview(
       lesson.status,
       lesson.interval,
@@ -429,7 +435,6 @@ export class ExamsService {
       correctAnswers,
     );
 
-    // Обновляем урок
     await this.lessonRepository.update(lesson.id, {
       status: sm2Result.status,
       interval: sm2Result.interval,
@@ -445,7 +450,6 @@ export class ExamsService {
   ): Promise<TextCheckingResponse> {
     const { userAnswer, expectedAnswer, questionText } = checkTextAnswerDto;
 
-    // Быстрый кейс: ответ из пробелов/переводов строк
     if (userAnswer.trim().length === 0) {
       return {
         isCorrect: false,
@@ -473,7 +477,6 @@ export class ExamsService {
 
       const checkingResult = JSON.parse(response) as TextCheckingResponse;
 
-      // Валидация результата
       if (typeof checkingResult.isCorrect !== 'boolean') {
         checkingResult.isCorrect = false;
       }
@@ -486,8 +489,6 @@ export class ExamsService {
         checkingResult.score = checkingResult.isCorrect ? 85 : 30;
       }
 
-      // Нормализация: приводим score и isCorrect к согласованному виду.
-      // isCorrect определяется по порогу score >= 70, а score ограничивается 0..100.
       checkingResult.score = Math.max(0, Math.min(100, checkingResult.score));
       checkingResult.isCorrect = checkingResult.score >= 70;
 
@@ -500,7 +501,6 @@ export class ExamsService {
         'Error checking text answer',
       );
 
-      // Fallback: простая проверка на основе длины и ключевых слов
       const isCorrect = this.simpleTextCheck(userAnswer, expectedAnswer);
 
       return {
@@ -517,25 +517,102 @@ export class ExamsService {
   }
 
   private simpleTextCheck(userAnswer: string, expectedAnswer: string): boolean {
-    // Простая проверка на основе длины и ключевых слов
     const userWords = userAnswer.toLowerCase().split(/\s+/);
     const expectedWords = expectedAnswer.toLowerCase().split(/\s+/);
 
-    // Если ответ слишком короткий, считаем неправильным
-    if (userAnswer.length < 10) return false;
+    if (userAnswer.length < 10) {
+      return false;
+    }
 
-    // Подсчитываем совпадения ключевых слов
     const commonWords = userWords.filter(
       (word) => word.length > 3 && expectedWords.includes(word),
     );
 
-    // Если есть хотя бы 30% совпадений ключевых слов, считаем правильным
     const matchRatio = commonWords.length / Math.max(expectedWords.length, 1);
     return matchRatio >= 0.3;
   }
 
   async deleteExamsByLesson(lessonId: string, userId: string) {
-    // Получаем урок для определения курса
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: lessonId },
+      relations: ['user'],
+    });
+
+    if (!lesson) {
+      throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
+    }
+
+    if (lesson.user.id !== userId) {
+      throw new ForbiddenException('You can only reset progress for your own lesson');
+    }
+
+    const exams = await this.examRepository.find({
+      where: {
+        user: { id: userId },
+        lesson: { id: lessonId },
+      },
+      relations: ['results'],
+    });
+
+    await this.dataSource.transaction(async (manager) => {
+      const examResultRepository = manager.getRepository(ExamResult);
+      const examRepository = manager.getRepository(Exam);
+
+      for (const exam of exams) {
+        const examResults = await examResultRepository.find({
+          where: { exam: { id: exam.id } },
+        });
+
+        if (examResults.length > 0) {
+          const resultIds = examResults.map((result) => result.id);
+          await examResultRepository.delete(resultIds);
+        }
+
+        await examRepository.delete(exam.id);
+      }
+    });
+
+    await this.resetLessonProgress(lessonId);
+
+    return {
+      message: 'Progress reset successfully',
+      deletedExamsCount: exams.length,
+    };
+  }
+
+  private async resetLessonProgress(lessonId: string) {
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: lessonId },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
+    }
+
+    await this.lessonRepository.update(lessonId, {
+      status: LessonStatus.NOT_STARTED,
+      interval: 0,
+      ease_factor: 2.5,
+      repetitions: 0,
+      last_reviewed_at: null,
+      next_review_at: null,
+    });
+  }
+
+  private async assertLessonAccess(lessonId: string, userId: string): Promise<void> {
+    const hasAccess = await this.accessControlService.checkLessonAccess(
+      lessonId,
+      userId,
+    );
+
+    if (!hasAccess) {
+      throw new ForbiddenException('You do not have access to this lesson');
+    }
+  }
+
+  private async getLessonForExamGeneration(lessonId: string, userId: string) {
+    await this.assertLessonAccess(lessonId, userId);
+
     const lesson = await this.lessonRepository.findOne({
       where: { id: lessonId },
       relations: ['unit', 'unit.course'],
@@ -545,58 +622,6 @@ export class ExamsService {
       throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
     }
 
-    // Находим все экзамены для этого урока и пользователя
-    const exams = await this.findExamsByLesson(lessonId, userId);
-
-    // Сначала удаляем все результаты экзаменов, затем сами экзамены
-    // Это необходимо для избежания нарушения внешних ключей
-    for (const exam of exams) {
-      // Находим все результаты экзамена
-      const examResults = await this.examResultRepository.find({
-        where: { exam: { id: exam.id } },
-      });
-
-      // Удаляем все результаты по их ID
-      if (examResults.length > 0) {
-        const resultIds = examResults.map((result) => result.id);
-        await this.examResultRepository.delete(resultIds);
-      }
-
-      // Затем удаляем сам экзамен
-      await this.examRepository.delete(exam.id);
-    }
-
-    // Сбрасываем прогресс урока
-    await this.resetLessonProgress(lessonId);
-
-    return {
-      message: 'Progress reset successfully',
-      deletedExamsCount: exams.length,
-    };
-  }
-
-  async resetLessonProgress(lessonId: string) {
-    const lesson = await this.lessonRepository.findOne({
-      where: { id: lessonId },
-    });
-
-    if (!lesson) {
-      throw new NotFoundException(`Lesson with ID "${lessonId}" not found`);
-    }
-
-    // Сбрасываем прогресс урока на начальное состояние
-    // Используем update() для установки null значений
-    await this.lessonRepository.update(lessonId, {
-      status: LessonStatus.NOT_STARTED,
-      interval: 0,
-      ease_factor: 2.5,
-      repetitions: 0,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - TypeORM обрабатывает null для nullable полей
-      last_reviewed_at: null,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - TypeORM обрабатывает null для nullable полей
-      next_review_at: null,
-    });
+    return lesson;
   }
 }

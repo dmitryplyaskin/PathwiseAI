@@ -43,7 +43,6 @@ OPENROUTER_SITE_URL=http://localhost:3000
 ```json
 {
   "lessonId": "uuid",
-  "userId": "uuid", // опционально
   "content": "Текст сообщения"
 }
 ```
@@ -55,7 +54,6 @@ OPENROUTER_SITE_URL=http://localhost:3000
 ```json
 {
   "lessonId": "uuid",
-  "userId": "uuid", // опционально
   "content": "Текст сообщения"
 }
 ```

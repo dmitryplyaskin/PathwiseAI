@@ -29,8 +29,8 @@ export class CoursesController {
   // Course endpoints
   @Post()
   @UseGuards(JwtAuthGuard)
-  createCourse(@Body() createCourseDto: CreateCourseDto) {
-    return this.coursesService.createCourse(createCourseDto);
+  createCourse(@Body() createCourseDto: CreateCourseDto, @CurrentUser() user: User) {
+    return this.coursesService.createCourse(createCourseDto, user.id);
   }
 
   @Get()
@@ -41,8 +41,8 @@ export class CoursesController {
 
   @Get('list')
   @UseGuards(JwtAuthGuard)
-  findCoursesForList(): Promise<CourseListItemDto[]> {
-    return this.coursesService.findCoursesForList();
+  findCoursesForList(@CurrentUser() user: User): Promise<CourseListItemDto[]> {
+    return this.coursesService.findCoursesForList(user.id);
   }
 
   @Get('shared')
@@ -109,9 +109,6 @@ export class CoursesController {
     @Body() createCourseOutlineDto: CreateCourseOutlineDto,
     @CurrentUser() user: User,
   ) {
-    return this.lessonsService.createCourseOutline({
-      ...createCourseOutlineDto,
-      userId: user.id,
-    });
+    return this.lessonsService.createCourseOutline(createCourseOutlineDto, user.id);
   }
 }

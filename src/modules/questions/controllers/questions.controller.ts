@@ -15,6 +15,8 @@ import { UpdateQuestionDto } from '../dto/update-question.dto';
 import { CreateUserAnswerDto } from '../dto/create-user-answer.dto';
 import { UpdateUserAnswerDto } from '../dto/update-user-answer.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import type { User } from '../../users/entities/user.entity';
 
 @Controller('questions')
 @UseGuards(JwtAuthGuard)
@@ -29,6 +31,44 @@ export class QuestionsController {
   @Get()
   findAllQuestions() {
     return this.questionsService.findAllQuestions();
+  }
+
+  @Post('answers')
+  createUserAnswer(
+    @Body() createUserAnswerDto: CreateUserAnswerDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.questionsService.createUserAnswer(createUserAnswerDto, user.id);
+  }
+
+  @Get('answers')
+  findAllUserAnswers(@CurrentUser() user: User) {
+    return this.questionsService.findAllUserAnswers(user.id);
+  }
+
+  @Get('answers/:id')
+  findOneUserAnswer(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.questionsService.findOneUserAnswer(id, user.id);
+  }
+
+  @Patch('answers/:id')
+  updateUserAnswer(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateUserAnswerDto: UpdateUserAnswerDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.questionsService.updateUserAnswer(id, updateUserAnswerDto, user.id);
+  }
+
+  @Delete('answers/:id')
+  removeUserAnswer(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: User,
+  ) {
+    return this.questionsService.removeUserAnswer(id, user.id);
   }
 
   @Get(':id')
@@ -47,33 +87,5 @@ export class QuestionsController {
   @Delete(':id')
   removeQuestion(@Param('id', ParseUUIDPipe) id: string) {
     return this.questionsService.removeQuestion(id);
-  }
-
-  @Post('answers')
-  createUserAnswer(@Body() createUserAnswerDto: CreateUserAnswerDto) {
-    return this.questionsService.createUserAnswer(createUserAnswerDto);
-  }
-
-  @Get('answers')
-  findAllUserAnswers() {
-    return this.questionsService.findAllUserAnswers();
-  }
-
-  @Get('answers/:id')
-  findOneUserAnswer(@Param('id', ParseUUIDPipe) id: string) {
-    return this.questionsService.findOneUserAnswer(id);
-  }
-
-  @Patch('answers/:id')
-  updateUserAnswer(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updateUserAnswerDto: UpdateUserAnswerDto,
-  ) {
-    return this.questionsService.updateUserAnswer(id, updateUserAnswerDto);
-  }
-
-  @Delete('answers/:id')
-  removeUserAnswer(@Param('id', ParseUUIDPipe) id: string) {
-    return this.questionsService.removeUserAnswer(id);
   }
 }

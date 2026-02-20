@@ -28,7 +28,6 @@ export interface CreateModuleRequest {
   complexity: ModuleComplexity;
   courseId?: string;
   newCourseName?: string;
-  userId: string;
 }
 
 export interface CreateModuleResponse {
@@ -43,7 +42,6 @@ export interface CreateCourseOutlineRequest {
   topic: string;
   details?: string;
   complexity: ModuleComplexity;
-  userId: string;
 }
 
 export interface CreateCourseOutlineResponse {

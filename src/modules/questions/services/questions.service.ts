@@ -17,7 +17,6 @@ export class QuestionsService {
     private readonly userAnswerRepository: Repository<UserAnswer>,
   ) {}
 
-  // Question methods
   createQuestion(createQuestionDto: CreateQuestionDto) {
     const question = this.questionRepository.create({
       ...createQuestionDto,
@@ -39,46 +38,55 @@ export class QuestionsService {
   }
 
   async updateQuestion(id: string, updateQuestionDto: UpdateQuestionDto) {
-    await this.findOneQuestion(id); // Проверка существования
+    await this.findOneQuestion(id);
     await this.questionRepository.update(id, updateQuestionDto);
     return this.findOneQuestion(id);
   }
 
   async removeQuestion(id: string) {
-    await this.findOneQuestion(id); // Проверка существования
+    await this.findOneQuestion(id);
     return this.questionRepository.delete(id);
   }
 
-  // UserAnswer methods
-  createUserAnswer(createUserAnswerDto: CreateUserAnswerDto) {
+  createUserAnswer(createUserAnswerDto: CreateUserAnswerDto, userId: string) {
     const userAnswer = this.userAnswerRepository.create({
       ...createUserAnswerDto,
-      user: { id: createUserAnswerDto.userId },
+      user: { id: userId },
       question: { id: createUserAnswerDto.questionId },
     });
     return this.userAnswerRepository.save(userAnswer);
   }
 
-  findAllUserAnswers() {
-    return this.userAnswerRepository.find();
+  findAllUserAnswers(userId: string) {
+    return this.userAnswerRepository.find({
+      where: { user: { id: userId } },
+      relations: ['question'],
+    });
   }
 
-  async findOneUserAnswer(id: string) {
-    const userAnswer = await this.userAnswerRepository.findOneBy({ id });
+  async findOneUserAnswer(id: string, userId: string) {
+    const userAnswer = await this.userAnswerRepository.findOne({
+      where: { id, user: { id: userId } },
+      relations: ['question'],
+    });
     if (!userAnswer) {
       throw new NotFoundException(`UserAnswer with ID "${id}" not found`);
     }
     return userAnswer;
   }
 
-  async updateUserAnswer(id: string, updateUserAnswerDto: UpdateUserAnswerDto) {
-    await this.findOneUserAnswer(id); // Проверка существования
+  async updateUserAnswer(
+    id: string,
+    updateUserAnswerDto: UpdateUserAnswerDto,
+    userId: string,
+  ) {
+    await this.findOneUserAnswer(id, userId);
     await this.userAnswerRepository.update(id, updateUserAnswerDto);
-    return this.findOneUserAnswer(id);
+    return this.findOneUserAnswer(id, userId);
   }
 
-  async removeUserAnswer(id: string) {
-    await this.findOneUserAnswer(id); // Проверка существования
+  async removeUserAnswer(id: string, userId: string) {
+    await this.findOneUserAnswer(id, userId);
     return this.userAnswerRepository.delete(id);
   }
 }

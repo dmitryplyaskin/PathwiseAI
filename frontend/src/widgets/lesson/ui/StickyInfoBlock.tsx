@@ -33,7 +33,6 @@ import { TestModal } from '../../test/ui';
 import { testsApi } from '@shared/api/tests';
 import type { TestData } from '../../test/types';
 import type { ExamHistoryItem } from '@shared/api/tests/types';
-import { useCurrentUser } from '@shared/model';
 import { LessonManagementMenu } from './LessonManagementMenu';
 import { LessonDeleteDialog } from './LessonDeleteDialog';
 import { ResetProgressDialog } from './ResetProgressDialog';
@@ -145,7 +144,6 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
     null,
   );
   const [lessonExams, setLessonExams] = useState<ExamHistoryItem[]>([]);
-  const { userId } = useCurrentUser();
   const navigate = useNavigate();
 
   const statusInfo = lesson
@@ -154,11 +152,10 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
 
   useEffect(() => {
     const fetchLessonExams = async () => {
-      if (!lesson || !userId) return;
+      if (!lesson) return;
       try {
         const exams = await testsApi.getLessonExams({
           lessonId: lesson.id,
-          userId,
         });
         setLessonExams(exams);
       } catch (error) {
@@ -166,17 +163,16 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
       }
     };
     void fetchLessonExams();
-  }, [lesson, userId]);
+  }, [lesson]);
 
   useEffect(() => {
     const handleLessonUpdate = (event: CustomEvent<{ lessonId: string }>) => {
       if (lesson && event.detail.lessonId === lesson.id) {
         const fetchLessonExams = async () => {
-          if (!lesson || !userId) return;
+          if (!lesson) return;
           try {
             const exams = await testsApi.getLessonExams({
               lessonId: lesson.id,
-              userId,
             });
             setLessonExams(exams);
           } catch (error) {
@@ -197,7 +193,7 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
         handleLessonUpdate as EventListener,
       );
     };
-  }, [lesson, userId]);
+  }, [lesson]);
 
   const latestCompletedExam = lessonExams.find(
     (exam) => exam.status === 'completed',
@@ -216,7 +212,6 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
     try {
       const generatedTest = await testsApi.generateTestForLesson({
         lessonId: lesson.id,
-        userId: userId ?? '',
         questionCount: settings?.mode === 'detailed' ? 10 : 5,
         mode: settings?.mode,
         questionTypes: settings?.questionTypes,
@@ -273,18 +268,16 @@ export const StickyInfoBlock = ({ lesson, notFound }: StickyInfoBlockProps) => {
   };
 
   const handleConfirmResetProgress = async () => {
-    if (!lesson || !userId) return;
+    if (!lesson) return;
     setIsResettingProgress(true);
     setResetProgressError(null);
     try {
       await testsApi.deleteLessonProgress({
         lessonId: lesson.id,
-        userId,
       });
       loadLesson(lesson.id);
       const exams = await testsApi.getLessonExams({
         lessonId: lesson.id,
-        userId,
       });
       setLessonExams(exams);
       window.dispatchEvent(

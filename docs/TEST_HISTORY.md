@@ -8,8 +8,9 @@
 
 ### Эндпоинты
 
-- `GET /exams/user/:userId` - получение всех экзаменов пользователя
-- `GET /exams/lesson/:lessonId/user/:userId` - получение экзаменов для конкретного урока
+- `GET /exams/me` - получение всех экзаменов текущего пользователя
+- `GET /exams/lesson/:lessonId` - получение экзаменов для конкретного урока текущего пользователя
+- `DELETE /exams/lesson/:lessonId/progress` - сброс прогресса тестов по уроку текущего пользователя
 
 ### Сервисы
 
@@ -29,14 +30,15 @@
 
 ### API
 
-- `testsApi.getUserExams(request: GetUserExamsRequest)` - получение истории тестов
+- `testsApi.getUserExams()` - получение истории тестов
 - `testsApi.getLessonExams(request: GetLessonExamsRequest)` - получение экзаменов для урока
+- `testsApi.deleteLessonProgress(request: DeleteLessonProgressRequest)` - сброс прогресса урока
 
 ### Типы
 
 - `ExamHistoryItem` - элемент истории теста
-- `GetUserExamsRequest` - запрос получения тестов пользователя
 - `GetLessonExamsRequest` - запрос получения экзаменов для урока
+- `DeleteLessonProgressRequest` - запрос сброса прогресса урока
 
 ## Функциональность
 

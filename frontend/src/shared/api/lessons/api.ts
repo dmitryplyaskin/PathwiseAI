@@ -21,16 +21,13 @@ export const lessonsApi = {
     question: string,
     threadId?: string,
     lessonContent?: string,
-    userId?: string,
   ): Promise<LessonQuestionResponse> => {
     return apiClient.post<LessonQuestionResponse>(
       `/lessons/${lessonId}/ask`,
       {
-        lessonId,
         question,
         threadId,
         lessonContent,
-        userId,
       },
     );
   },
@@ -72,9 +69,7 @@ export const lessonsApi = {
     );
   },
 
-  getLessonsForReview: async (userId: string): Promise<LessonForReview[]> => {
-    return apiClient.get<LessonForReview[]>(
-      `/lessons/for-review/${userId}`,
-    );
+  getLessonsForReview: async (): Promise<LessonForReview[]> => {
+    return apiClient.get<LessonForReview[]>('/lessons/for-review');
   },
 };

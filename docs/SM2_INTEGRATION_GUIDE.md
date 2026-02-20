@@ -215,9 +215,9 @@ async findLessonsForReview(userId: string): Promise<Lesson[]> {
 Добавить endpoint:
 
 ```typescript
-@Get('for-review/:userId')
-async getLessonsForReview(@Param('userId') userId: string) {
-  return this.lessonsService.findLessonsForReview(userId);
+@Get('for-review')
+async getLessonsForReview(@CurrentUser() user: User) {
+  return this.lessonsService.findLessonsForReview(user.id);
 }
 ```
 
@@ -266,8 +266,8 @@ export interface LessonForReview {
 export const lessonsApi = {
   // ... существующие методы
 
-  getLessonsForReview: async (userId: string): Promise<LessonForReview[]> => {
-    return apiClient.get<LessonForReview[]>(`/lessons/for-review/${userId}`);
+  getLessonsForReview: async (): Promise<LessonForReview[]> => {
+    return apiClient.get<LessonForReview[]>('/lessons/for-review');
   },
 };
 ```

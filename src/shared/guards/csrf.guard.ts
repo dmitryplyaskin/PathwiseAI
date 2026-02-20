@@ -57,8 +57,14 @@ export class CsrfGuard implements CanActivate {
         process.env.FRONTEND_URL,
       ].filter(Boolean);
 
-      const requestOrigin =
-        origin || (referer ? new URL(referer).origin : null);
+      let requestOrigin: string | null = origin || null;
+      if (!requestOrigin && referer) {
+        try {
+          requestOrigin = new URL(referer).origin;
+        } catch {
+          throw new ForbiddenException('Недопустимый referer');
+        }
+      }
 
       if (requestOrigin && !allowedOrigins.includes(requestOrigin)) {
         throw new ForbiddenException('Недопустимый origin');

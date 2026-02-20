@@ -28,10 +28,10 @@ export class LessonsController {
     return this.lessonsService.findAccessibleLessons(user.id);
   }
 
-  @Get('for-review/:userId')
+  @Get('for-review')
   @UseGuards(JwtAuthGuard)
-  getLessonsForReview(@Param('userId', ParseUUIDPipe) userId: string) {
-    return this.lessonsService.findLessonsForReview(userId);
+  getLessonsForReview(@CurrentUser() user: User) {
+    return this.lessonsService.findLessonsForReview(user.id);
   }
 
   @Get(':id')
@@ -88,8 +88,8 @@ export class LessonsController {
   // Module endpoint (создание урока с возможностью создания нового курса)
   @Post('modules')
   @UseGuards(JwtAuthGuard)
-  createModule(@Body() createModuleDto: CreateModuleDto) {
-    return this.lessonsService.createModule(createModuleDto);
+  createModule(@Body() createModuleDto: CreateModuleDto, @CurrentUser() user: User) {
+    return this.lessonsService.createModule(createModuleDto, user.id);
   }
 
   // AI Assistant endpoint (вопросы к ИИ-помощнику по уроку)
@@ -106,11 +106,7 @@ export class LessonsController {
     messageId: string;
     threadId: string;
   }> {
-    return this.lessonsService.askLessonQuestion({
-      ...askLessonQuestionDto,
-      lessonId,
-      userId: user.id,
-    });
+    return this.lessonsService.askLessonQuestion(lessonId, user.id, askLessonQuestionDto);
   }
 
   // Получить список веток разговоров

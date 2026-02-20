@@ -12,11 +12,11 @@ import { ExamStatus } from '../entities/exam.entity';
 export class CreateExamDto {
   @IsUUID()
   @IsNotEmpty()
-  userId: string;
+  courseId: string;
 
   @IsUUID()
   @IsNotEmpty()
-  courseId: string;
+  lessonId: string;
 
   @IsString()
   @IsNotEmpty()

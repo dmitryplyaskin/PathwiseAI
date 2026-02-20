@@ -6,6 +6,8 @@ import {
   IsString,
   IsBoolean,
   IsOptional,
+  IsInt,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -34,16 +36,13 @@ export class SubmitTestResultDto {
   @IsNotEmpty()
   examId: string;
 
-  @IsUUID()
-  @IsNotEmpty()
-  userId: string;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => QuestionAnswerDto)
   answers: QuestionAnswerDto[];
 
-  @IsString()
+  @IsInt()
+  @Min(0)
   @IsNotEmpty()
-  timeSpent: string; // в секундах
+  timeSpent: number; // в секундах
 }

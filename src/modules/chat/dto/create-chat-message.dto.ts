@@ -5,10 +5,6 @@ export class CreateChatMessageDto {
   @IsNotEmpty()
   lessonId: string;
 
-  @IsUUID()
-  @IsOptional()
-  userId?: string;
-
   @IsString()
   @IsNotEmpty()
   content: string;

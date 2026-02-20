@@ -36,13 +36,13 @@ export class Question {
   question_type: QuestionType;
 
   @Column('jsonb', { nullable: true })
-  options: Record<string, any>;
+  options: Record<string, any> | null;
 
   @Column('text')
   correct_answer: string;
 
   @Column('text', { nullable: true })
-  explanation: string;
+  explanation: string | null;
 
   @OneToMany(() => UserAnswer, (userAnswer) => userAnswer.question)
   user_answers: UserAnswer[];

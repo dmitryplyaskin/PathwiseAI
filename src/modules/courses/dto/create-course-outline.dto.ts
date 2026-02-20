@@ -3,7 +3,6 @@ import {
   IsNotEmpty,
   IsEnum,
   IsOptional,
-  IsUUID,
 } from 'class-validator';
 
 export enum CourseComplexity {
@@ -23,8 +22,4 @@ export class CreateCourseOutlineDto {
 
   @IsEnum(CourseComplexity)
   complexity: CourseComplexity;
-
-  @IsUUID()
-  @IsNotEmpty()
-  userId: string;
 }

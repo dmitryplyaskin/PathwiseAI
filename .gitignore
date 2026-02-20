@@ -5,6 +5,7 @@
 
 # PGlite database
 /pglite-data
+/pglite-backups
 
 # Logs
 logs
@@ -64,3 +65,4 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # Windows nul files from pre-commit hooks
 nul
 frontend/nul
+
