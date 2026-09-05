@@ -31,14 +31,14 @@
 
 **Файлы:**
 
-- `src/modules/exams/controllers/exams.controller.ts` - все эндпоинты не проверяют права доступа
-- `src/modules/questions/controllers/questions.controller.ts` - все эндпоинты не проверяют права доступа
-- `src/modules/users/controllers/users.controller.ts` - все эндпоинты не защищены, включая удаление пользователей
+- `server/src/modules/exams/controllers/exams.controller.ts` - все эндпоинты не проверяют права доступа
+- `server/src/modules/questions/controllers/questions.controller.ts` - все эндпоинты не проверяют права доступа
+- `server/src/modules/users/controllers/users.controller.ts` - все эндпоинты не защищены, включая удаление пользователей
 
 **Примеры:**
 
 ```typescript
-// src/modules/exams/controllers/exams.controller.ts:24-26
+// server/src/modules/exams/controllers/exams.controller.ts:24-26
 @Post()
 createExam(@Body() createExamDto: CreateExamDto) {
   return this.examsService.createExam(createExamDto);
@@ -55,11 +55,11 @@ createExam(@Body() createExamDto: CreateExamDto) {
 **Критичность: ВЫСОКАЯ**
 
 **Проблема:**
-В `src/modules/auth/strategies/jwt.strategy.ts:14-17` проверка секрета происходит только при инициализации. Если секрет не установлен, приложение упадет только при первом использовании JWT, а не при старте.
+В `server/src/modules/auth/strategies/jwt.strategy.ts:14-17` проверка секрета происходит только при инициализации. Если секрет не установлен, приложение упадет только при первом использовании JWT, а не при старте.
 
 **Файл:**
 
-- `src/modules/auth/strategies/jwt.strategy.ts`
+- `server/src/modules/auth/strategies/jwt.strategy.ts`
 
 **Рекомендация:**
 Добавить валидацию секрета в `main.ts` при старте приложения или использовать ConfigModule с валидацией схемы.
@@ -71,11 +71,11 @@ createExam(@Body() createExamDto: CreateExamDto) {
 **Критичность: СРЕДНЯЯ**
 
 **Проблема:**
-В `src/shared/services/user-seed.service.ts:72` используется хардкод пароля `'admin123'`.
+В `server/src/shared/services/user-seed.service.ts:72` используется хардкод пароля `'admin123'`.
 
 **Файл:**
 
-- `src/shared/services/user-seed.service.ts:72`
+- `server/src/shared/services/user-seed.service.ts:72`
 
 **Рекомендация:**
 Вынести пароль в переменные окружения или использовать генерацию случайного пароля с выводом в консоль.
@@ -99,11 +99,11 @@ createExam(@Body() createExamDto: CreateExamDto) {
 **Критичность: СРЕДНЯЯ**
 
 **Проблема:**
-В `src/modules/courses/services/lessons.service.ts:273-306` метод `saveDebugResponse` создает файлы без проверки прав доступа и без ограничения размера.
+В `server/src/modules/courses/services/lessons.service.ts:273-306` метод `saveDebugResponse` создает файлы без проверки прав доступа и без ограничения размера.
 
 **Файл:**
 
-- `src/modules/courses/services/lessons.service.ts:273-306`
+- `server/src/modules/courses/services/lessons.service.ts:273-306`
 
 **Рекомендация:**
 Добавить проверку прав доступа, ограничение размера файлов и санитизацию имен файлов.
@@ -145,10 +145,10 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Файлы:**
 
-- `src/modules/courses/services/lessons.service.ts` - 8 вызовов
-- `src/modules/exams/services/exams.service.ts` - 3 вызова
-- `src/modules/chat/services/openrouter.service.ts` - 2 вызова
-- `src/shared/services/user-seed.service.ts` - 6 вызовов
+- `server/src/modules/courses/services/lessons.service.ts` - 8 вызовов
+- `server/src/modules/exams/services/exams.service.ts` - 3 вызова
+- `server/src/modules/chat/services/openrouter.service.ts` - 2 вызова
+- `server/src/shared/services/user-seed.service.ts` - 6 вызовов
 
 **Рекомендация:**
 Внедрить систему логирования (например, Winston или Pino) и заменить все `console.log` на структурированное логирование.
@@ -164,10 +164,10 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/auth/controllers/profile.controller.ts:9` - `user: any`
-- `src/modules/auth/controllers/admin.controller.ts:13` - `user: any`
-- `src/modules/auth/strategies/jwt.strategy.ts:35` - `payload: any`
-- `src/modules/courses/services/lessons.service.ts:357` - `newMessage: any`
+- `server/src/modules/auth/controllers/profile.controller.ts:9` - `user: any`
+- `server/src/modules/auth/controllers/admin.controller.ts:13` - `user: any`
+- `server/src/modules/auth/strategies/jwt.strategy.ts:35` - `payload: any`
+- `server/src/modules/courses/services/lessons.service.ts:357` - `newMessage: any`
 
 **Рекомендация:**
 Создать интерфейсы для типизации пользователей и payload токенов.
@@ -183,8 +183,8 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/courses/services/lessons.service.ts:218-271` - генерация контента урока может упасть без обработки
-- `src/modules/exams/services/exams.service.ts:231-267` - генерация теста может упасть
+- `server/src/modules/courses/services/lessons.service.ts:218-271` - генерация контента урока может упасть без обработки
+- `server/src/modules/exams/services/exams.service.ts:231-267` - генерация теста может упасть
 
 **Рекомендация:**
 Добавить глобальный exception filter и обработку ошибок во всех критичных местах.
@@ -200,9 +200,9 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/courses/services/lessons.service.ts:55` - `'...'` при обрезке описания
-- `src/modules/exams/services/exams.service.ts:349` - `'Тест по уроку: '` - хардкод строки
-- `src/modules/courses/services/sm2-spaced-repetition.service.ts` - магические числа 1.3, 2.5, 0.1, 0.08, 0.02, 0.2
+- `server/src/modules/courses/services/lessons.service.ts:55` - `'...'` при обрезке описания
+- `server/src/modules/exams/services/exams.service.ts:349` - `'Тест по уроку: '` - хардкод строки
+- `server/src/modules/courses/services/sm2-spaced-repetition.service.ts` - магические числа 1.3, 2.5, 0.1, 0.08, 0.02, 0.2
 
 **Рекомендация:**
 Вынести все магические значения в константы или конфигурационные файлы.
@@ -226,7 +226,7 @@ createExam(@Body() createExamDto: CreateExamDto) {
 **Критичность: НИЗКАЯ**
 
 **Проблема:**
-В `src/app.controller.ts` и `src/app.service.ts` есть дефолтный код "Hello World", который не используется.
+В `server/src/app.controller.ts` и `server/src/app.service.ts` есть дефолтный код "Hello World", который не используется.
 
 **Рекомендация:**
 Удалить неиспользуемый код или использовать его для health check эндпоинта.
@@ -244,9 +244,9 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Файлы:**
 
-- `src/shared/services/access-control.service.ts` - методы проверки доступа
-- `src/modules/courses/services/courses.service.ts:86-91` - дублирование проверки
-- `src/modules/courses/services/lessons.service.ts:64-69` - дублирование проверки
+- `server/src/shared/services/access-control.service.ts` - методы проверки доступа
+- `server/src/modules/courses/services/courses.service.ts:86-91` - дублирование проверки
+- `server/src/modules/courses/services/lessons.service.ts:64-69` - дублирование проверки
 
 **Рекомендация:**
 Использовать только `AccessControlInterceptor` для проверки доступа, убрать дублирование из сервисов.
@@ -262,9 +262,9 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Файлы:**
 
-- `src/modules/chat/services/chat.service.ts:61-72` - системный промпт
-- `src/modules/chat/services/chat.service.ts:200-211` - тот же системный промпт
-- `src/modules/chat/services/chat.service.ts:312-313` - упрощенная версия
+- `server/src/modules/chat/services/chat.service.ts:61-72` - системный промпт
+- `server/src/modules/chat/services/chat.service.ts:200-211` - тот же системный промпт
+- `server/src/modules/chat/services/chat.service.ts:312-313` - упрощенная версия
 
 **Рекомендация:**
 Вынести системные промпты в отдельный конфигурационный файл.
@@ -280,9 +280,9 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Файлы:**
 
-- `src/modules/courses/services/courses.service.ts:19-25`
-- `src/modules/courses/services/units.service.ts:18-24`
-- `src/modules/courses/services/lessons.service.ts:47-54`
+- `server/src/modules/courses/services/courses.service.ts:19-25`
+- `server/src/modules/courses/services/units.service.ts:18-24`
+- `server/src/modules/courses/services/lessons.service.ts:47-54`
 
 **Рекомендация:**
 Создать базовый сервис с общими методами CRUD операций.
@@ -298,8 +298,8 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/exams/services/exams.service.ts:269-296` - форматирование теста
-- `src/modules/courses/services/courses.service.ts:36-77` - форматирование списка курсов
+- `server/src/modules/exams/services/exams.service.ts:269-296` - форматирование теста
+- `server/src/modules/courses/services/courses.service.ts:36-77` - форматирование списка курсов
 
 **Рекомендация:**
 Создать отдельные DTO классы для ответов или использовать transformers.
@@ -317,8 +317,8 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/courses/services/courses.service.ts:27-28` - `findAllCourses()` не загружает relations
-- `src/modules/exams/services/exams.service.ts:57-62` - может потребоваться больше relations
+- `server/src/modules/courses/services/courses.service.ts:27-28` - `findAllCourses()` не загружает relations
+- `server/src/modules/exams/services/exams.service.ts:57-62` - может потребоваться больше relations
 
 **Рекомендация:**
 Добавить загрузку необходимых relations в запросы или использовать QueryBuilder с явным указанием relations.
@@ -346,8 +346,8 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/courses/services/courses.service.ts:121-128` - делается два запроса при обновлении (findOneCourse вызывается дважды)
-- `src/modules/courses/services/lessons.service.ts:128-136` - аналогично
+- `server/src/modules/courses/services/courses.service.ts:121-128` - делается два запроса при обновлении (findOneCourse вызывается дважды)
+- `server/src/modules/courses/services/lessons.service.ts:128-136` - аналогично
 
 **Рекомендация:**
 Оптимизировать запросы, использовать `findOne` с последующим `save` вместо `update` + `findOne`.
@@ -363,9 +363,9 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/users/services/users.service.ts:55-58` - `findAll()`
-- `src/modules/courses/services/courses.service.ts:27-28` - `findAllCourses()`
-- `src/modules/exams/services/exams.service.ts:53-54` - `findAllExams()`
+- `server/src/modules/users/services/users.service.ts:55-58` - `findAll()`
+- `server/src/modules/courses/services/courses.service.ts:27-28` - `findAllCourses()`
+- `server/src/modules/exams/services/exams.service.ts:53-54` - `findAllExams()`
 
 **Рекомендация:**
 Добавить пагинацию для всех методов получения списков.
@@ -381,7 +381,7 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Файл:**
 
-- `src/modules/courses/services/lessons.service.ts:273-306`
+- `server/src/modules/courses/services/lessons.service.ts:273-306`
 
 **Рекомендация:**
 Использовать асинхронные методы `fs.promises` вместо синхронных.
@@ -399,7 +399,7 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Файл:**
 
-- `src/modules/courses/services/lessons.service.ts` - 503 строки кода
+- `server/src/modules/courses/services/lessons.service.ts` - 503 строки кода
 
 **Рекомендация:**
 Разделить на несколько сервисов:
@@ -419,7 +419,7 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Файл:**
 
-- `src/modules/courses/services/lessons.service.ts:32-33`
+- `server/src/modules/courses/services/lessons.service.ts:32-33`
 
 **Рекомендация:**
 Создать абстракцию для работы с файлами (FileService) и использовать dependency injection.
@@ -447,8 +447,8 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/courses/services/lessons.service.ts:276` - `'debug-responses'`
-- `src/modules/courses/services/courses.service.ts:55` - обрезка описания на 100 символов
+- `server/src/modules/courses/services/lessons.service.ts:276` - `'debug-responses'`
+- `server/src/modules/courses/services/courses.service.ts:55` - обрезка описания на 100 символов
 
 **Рекомендация:**
 Вынести все конфигурационные значения в конфигурационные файлы или переменные окружения.
@@ -466,9 +466,9 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/courses/services/lessons.service.ts:268` - выбрасывается `Error` с общим сообщением
-- `src/modules/exams/services/exams.service.ts:264` - выбрасывается `Error` с общим сообщением
-- `src/modules/auth/services/auth.service.ts:30-32` - возвращается `null` вместо исключения
+- `server/src/modules/courses/services/lessons.service.ts:268` - выбрасывается `Error` с общим сообщением
+- `server/src/modules/exams/services/exams.service.ts:264` - выбрасывается `Error` с общим сообщением
+- `server/src/modules/auth/services/auth.service.ts:30-32` - возвращается `null` вместо исключения
 
 **Рекомендация:**
 Создать кастомные исключения и использовать их последовательно во всем приложении.
@@ -496,8 +496,8 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/courses/services/lessons.service.ts:269` - `'Failed to generate lesson content'`
-- `src/modules/exams/services/exams.service.ts:265` - `'Failed to generate test'`
+- `server/src/modules/courses/services/lessons.service.ts:269` - `'Failed to generate lesson content'`
+- `server/src/modules/exams/services/exams.service.ts:265` - `'Failed to generate test'`
 
 **Рекомендация:**
 Добавлять контекст к ошибкам (параметры запроса, ID пользователя и т.д.).
@@ -562,10 +562,10 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/auth/controllers/profile.controller.ts:9`
-- `src/modules/auth/controllers/admin.controller.ts:13`
-- `src/modules/auth/strategies/jwt.strategy.ts:35`
-- `src/modules/courses/services/lessons.service.ts:357`
+- `server/src/modules/auth/controllers/profile.controller.ts:9`
+- `server/src/modules/auth/controllers/admin.controller.ts:13`
+- `server/src/modules/auth/strategies/jwt.strategy.ts:35`
+- `server/src/modules/courses/services/lessons.service.ts:357`
 
 **Рекомендация:**
 Создать интерфейсы `UserPayload`, `AuthenticatedUser` и использовать их вместо `any`.
@@ -581,7 +581,7 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Файл:**
 
-- `src/config/openrouter.config.ts`
+- `server/src/config/openrouter.config.ts`
 
 **Рекомендация:**
 Создать интерфейс для конфигурации и использовать его.
@@ -597,8 +597,8 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Примеры:**
 
-- `src/modules/courses/services/lessons.service.ts:367` - `Promise<any[]>`
-- `src/modules/courses/services/lessons.service.ts:372` - `Promise<any[]>`
+- `server/src/modules/courses/services/lessons.service.ts:367` - `Promise<any[]>`
+- `server/src/modules/courses/services/lessons.service.ts:372` - `Promise<any[]>`
 
 **Рекомендация:**
 Создать интерфейсы для всех возвращаемых типов.
@@ -628,7 +628,7 @@ createExam(@Body() createExamDto: CreateExamDto) {
 
 **Файл:**
 
-- `src/app.module.ts:30`
+- `server/src/app.module.ts:30`
 
 **Рекомендация:**
 Отключить `synchronize` и использовать миграции TypeORM.
@@ -668,7 +668,7 @@ CORS настроен только для localhost, что может быть 
 
 **Файл:**
 
-- `src/main.ts:23-28`
+- `server/src/main.ts:23-28`
 
 **Рекомендация:**
 Вынести CORS настройки в переменные окружения.

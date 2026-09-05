@@ -72,15 +72,15 @@
 
 - После прохождения теста результаты отправляются на сервер, а данные урока/статуса могут быть обновлены повторным запросом.
 - Важно: обновление урока выполняется **без размонтирования страницы урока**, чтобы **не закрывать окно результата теста** до явного закрытия пользователем.
-- Реализация: `frontend/src/widgets/lesson/ui/LessonPage.tsx` не показывает полноэкранный `LoadingScreen`, если урок уже загружен (фоновая перезагрузка).
+- Реализация: `web/src/widgets/lesson/ui/LessonPage.tsx` не показывает полноэкранный `LoadingScreen`, если урок уже загружен (фоновая перезагрузка).
 - Пропущенные вопросы: при отправке результатов пропуск допускается (ответ может быть пустым/отсутствовать) и считается **неправильным ответом**, а не ошибкой валидации.
 
 ## Файлы
 
-- `src/modules/exams/services/exams.service.ts` - сервис экзаменов
-- `src/modules/exams/controllers/exams.controller.ts` - контроллер экзаменов
-- `frontend/src/pages/test-history/ui/TestHistoryPage.tsx` - страница истории
-- `frontend/src/shared/api/tests/api.ts` - API методы
-- `frontend/src/shared/api/tests/types.ts` - типы данных
-- `frontend/src/app/config/router.tsx` - роутинг
-- `frontend/src/app/ui/Layout.tsx` - навигация
+- `server/src/modules/exams/services/exams.service.ts` - сервис экзаменов
+- `server/src/modules/exams/controllers/exams.controller.ts` - контроллер экзаменов
+- `web/src/pages/test-history/ui/TestHistoryPage.tsx` - страница истории
+- `web/src/shared/api/tests/api.ts` - API методы
+- `web/src/shared/api/tests/types.ts` - типы данных
+- `web/src/app/config/router.tsx` - роутинг
+- `web/src/app/ui/Layout.tsx` - навигация

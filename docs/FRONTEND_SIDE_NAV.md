@@ -2,10 +2,10 @@
 
 ## Структура
 
-- `frontend/src/widgets/side-nav/navigation.ts`: маршруты, иконки, правила активного состояния, ширины и ключ localStorage.
-- `frontend/src/widgets/side-nav/ui/SideNav.tsx`: адаптивный MUI Drawer, ссылки и блок аккаунта.
-- `frontend/src/app/ui/Layout.tsx`: мобильное открытие, сохранение компактного режима, breadcrumbs и основной контент.
-- `frontend/src/shared/config/theme.ts`: общая синяя палитра, нейтральные поверхности, типографика и фокус.
+- `web/src/widgets/side-nav/navigation.ts`: маршруты, иконки, правила активного состояния, ширины и ключ localStorage.
+- `web/src/widgets/side-nav/ui/SideNav.tsx`: адаптивный MUI Drawer, ссылки и блок аккаунта.
+- `web/src/app/ui/Layout.tsx`: мобильное открытие, сохранение компактного режима, breadcrumbs и основной контент.
+- `web/src/shared/config/theme.ts`: общая синяя палитра, нейтральные поверхности, типографика и фокус.
 
 ## Навигация
 

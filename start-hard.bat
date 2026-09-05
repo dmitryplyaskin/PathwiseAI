@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 echo ========================================
 echo PathwiseAI Project - HARD START
 echo ========================================
@@ -19,7 +20,7 @@ if %errorlevel% equ 0 (
 echo.
 echo [1/7] Installing backend dependencies (FORCE)...
 echo Installing backend dependencies with yarn...
-call yarn install --no-cache --force
+call yarn --cwd server install --no-cache --force
 if %errorlevel% neq 0 (
     echo Error installing backend dependencies!
     pause
@@ -27,33 +28,29 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [2/7] Installing frontend dependencies (FORCE)...
-cd frontend
-echo Installing frontend dependencies with yarn...
-call yarn install --no-cache --force
+echo [2/7] Installing web dependencies (FORCE)...
+echo Installing web dependencies with yarn...
+call yarn --cwd web install --no-cache --force
 if %errorlevel% neq 0 (
-    echo Error installing frontend dependencies!
+    echo Error installing web dependencies!
     pause
     exit /b 1
 )
-cd ..
 
 echo.
-echo [3/7] Building frontend (FORCE)...
-echo Building frontend with yarn...
-cd frontend
-call yarn build
+echo [3/7] Building web (FORCE)...
+echo Building web with yarn...
+call yarn --cwd web build
 if %errorlevel% neq 0 (
-    echo Error building frontend!
+    echo Error building web!
     pause
     exit /b 1
 )
-cd ..
 
 echo.
 echo [4/7] Building backend (FORCE)...
 echo Building backend with yarn...
-call yarn build
+call yarn --cwd server build
 if %errorlevel% neq 0 (
     echo Error building backend!
     pause

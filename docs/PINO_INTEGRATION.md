@@ -8,7 +8,7 @@
 
 ### Основная конфигурация
 
-Конфигурация logger находится в `src/config/logger.config.ts`:
+Конфигурация logger находится в `server/src/config/logger.config.ts`:
 
 - **Dev режим**: Использует `pino-pretty` для красивого вывода в консоль с цветами
 - **Prod режим**: Выводит логи в stdout в JSON формате
@@ -60,11 +60,11 @@ catch (error) {
 
 ## Измененные файлы
 
-- `src/config/logger.config.ts` - Конфигурация logger
-- `src/app.module.ts` - Подключение LoggerModule
-- `src/main.ts` - Использование logger в bootstrap
-- `src/modules/courses/services/lessons.service.ts` - Замена console.log на logger
-- `src/modules/exams/services/exams.service.ts` - Замена console.log на logger
-- `src/modules/chat/services/openrouter.service.ts` - Замена console.log на logger
-- `src/modules/chat/services/chat.service.ts` - Замена console.log на logger, исправление типизации
-- `src/shared/services/user-seed.service.ts` - Замена console.log на logger
+- `server/src/config/logger.config.ts` - Конфигурация logger
+- `server/src/app.module.ts` - Подключение LoggerModule
+- `server/src/main.ts` - Использование logger в bootstrap
+- `server/src/modules/courses/services/lessons.service.ts` - Замена console.log на logger
+- `server/src/modules/exams/services/exams.service.ts` - Замена console.log на logger
+- `server/src/modules/chat/services/openrouter.service.ts` - Замена console.log на logger
+- `server/src/modules/chat/services/chat.service.ts` - Замена console.log на logger, исправление типизации
+- `server/src/shared/services/user-seed.service.ts` - Замена console.log на logger

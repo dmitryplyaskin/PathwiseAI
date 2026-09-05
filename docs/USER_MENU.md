@@ -6,9 +6,9 @@
 
 ## Расположение
 
-- Компонент: `frontend/src/widgets/user-menu/ui/UserMenu.tsx`
-- Экспорт: `frontend/src/widgets/user-menu/index.ts`
-- Использование: `frontend/src/app/ui/Layout.tsx`
+- Компонент: `web/src/widgets/user-menu/ui/UserMenu.tsx`
+- Экспорт: `web/src/widgets/user-menu/index.ts`
+- Использование: `web/src/app/ui/Layout.tsx`
 
 ## Функциональность
 

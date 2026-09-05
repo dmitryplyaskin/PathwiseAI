@@ -63,7 +63,7 @@ npm run start:dev
 ### 4. Запустите фронтенд
 
 \`\`\`bash
-cd frontend
+cd web
 npm run dev
 \`\`\`
 

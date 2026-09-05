@@ -31,7 +31,7 @@ bcrypt               # Хеширование паролей
 ## Структура модуля авторизации
 
 ```
-src/modules/auth/
+server/src/modules/auth/
 ├── controllers/
 │   ├── auth.controller.ts      # Эндпоинты регистрации и авторизации
 │   └── profile.controller.ts   # Защищенный эндпоинт профиля

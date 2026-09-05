@@ -37,8 +37,8 @@
 
 ### Файлы
 
-- `frontend/src/pages/home/ui/HomePage.tsx` - Основная логика блока повторения
-- `frontend/src/widgets/lessons-list/ui/LessonsList.tsx` - Обновленные карточки с подсказками
+- `web/src/pages/home/ui/HomePage.tsx` - Основная логика блока повторения
+- `web/src/widgets/lessons-list/ui/LessonsList.tsx` - Обновленные карточки с подсказками
 
 ### Функции
 

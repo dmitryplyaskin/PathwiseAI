@@ -18,16 +18,16 @@ Write production-grade code: strict types, predictable UI behavior, clear module
 
 ## Repository structure (follow existing layout)
 
-- `frontend/src/main.tsx` — app entry.
-- `frontend/src/app/` — app shell:
+- `web/src/main.tsx` — app entry.
+- `web/src/app/` — app shell:
   - `app/config/router.tsx` — routes
   - `app/providers/*` — providers composition
   - `app/ui/*` — `App`, `Layout`
-- `frontend/src/pages/` — route-level pages (thin composition).
-- `frontend/src/widgets/` — large UI blocks for pages (compose features).
-- `frontend/src/features/` — user-facing features (forms, cards, flows).
-- `frontend/src/shared/` — cross-cutting (api, ui-kit, config, model, utils).
-- Prefer existing path aliases (`@app`, `@pages`, `@widgets`, `@features`, `@shared`) from `frontend/vite.config.ts` + `frontend/tsconfig.app.json`.
+- `web/src/pages/` — route-level pages (thin composition).
+- `web/src/widgets/` — large UI blocks for pages (compose features).
+- `web/src/features/` — user-facing features (forms, cards, flows).
+- `web/src/shared/` — cross-cutting (api, ui-kit, config, model, utils).
+- Prefer existing path aliases (`@app`, `@pages`, `@widgets`, `@features`, `@shared`) from `web/vite.config.ts` + `web/tsconfig.app.json`.
 
 ## Module boundaries (strict)
 
@@ -53,7 +53,7 @@ Write production-grade code: strict types, predictable UI behavior, clear module
 
 ## State management (Effector)
 
-- Keep stores/events/effects in `frontend/src/shared/model/<domain>/*`.
+- Keep stores/events/effects in `web/src/shared/model/<domain>/*`.
 - UI components should not contain direct fetch logic when a model exists; prefer triggering events/effects from the model.
 - Effects must handle errors predictably and expose error state via stores.
 - Avoid cross-domain coupling; if multiple domains need shared behavior, extract a shared helper/service.
@@ -74,7 +74,7 @@ Write production-grade code: strict types, predictable UI behavior, clear module
 
 - Never use `any` in payloads. If payload is unknown, use `unknown` and narrow.
 - Prefer explicit payload types for `createEvent<T>()` / `createEffect<Params, Done>()`.
-- Keep API DTO types in `frontend/src/shared/api/**/types.ts`, and reuse them in models.
+- Keep API DTO types in `web/src/shared/api/**/types.ts`, and reuse them in models.
 
 ### Patterns (preferred)
 
@@ -103,13 +103,13 @@ Write production-grade code: strict types, predictable UI behavior, clear module
 - Doing fetches directly in components when a model already exists for that domain.
 - Putting large orchestration logic into a single model file (“god model”). Split by concern.
 
-## API conventions (frontend)
+## API conventions (web)
 
-- Use `frontend/src/shared/api/base/client.ts` (`ApiClient`) as the single HTTP entry point.
+- Use `web/src/shared/api/base/client.ts` (`ApiClient`) as the single HTTP entry point.
 - Do not hardcode API base URLs. Use Vite env (`import.meta.env.VITE_*`) and keep defaults minimal.
 - Do not trust client-side `userId` for security decisions:
   - Do not treat `userId` from the UI as authoritative.
-  - Prefer backend deriving `userId` from JWT; on the frontend, do not build flows around “spoofable” IDs.
+  - Prefer backend deriving `userId` from JWT; on the web, do not build flows around “spoofable” IDs.
 - Never log credentials/tokens/PII to `console.*`.
 - Centralize handling for 401/403 (logout + redirect) instead of scattered per-component checks.
 
@@ -128,17 +128,17 @@ Write production-grade code: strict types, predictable UI behavior, clear module
 - Ensure focus states remain visible and keyboard navigation works.
 - For dialogs/menus: verify proper focus management (MUI defaults are fine, don’t break them).
 
-## Security (frontend)
+## Security (web)
 
-- Do not store secrets in the frontend (API keys, prompts, “correct answers”, internal admin flags).
+- Do not store secrets in the web (API keys, prompts, “correct answers”, internal admin flags).
 - Do not send “expected answers” or correctness flags from client for grading logic.
 - Sanitize/escape untrusted content. For Markdown rendering, avoid enabling raw HTML unless explicitly required and audited.
 
 ## Post-task requirement
 
-After any frontend changes in `frontend/src/`:
+After any web changes in `web/src/`:
 
-- `yarn lint` (in `frontend/`)
-- `yarn build` (in `frontend/`)
+- `yarn lint` (in `web/`)
+- `yarn build` (in `web/`)
 
 If there are errors, fix them and rerun until clean.

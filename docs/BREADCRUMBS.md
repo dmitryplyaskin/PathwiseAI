@@ -6,10 +6,10 @@
 
 ## Файлы
 
-- `frontend/src/shared/ui/breadcrumbs/types.ts` - типы данных
-- `frontend/src/shared/ui/breadcrumbs/use-breadcrumbs.ts` - хук для генерации breadcrumbs
-- `frontend/src/shared/ui/breadcrumbs/breadcrumbs.tsx` - компонент отображения
-- `frontend/src/shared/ui/breadcrumbs/index.ts` - экспорты
+- `web/src/shared/ui/breadcrumbs/types.ts` - типы данных
+- `web/src/shared/ui/breadcrumbs/use-breadcrumbs.ts` - хук для генерации breadcrumbs
+- `web/src/shared/ui/breadcrumbs/breadcrumbs.tsx` - компонент отображения
+- `web/src/shared/ui/breadcrumbs/index.ts` - экспорты
 
 ## Функциональность
 

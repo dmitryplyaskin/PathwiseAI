@@ -29,22 +29,22 @@
 ## Новые файлы
 
 ```
-src/modules/users/enums/user-role.enum.ts
-src/modules/auth/decorators/roles.decorator.ts
-src/modules/auth/guards/roles.guard.ts
-src/modules/auth/controllers/admin.controller.ts
+server/src/modules/users/enums/user-role.enum.ts
+server/src/modules/auth/decorators/roles.decorator.ts
+server/src/modules/auth/guards/roles.guard.ts
+server/src/modules/auth/controllers/admin.controller.ts
 ```
 
 ## Обновленные файлы
 
-- `src/modules/users/entities/user.entity.ts` - добавлено поле role
-- `src/modules/auth/dto/login.dto.ts` - изменено поле email на login
-- `src/modules/auth/dto/register.dto.ts` - добавлена поддержка ролей
-- `src/modules/users/dto/create-user.dto.ts` - добавлена поддержка ролей
-- `src/modules/auth/strategies/local.strategy.ts` - обновлен для работы с логином
-- `src/modules/auth/services/auth.service.ts` - добавлена поддержка ролей
-- `src/modules/users/services/users.service.ts` - добавлен метод findByLoginForAuth
-- `src/modules/auth/strategies/jwt.strategy.ts` - добавлена поддержка ролей
+- `server/src/modules/users/entities/user.entity.ts` - добавлено поле role
+- `server/src/modules/auth/dto/login.dto.ts` - изменено поле email на login
+- `server/src/modules/auth/dto/register.dto.ts` - добавлена поддержка ролей
+- `server/src/modules/users/dto/create-user.dto.ts` - добавлена поддержка ролей
+- `server/src/modules/auth/strategies/local.strategy.ts` - обновлен для работы с логином
+- `server/src/modules/auth/services/auth.service.ts` - добавлена поддержка ролей
+- `server/src/modules/users/services/users.service.ts` - добавлен метод findByLoginForAuth
+- `server/src/modules/auth/strategies/jwt.strategy.ts` - добавлена поддержка ролей
 
 ## API изменения
 

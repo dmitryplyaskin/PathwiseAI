@@ -21,7 +21,7 @@
 ### Новая структура папок
 
 ```
-src/modules/courses/
+server/src/modules/courses/
 ├── config/
 │   ├── lesson-generation.prompts.ts  # Промпты для генерации уроков
 │   └── lesson-generation.schema.ts   # JSON схема для валидации ответов AI

@@ -39,19 +39,19 @@
 
 #### Файлы
 
-- `src/modules/courses/controllers/courses.controller.ts` - добавлен метод `getCourseLessons`
-- `src/modules/courses/services/lessons.service.ts` - добавлен метод `findLessonsByCourseId`
+- `server/src/modules/courses/controllers/courses.controller.ts` - добавлен метод `getCourseLessons`
+- `server/src/modules/courses/services/lessons.service.ts` - добавлен метод `findLessonsByCourseId`
 
 ### Frontend
 
 #### Новые компоненты
 
-- `frontend/src/features/course-card/ui/CourseCardWithLessons.tsx` - карточка курса с уроками
+- `web/src/features/course-card/ui/CourseCardWithLessons.tsx` - карточка курса с уроками
 
 #### Обновленные компоненты
 
-- `frontend/src/widgets/courses-list/ui/CoursesList.tsx` - использует новый компонент карточки
-- `frontend/src/shared/api/courses/api.ts` - добавлен метод `getCourseLessons`
+- `web/src/widgets/courses-list/ui/CoursesList.tsx` - использует новый компонент карточки
+- `web/src/shared/api/courses/api.ts` - добавлен метод `getCourseLessons`
 
 #### API интеграция
 

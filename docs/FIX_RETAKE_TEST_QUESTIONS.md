@@ -8,7 +8,7 @@
 ## Внесенные изменения
 
 ### Backend
-**Файл:** `src/modules/exams/services/exams.service.ts`
+**Файл:** `server/src/modules/exams/services/exams.service.ts`
 
 **Метод:** `getOrGenerateTestForLesson`
 

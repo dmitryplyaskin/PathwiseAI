@@ -23,7 +23,7 @@
 
 ### Затронутые файлы
 
-- `frontend/src/widgets/lesson/ui/lesson_header.tsx`
-- `frontend/src/widgets/lesson/ui/lesson_content.tsx`
-- `frontend/src/widgets/lesson/ui/StickyInfoBlock.tsx`
-- `frontend/src/widgets/lesson/ui/TestGenerationSettingsModal.tsx`
+- `web/src/widgets/lesson/ui/lesson_header.tsx`
+- `web/src/widgets/lesson/ui/lesson_content.tsx`
+- `web/src/widgets/lesson/ui/StickyInfoBlock.tsx`
+- `web/src/widgets/lesson/ui/TestGenerationSettingsModal.tsx`

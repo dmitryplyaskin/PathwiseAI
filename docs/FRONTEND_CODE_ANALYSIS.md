@@ -4,7 +4,7 @@
 
 ### 1. Жестко закодированный URL API в конфигурации
 
-**Файл:** `frontend/src/shared/api/config.ts`
+**Файл:** `web/src/shared/api/config.ts`
 **Проблема:** Base URL API жестко закодирован как `http://localhost:3000/api`, что делает невозможным использование разных окружений (dev, staging, production) без изменения кода.
 **Риски:**
 
@@ -17,9 +17,9 @@
 
 **Файлы:**
 
-- `frontend/src/pages/login/index.tsx`
-- `frontend/src/pages/register/index.tsx`
-- `frontend/src/widgets/lesson/ui/question_input.tsx`
+- `web/src/pages/login/index.tsx`
+- `web/src/pages/register/index.tsx`
+- `web/src/widgets/lesson/ui/question_input.tsx`
   **Проблема:** Нет валидации длины, формата и санитизации пользовательского ввода перед отправкой на сервер.
   **Риски:**
 - Возможность отправки слишком длинных строк
@@ -29,7 +29,7 @@
 
 ### 3. Логирование конфиденциальных данных в консоль
 
-**Файл:** `frontend/src/shared/model/auth/auth-model.ts`
+**Файл:** `web/src/shared/model/auth/auth-model.ts`
 **Проблема:** В production коде присутствуют `console.log` с данными авторизации (логин, пароль, ответы сервера).
 **Риски:**
 
@@ -42,8 +42,8 @@
 
 **Файлы:**
 
-- `frontend/src/shared/api/base/client.ts`
-- `frontend/src/shared/ui/auth-guard/auth-guard.tsx`
+- `web/src/shared/api/base/client.ts`
+- `web/src/shared/ui/auth-guard/auth-guard.tsx`
   **Проблема:** При получении 401 ошибки от API не происходит автоматический logout и очистка состояния авторизации.
   **Риски:**
 - Пользователь может остаться в авторизованном состоянии после истечения сессии
@@ -52,7 +52,7 @@
 
 ### 5. Проблема с бесконечным циклом в InitializedProvider
 
-**Файл:** `frontend/src/app/providers/with-initialized.tsx`
+**Файл:** `web/src/app/providers/with-initialized.tsx`
 **Проблема:** `useEffect` с зависимостью от `appInitialized` вызывает `checkAuthFx()`, что может привести к бесконечным запросам при ошибках.
 **Риски:**
 
@@ -67,8 +67,8 @@
 
 **Файлы:**
 
-- `frontend/src/shared/api/hooks/use-api.ts` (строки 12, 16, 17, 29, 62, 70)
-- `frontend/src/features/course-card/ui/CourseCard.tsx` (строка 292)
+- `web/src/shared/api/hooks/use-api.ts` (строки 12, 16, 17, 29, 62, 70)
+- `web/src/features/course-card/ui/CourseCard.tsx` (строка 292)
   **Проблема:** Использование типа `any` снижает безопасность типов TypeScript и может привести к ошибкам во время выполнения.
   **Риски:**
 - Потеря преимуществ статической типизации
@@ -78,7 +78,7 @@
 
 ### 7. Отсутствие глобальной обработки ошибок API
 
-**Файл:** `frontend/src/shared/api/base/client.ts`
+**Файл:** `web/src/shared/api/base/client.ts`
 **Проблема:** Ошибки API обрабатываются локально в каждом компоненте, отсутствует централизованная система уведомлений об ошибках.
 **Риски:**
 
@@ -89,7 +89,7 @@
 
 ### 8. Отсутствие защиты от XSS в Markdown рендерере
 
-**Файл:** `frontend/src/shared/ui/markdown-renderer/markdown-renderer.tsx`
+**Файл:** `web/src/shared/ui/markdown-renderer/markdown-renderer.tsx`
 **Проблема:** Хотя `react-markdown` в целом безопасен, ссылки открываются в `target="_blank"` без дополнительной защиты от `window.opener` атак.
 **Риски:**
 
@@ -101,8 +101,8 @@
 
 **Файлы:**
 
-- `frontend/src/widgets/lesson/model/use_lesson_page.ts`
-- `frontend/src/widgets/test/ui/TextQuestion.tsx`
+- `web/src/widgets/lesson/model/use_lesson_page.ts`
+- `web/src/widgets/test/ui/TextQuestion.tsx`
   **Проблема:** Нет защиты от множественных быстрых запросов от пользователя.
   **Риски:**
 - Возможность перегрузки сервера множественными запросами
@@ -111,7 +111,7 @@
 
 ### 10. Отсутствие обработки сетевых ошибок
 
-**Файл:** `frontend/src/shared/api/base/client.ts`
+**Файл:** `web/src/shared/api/base/client.ts`
 **Проблема:** Недостаточная обработка случаев когда сеть недоступна или запрос прерван.
 **Риски:**
 
@@ -121,7 +121,7 @@
 
 ### 11. Отсутствие валидации ответов API
 
-**Файлы:** Все API методы в `frontend/src/shared/api/`
+**Файлы:** Все API методы в `web/src/shared/api/`
 **Проблема:** Ответы от API не валидируются на соответствие ожидаемым типам перед использованием.
 **Риски:**
 
@@ -133,8 +133,8 @@
 
 **Файлы:**
 
-- `frontend/src/widgets/lesson/model/use_lesson_page.ts`
-- `frontend/src/widgets/lesson/ui/LessonPage.tsx`
+- `web/src/widgets/lesson/model/use_lesson_page.ts`
+- `web/src/widgets/lesson/ui/LessonPage.tsx`
   **Проблема:** Отсутствие мемоизации для дорогих вычислений и компонентов, возможные лишние ререндеры.
   **Риски:**
 - Медленная работа приложения
@@ -192,7 +192,7 @@
 
 ### 18. Неоптимальная конфигурация code splitting
 
-**Файл:** `frontend/vite.config.ts`
+**Файл:** `web/vite.config.ts`
 **Проблема:** Ручная конфигурация `manualChunks` может быть неоптимальной и требовать постоянной поддержки.
 **Риски:**
 
@@ -202,7 +202,7 @@
 
 ### 19. Отсутствие обработки случая когда API возвращает неожиданный формат данных
 
-**Файл:** `frontend/src/shared/api/base/client.ts`
+**Файл:** `web/src/shared/api/base/client.ts`
 **Проблема:** При ошибке парсинга JSON возвращается общая ошибка без деталей.
 **Риски:**
 
@@ -214,8 +214,8 @@
 
 **Файлы:**
 
-- `frontend/src/shared/ui/markdown-renderer/markdown-renderer.tsx` (строки 300-301)
-- `frontend/src/widgets/test/ui/TextQuestion.tsx` (строки 58-60)
+- `web/src/shared/ui/markdown-renderer/markdown-renderer.tsx` (строки 300-301)
+- `web/src/widgets/test/ui/TextQuestion.tsx` (строки 58-60)
   **Проблема:** Использование `@ts-ignore` скрывает проблемы типизации вместо их решения.
   **Риски:**
 - Возможные runtime ошибки
@@ -285,7 +285,7 @@
 
 ### 28. Большой размер vendor chunks
 
-**Файл:** `frontend/vite.config.ts`
+**Файл:** `web/vite.config.ts`
 **Проблема:** Vendor chunks могут быть слишком большими из-за включения всех зависимостей MUI.
 **Риски:**
 

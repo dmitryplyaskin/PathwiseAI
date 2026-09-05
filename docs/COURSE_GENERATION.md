@@ -52,16 +52,16 @@
 
 ### Бэкенд
 
-- `src/modules/courses/entities/lesson.entity.ts` - Флаг isCreated
-- `src/modules/courses/dto/create-course-outline.dto.ts` - DTO для создания курса
-- `src/modules/courses/config/course-generation.schema.ts` - Схема генерации
-- `src/modules/courses/config/course-generation.prompts.ts` - Промпты
-- `src/modules/courses/services/lessons.service.ts` - Логика генерации
-- `src/modules/courses/controllers/courses.controller.ts` - API endpoint
+- `server/src/modules/courses/entities/lesson.entity.ts` - Флаг isCreated
+- `server/src/modules/courses/dto/create-course-outline.dto.ts` - DTO для создания курса
+- `server/src/modules/courses/config/course-generation.schema.ts` - Схема генерации
+- `server/src/modules/courses/config/course-generation.prompts.ts` - Промпты
+- `server/src/modules/courses/services/lessons.service.ts` - Логика генерации
+- `server/src/modules/courses/controllers/courses.controller.ts` - API endpoint
 
 ### Фронтенд
 
-- `frontend/src/shared/api/courses/types.ts` - Типы для API
-- `frontend/src/shared/api/courses/api.ts` - API методы
-- `frontend/src/shared/model/courses/courses-model.ts` - Модель состояния
-- `frontend/src/features/education-module/ui/content-creation/ContentCreationModal.tsx` - UI
+- `web/src/shared/api/courses/types.ts` - Типы для API
+- `web/src/shared/api/courses/api.ts` - API методы
+- `web/src/shared/model/courses/courses-model.ts` - Модель состояния
+- `web/src/features/education-module/ui/content-creation/ContentCreationModal.tsx` - UI

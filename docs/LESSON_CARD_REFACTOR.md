@@ -5,7 +5,7 @@
 ## Основные изменения
 
 1.  **Универсальный компонент `LessonCard`**
-    *   Путь: `frontend/src/features/lesson-card/ui/LessonCard.tsx`
+    *   Путь: `web/src/features/lesson-card/ui/LessonCard.tsx`
     *   Компонент обновлен для использования реальных данных из API (`Lesson` и `LessonForReview`).
     *   Добавлена поддержка пропса `variant` (`'default' | 'review'`).
     *   **Интерфейс:**
@@ -15,15 +15,15 @@
         *   В обычном режиме (`variant="default"`) отображает дату создания и статус прохождения.
 
 2.  **Обновление списков**
-    *   **`LessonsList`** (`frontend/src/widgets/lessons-list/ui/LessonsList.tsx`):
+    *   **`LessonsList`** (`web/src/widgets/lessons-list/ui/LessonsList.tsx`):
         *   Переведен на использование нового `LessonCard` в режиме `default`.
         *   Убрана дублирующая логика форматирования дат и статусов.
-    *   **`ReviewLessonsList`** (`frontend/src/widgets/review-lessons/ui/ReviewLessonsList.tsx`):
+    *   **`ReviewLessonsList`** (`web/src/widgets/review-lessons/ui/ReviewLessonsList.tsx`):
         *   Переведен на использование нового `LessonCard` в режиме `review`.
         *   Реализовано отображение приоритета повторения (Критично/Важно/Планово) внутри карточки.
 
 3.  **Очистка кода**
-    *   Удален неиспользуемый файл моков: `frontend/src/widgets/lessons-list/model/mock.ts`.
+    *   Удален неиспользуемый файл моков: `web/src/widgets/lessons-list/model/mock.ts`.
 
 ## Использование
 

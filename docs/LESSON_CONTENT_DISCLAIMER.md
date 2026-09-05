@@ -6,7 +6,7 @@
 
 ## Где реализовано
 
-- `frontend/src/widgets/lesson/ui/lesson_content.tsx`
+- `web/src/widgets/lesson/ui/lesson_content.tsx`
 
 ## Текст дисклеймера
 

@@ -9,14 +9,14 @@
 
 ### Backend
 
-**Файл:** `src/modules/exams/dto/generate-test.dto.ts`
+**Файл:** `server/src/modules/exams/dto/generate-test.dto.ts`
 Добавлено поле `forceNew` в DTO:
 ```typescript
 @IsOptional()
 forceNew?: boolean;
 ```
 
-**Файл:** `src/modules/exams/services/exams.service.ts`
+**Файл:** `server/src/modules/exams/services/exams.service.ts`
 Изменено условие проверки в методе `getOrGenerateTestForLesson`. Теперь проверка идет строго по флагу `forceNew`.
 
 ```typescript
@@ -29,7 +29,7 @@ if (!forceNew) { ... }
 
 ### Frontend
 
-**Файл:** `frontend/src/shared/api/tests/types.ts`
+**Файл:** `web/src/shared/api/tests/types.ts`
 Обновлен интерфейс `GenerateTestRequest`:
 ```typescript
 export interface GenerateTestRequest {
@@ -38,7 +38,7 @@ export interface GenerateTestRequest {
 }
 ```
 
-**Файл:** `frontend/src/widgets/lesson/ui/StickyInfoBlock.tsx`
+**Файл:** `web/src/widgets/lesson/ui/StickyInfoBlock.tsx`
 Обновлен вызов API. Флаг `forceNew` устанавливается в `true`, только если переданы настройки (settings), что означает явный запрос пользователя на создание нового (кастомизированного) теста. Если настройки не переданы (нажатие "Начать тест" или "Пройти снова" на главном экране урока), `forceNew` будет `false`.
 
 ```typescript

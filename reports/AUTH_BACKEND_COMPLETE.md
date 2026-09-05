@@ -22,10 +22,10 @@ bcrypt               # Хеширование паролей
 
 ## Структура модулей
 
-### Модуль авторизации (`src/modules/auth/`)
+### Модуль авторизации (`server/src/modules/auth/`)
 
 ```
-src/modules/auth/
+server/src/modules/auth/
 ├── controllers/
 │   ├── auth.controller.ts      # POST /auth/register, POST /auth/login
 │   ├── profile.controller.ts   # GET /profile (защищенный)
@@ -49,10 +49,10 @@ src/modules/auth/
 └── README.md                   # Документация модуля
 ```
 
-### Модуль пользователей (`src/modules/users/`)
+### Модуль пользователей (`server/src/modules/users/`)
 
 ```
-src/modules/users/
+server/src/modules/users/
 ├── entities/
 │   └── user.entity.ts          # Сущность User с полем role
 ├── enums/
@@ -72,7 +72,7 @@ src/modules/users/
 ### Enum ролей
 
 ```typescript
-// src/modules/users/enums/user-role.enum.ts
+// server/src/modules/users/enums/user-role.enum.ts
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
@@ -82,7 +82,7 @@ export enum UserRole {
 ### Сущность пользователя
 
 ```typescript
-// src/modules/users/entities/user.entity.ts
+// server/src/modules/users/entities/user.entity.ts
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')

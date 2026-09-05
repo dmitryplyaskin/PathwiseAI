@@ -23,25 +23,35 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+PathwiseAI is a personal learning platform with an AI-powered NestJS backend
+and a React/Vite web client. The applications live in `server/` and `web/`;
+the repository root contains shared scripts, documentation, environment
+configuration, and PGlite data.
 
 ## Project setup
 
 ```bash
-$ yarn install
+$ yarn install:all
 ```
+
+Backend environment variables are read from the root `.env` file (copy
+`env.example`); Vite variables are read from `web/.env` (copy
+`web/env.example`).
 
 ## Compile and run the project
 
 ```bash
-# development
-$ yarn run start
+# backend development
+$ yarn start:dev
+
+# web development (in a second terminal)
+$ yarn dev:web
 
 # watch mode
 $ yarn run start:dev
 
 # production mode
-$ yarn run start:prod
+$ yarn start:prod
 ```
 
 ## Run tests
@@ -59,7 +69,8 @@ $ yarn run test:cov
 
 ## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+The production server serves the built client from `web/dist`. Build both
+applications from the repository root with `yarn build`.
 
 If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
 

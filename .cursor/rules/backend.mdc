@@ -12,24 +12,24 @@ Write production-grade code: strict types, predictable HTTP/API behavior, clear 
 
 - **Environment:** Windows + PowerShell.
 - **Package manager:** **Yarn only** (never npm/pnpm).
-- **Runtime:** Node.js + TypeScript. Build output goes to `dist/` (`nest build` / `tsc`).
+- **Runtime:** Node.js + TypeScript. Build output goes to `server/dist/` (`nest build` / `tsc`).
 - **Framework:** **NestJS** (controllers + services + modules).
-- **DB:** **TypeORM** + `typeorm-pglite` (see `src/app.module.ts`).
-- **Logging:** `nestjs-pino` (see `src/config/logger.config.ts`). `Logger` is acceptable, but prefer structured logging.
+- **DB:** **TypeORM** + `typeorm-pglite` (see `server/src/app.module.ts`).
+- **Logging:** `nestjs-pino` (see `server/src/config/logger.config.ts`). `Logger` is acceptable, but prefer structured logging.
 - **Comments:** if you add comments, they must be **in English** (existing code may be mixed).
 
 ## Repository structure (follow existing layout)
 
-- `src/main.ts` — bootstrap (CORS, global pipes, static assets).
-- `src/app.module.ts` — module wiring, TypeORM config, global guards/middleware.
-- `src/config/*` — config providers (logger/openrouter, etc.).
-- `src/modules/<domain>/` — domain modules:
+- `server/src/main.ts` — bootstrap (CORS, global pipes, static assets).
+- `server/src/app.module.ts` — module wiring, TypeORM config, global guards/middleware.
+- `server/src/config/*` — config providers (logger/openrouter, etc.).
+- `server/src/modules/<domain>/` — domain modules:
   - `controllers/` — HTTP layer (thin).
   - `services/` — business logic/orchestration.
   - `dto/` — input/output DTOs + `class-validator`.
   - `entities/` — TypeORM entities.
   - `<domain>.module.ts` — dependency wiring.
-- `src/shared/` — cross-cutting concerns (decorators/guards/interceptors/exceptions/middleware/services).
+- `server/src/shared/` — cross-cutting concerns (decorators/guards/interceptors/exceptions/middleware/services).
 
 ## Module boundaries (strict)
 
@@ -37,7 +37,7 @@ Write production-grade code: strict types, predictable HTTP/API behavior, clear 
 - **Services**: business logic, transactions, repository access, external API calls.
 - **Entities/DTO**: no business logic.
 - **Shared**: only what is truly reused across modules; otherwise keep code near the domain.
-- Avoid circular dependencies. If a cycle emerges, extract shared types/helpers into `src/shared/*` or a local shared file.
+- Avoid circular dependencies. If a cycle emerges, extract shared types/helpers into `server/src/shared/*` or a local shared file.
 
 ## TypeScript (strict)
 
@@ -51,24 +51,24 @@ Write production-grade code: strict types, predictable HTTP/API behavior, clear 
 - Input validation:
   - DTO + `class-validator`,
   - `ParseUUIDPipe` for `:id` params,
-  - rely on the global `ValidationPipe` (see `src/main.ts`).
+  - rely on the global `ValidationPipe` (see `server/src/main.ts`).
 - Do not pass Express `Request/Response` into services (exception: streaming endpoints where it’s unavoidable).
 - Errors:
   - Use `HttpException` / `BadRequestException` / `ForbiddenException` / `NotFoundException`, etc.
-  - For domain errors, create custom exceptions in `src/shared/exceptions/*` (or next to the module).
+  - For domain errors, create custom exceptions in `server/src/shared/exceptions/*` (or next to the module).
   - Do not silently swallow errors; if you implement a fallback, log context.
 - Do not expose “findAll without filtering” for user data; add access control and pagination.
 
 ## Security (mandatory)
 
 - **Authentication**:
-  - By default, endpoints require JWT (`JwtAuthGuard`). Mark exceptions with `@Public()` (see `src/shared/decorators/public.decorator.ts`).
+  - By default, endpoints require JWT (`JwtAuthGuard`). Mark exceptions with `@Public()` (see `server/src/shared/decorators/public.decorator.ts`).
 - **Authorization / ownership**:
   - Do not accept `userId` from client body/params for user-owned operations.
   - Derive `userId` from the JWT via `@CurrentUser()`.
-  - Enforce access via `AccessControlService` / guards / interceptors (see `src/shared/services/access-control.service.ts`).
+  - Enforce access via `AccessControlService` / guards / interceptors (see `server/src/shared/services/access-control.service.ts`).
 - **CSRF**:
-  - The project uses a global `CsrfGuard` (see `src/shared/guards/csrf.guard.ts`).
+  - The project uses a global `CsrfGuard` (see `server/src/shared/guards/csrf.guard.ts`).
   - CSRF is an addition to auth, not a replacement.
 
 ## DB/TypeORM
@@ -89,7 +89,7 @@ Write production-grade code: strict types, predictable HTTP/API behavior, clear 
 
 ## Post-task requirement
 
-After any backend changes in `src/`:
+After any backend changes in `server/src/`:
 
 - `yarn lint`
 - `yarn build`

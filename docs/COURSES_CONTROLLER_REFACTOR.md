@@ -9,7 +9,7 @@
 
 ### Новые контроллеры
 
-1. **CoursesController** (`src/modules/courses/controllers/courses.controller.ts`)
+1. **CoursesController** (`server/src/modules/courses/controllers/courses.controller.ts`)
    - Отвечает только за операции с курсами.
    - Эндпоинты (prefix: `/courses`):
      - `POST /` - Создание курса
@@ -23,7 +23,7 @@
      - `DELETE /:id` - Удаление курса
      - `POST /outlines` - Создание структуры курса (Аутлайн)
 
-2. **UnitsController** (`src/modules/courses/controllers/units.controller.ts`)
+2. **UnitsController** (`server/src/modules/courses/controllers/units.controller.ts`)
    - Отвечает за операции с модулями (юнитами).
    - Эндпоинты (prefix: `/units`):
      - `POST /` - Создание юнита (ранее `POST /courses/units`)
@@ -34,7 +34,7 @@
      - `PATCH /:id/shared` - Изменение видимости юнита (ранее `PATCH /courses/units/:id/shared`)
      - `DELETE /:id` - Удаление юнита (ранее `DELETE /courses/units/:id`)
 
-3. **LessonsController** (`src/modules/courses/controllers/lessons.controller.ts`)
+3. **LessonsController** (`server/src/modules/courses/controllers/lessons.controller.ts`)
    - Отвечает за операции с уроками.
    - Эндпоинты (prefix: `/lessons`):
      - `GET /` - Получение всех уроков (ранее `GET /courses/lessons`)
@@ -54,8 +54,8 @@
 ### Frontend
 
 API клиенты на фронтенде были обновлены для соответствия новым маршрутам:
-- `frontend/src/shared/api/lessons/api.ts`
-- `frontend/src/shared/api/courses/api.ts`
+- `web/src/shared/api/lessons/api.ts`
+- `web/src/shared/api/courses/api.ts`
 
 ## Преимущества
 

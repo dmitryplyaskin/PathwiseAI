@@ -37,18 +37,17 @@ psql -U your_username -d PathwiseAI -f migration-add-thread-id.sql
 ```bash
 # Остановить текущий процесс (Ctrl+C)
 
-# Очистить dist и пересобрать
-rm -rf dist/
-npm run build
+# Пересобрать backend
+yarn --cwd server build
 
 # Запустить снова
-npm run start:dev
+yarn --cwd server start:dev
 ```
 
 ### 3. Перезапустить фронтенд
 
 ```bash
-cd frontend
+cd web
 
 # Остановить текущий процесс (Ctrl+C)
 
@@ -111,7 +110,7 @@ yarn dev
 **Решение:**
 
 ```bash
-cd frontend
+cd web
 rm -rf node_modules
 npm install
 ```

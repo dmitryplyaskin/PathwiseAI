@@ -13,7 +13,7 @@
 
 ## Текущее поведение (Frontend)
 
-Файл: `frontend/src/pages/home/ui/HomePage.tsx`
+Файл: `web/src/pages/home/ui/HomePage.tsx`
 
 ### 1) Повторить
 

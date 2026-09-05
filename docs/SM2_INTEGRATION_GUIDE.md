@@ -26,7 +26,7 @@
 
 #### 1.1 Создать сервис для SM-2 алгоритма
 
-**Файл:** `src/modules/courses/services/sm2-spaced-repetition.service.ts`
+**Файл:** `server/src/modules/courses/services/sm2-spaced-repetition.service.ts`
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -120,7 +120,7 @@ export class SM2SpacedRepetitionService {
 
 #### 1.2 Обновить ExamsService
 
-**Файл:** `src/modules/exams/services/exams.service.ts`
+**Файл:** `server/src/modules/exams/services/exams.service.ts`
 
 Добавить импорт и инжекцию сервиса:
 
@@ -188,7 +188,7 @@ private async updateLessonProgress(exam: Exam, score: number) {
 
 #### 1.3 Добавить API для получения уроков для повторения
 
-**Файл:** `src/modules/courses/services/lessons.service.ts`
+**Файл:** `server/src/modules/courses/services/lessons.service.ts`
 
 Добавить метод:
 
@@ -210,7 +210,7 @@ async findLessonsForReview(userId: string): Promise<Lesson[]> {
 }
 ```
 
-**Файл:** `src/modules/courses/controllers/lessons.controller.ts`
+**Файл:** `server/src/modules/courses/controllers/lessons.controller.ts`
 
 Добавить endpoint:
 
@@ -225,7 +225,7 @@ async getLessonsForReview(@CurrentUser() user: User) {
 
 #### 2.1 Обновить типы API
 
-**Файл:** `frontend/src/shared/api/lessons/types.ts`
+**Файл:** `web/src/shared/api/lessons/types.ts`
 
 Добавить интерфейс для урока для повторения:
 
@@ -258,7 +258,7 @@ export interface LessonForReview {
 
 #### 2.2 Добавить API методы
 
-**Файл:** `frontend/src/shared/api/lessons/api.ts`
+**Файл:** `web/src/shared/api/lessons/api.ts`
 
 Добавить метод:
 
@@ -274,7 +274,7 @@ export const lessonsApi = {
 
 #### 2.3 Обновить состояние после тестирования
 
-**Файл:** `frontend/src/widgets/test/ui/TestModal.tsx`
+**Файл:** `web/src/widgets/test/ui/TestModal.tsx`
 
 Обновить метод `finishTest`:
 
@@ -319,7 +319,7 @@ const finishTest = async (finalAnswers?: QuestionAnswer[]) => {
 
 #### 3.1 Создать компонент списка уроков для повторения
 
-**Файл:** `frontend/src/widgets/review-lessons/ui/ReviewLessonsList.tsx`
+**Файл:** `web/src/widgets/review-lessons/ui/ReviewLessonsList.tsx`
 
 ```typescript
 import React, { useState, useEffect } from 'react';
@@ -523,7 +523,7 @@ export const ReviewLessonsList: React.FC<ReviewLessonsListProps> = ({
 
 #### 3.2 Обновить главную страницу
 
-**Файл:** `frontend/src/pages/home/ui/HomePage.tsx`
+**Файл:** `web/src/pages/home/ui/HomePage.tsx`
 
 Заменить статический блок "Требуют повторения" на динамический:
 
@@ -544,7 +544,7 @@ import { ReviewLessonsList } from '@widgets/review-lessons/ui/ReviewLessonsList'
 
 #### 3.3 Создать страницу для повторения
 
-**Файл:** `frontend/src/pages/review/ui/ReviewPage.tsx`
+**Файл:** `web/src/pages/review/ui/ReviewPage.tsx`
 
 ```typescript
 import React from 'react';
@@ -607,7 +607,7 @@ export const ReviewPage: React.FC = () => {
 
 #### 4.1 Добавить маршрут для страницы повторения
 
-**Файл:** `frontend/src/app/App.tsx`
+**Файл:** `web/src/app/App.tsx`
 
 ```typescript
 import { ReviewPage } from '@pages/review/ui/ReviewPage';
@@ -624,7 +624,7 @@ import { ReviewPage } from '@pages/review/ui/ReviewPage';
 
 #### 5.1 Создать тесты для SM-2 сервиса
 
-**Файл:** `src/modules/courses/services/sm2-spaced-repetition.service.spec.ts`
+**Файл:** `server/src/modules/courses/services/sm2-spaced-repetition.service.spec.ts`
 
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';

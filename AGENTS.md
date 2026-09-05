@@ -6,26 +6,26 @@ PathwiseAI — персональная система обучения: соз�
 
 Репозиторий содержит два приложения с отдельными package.json и yarn.lock:
 
-- Корень: NestJS 11, TypeScript, TypeORM и локальный PostgreSQL-совместимый PGlite.
-- `frontend/`: React 19, TypeScript, Vite 7, React Router 7, MUI 7, Emotion и Effector.
+- `server/`: NestJS 11, TypeScript, TypeORM и локальный PostgreSQL-совместимый PGlite.
+- `web/`: React 19, TypeScript, Vite 7, React Router 7, MUI 7, Emotion и Effector.
 
 ## Ориентиры в коде
 
-- `src/main.ts`: запуск сервера, `/api`, CORS, cookies, валидация DTO и раздача `frontend/dist`.
-- `src/app.module.ts`: модули, PGlite, глобальный CSRF guard.
-- `src/modules/{auth,users,courses,questions,exams,chat}/`: серверные домены. Контроллеры отвечают за HTTP, сервисы — за предметную логику, DTO — за валидацию, entities — за хранение.
-- `src/shared/`: общие серверные компоненты; `src/config/`: OpenRouter и Pino.
-- `frontend/src/app/`: провайдеры, маршруты, Layout.
-- `frontend/src/pages/`: страницы маршрутов; `widgets/`: крупные блоки экранов; `features/`: пользовательские функции.
-- `frontend/src/shared/`: API-клиент и типы, модели Effector, общие UI-компоненты, тема.
-- `frontend/src/shared/config/theme.ts`: палитра, типографика и настройки MUI.
-- `frontend/src/widgets/side-nav/navigation.ts`: пункты меню, сопоставление маршрутов, ширины панели и ключ сохранения её состояния.
+- `server/src/main.ts`: запуск сервера, `/api`, CORS, cookies, валидация DTO и раздача `web/dist`.
+- `server/src/app.module.ts`: модули, PGlite, глобальный CSRF guard.
+- `server/src/modules/{auth,users,courses,questions,exams,chat}/`: серверные домены. Контроллеры отвечают за HTTP, сервисы — за предметную логику, DTO — за валидацию, entities — за хранение.
+- `server/src/shared/`: общие серверные компоненты; `server/src/config/`: OpenRouter и Pino.
+- `web/src/app/`: провайдеры, маршруты, Layout.
+- `web/src/pages/`: страницы маршрутов; `widgets/`: крупные блоки экранов; `features/`: пользовательские функции.
+- `web/src/shared/`: API-клиент и типы, модели Effector, общие UI-компоненты, тема.
+- `web/src/shared/config/theme.ts`: палитра, типографика и настройки MUI.
+- `web/src/widgets/side-nav/navigation.ts`: пункты меню, сопоставление маршрутов, ширины панели и ключ сохранения её состояния.
 
 Соблюдайте существующие слои и алиасы `@app`, `@pages`, `@widgets`, `@features`, `@shared`, `@assets`. Общие модули не должны зависеть от страниц. Не добавляйте второй UI-kit, менеджер состояния или способ стилизации без необходимости.
 
 ## Документация
 
-Корневой README в основном является шаблоном NestJS. Перед задачей читайте соответствующие документы в `docs/`, затем сверяйте их с реализацией: часть описывает старое состояние проекта.
+Корневой README содержит общие команды и структуру проекта. Перед задачей читайте соответствующие документы в `docs/`, затем сверяйте их с реализацией: часть описывает старое состояние проекта.
 
 Основные точки входа:
 
@@ -33,7 +33,7 @@ PathwiseAI — персональная система обучения: соз�
 - Обучение: `docs/HOME_PAGE_DASHBOARD.md`, `docs/COURSES_PAGE.md`, `docs/COURSE_PAGE.md`, `docs/CONTENT_CREATION_MODAL.md`.
 - Повторение и тесты: `docs/SM2_INTEGRATION_GUIDE.md`, `docs/TEST_HISTORY.md`.
 - API и доступ: `docs/API_STANDARDIZATION.md`, `docs/ACCESS_CONTROL.md`, `docs/AUTH_ISSUES_AUDIT_2026-02-20.md`.
-- Чат и урок: `src/modules/chat/README.md`, `frontend/src/widgets/lesson/README.md`, `frontend/src/widgets/test/README.md`.
+- Чат и урок: `server/src/modules/chat/README.md`, `web/src/widgets/lesson/README.md`, `web/src/widgets/test/README.md`.
 
 Обновляйте затронутую документацию при изменении поведения. Не принимайте старые отчёты об аудите за доказательство текущей ошибки.
 
@@ -43,17 +43,18 @@ PathwiseAI — персональная система обучения: соз�
 
 | Каталог     | Команда                 | Назначение                            |
 | ----------- | ----------------------- | ------------------------------------- |
-| Корень      | `yarn install`          | Установить серверные зависимости      |
-| `frontend/` | `yarn install`          | Установить клиентские зависимости     |
+| Корень      | `yarn install:all`      | Установить зависимости обоих приложений |
+| `server/`   | `yarn install`          | Установить серверные зависимости      |
+| `web/`      | `yarn install`          | Установить клиентские зависимости     |
 | Корень      | `yarn start:dev`        | Запустить NestJS в watch-режиме       |
-| `frontend/` | `yarn dev`              | Запустить Vite                        |
-| `frontend/` | `yarn build`            | Проверить TypeScript и собрать клиент |
-| Корень      | `yarn build`            | Собрать сервер                        |
-| Корень      | `yarn test --runInBand` | Серверные unit-тесты                  |
-| Корень      | `yarn test:e2e`         | Серверные e2e-тесты                   |
-| `frontend/` | `yarn lint`             | Проверить клиент ESLint               |
+| `web/`      | `yarn dev`              | Запустить Vite                        |
+| `web/`      | `yarn build`            | Проверить TypeScript и собрать клиент |
+| `server/`   | `yarn build`            | Собрать сервер                        |
+| `server/`   | `yarn test --runInBand` | Серверные unit-тесты                  |
+| `server/`   | `yarn test:e2e`         | Серверные e2e-тесты                   |
+| `web/`      | `yarn lint`             | Проверить клиент ESLint               |
 
-Для локальной проверки выбирайте ESLint нужного приложения и изменённые файлы. Корневой `yarn lint` запускает `--fix` на всём сервере; не используйте его как проверку без изменений. Форматируйте только затронутые файлы через Prettier: одинарные кавычки, trailing commas.
+Для локальной проверки выбирайте ESLint нужного приложения и изменённые файлы. Корневой `yarn lint` запускает проверки обоих приложений, а server-скрипт сохраняет существующий `--fix`; не используйте его как проверку без изменений. Форматируйте только затронутые файлы через Prettier: одинарные кавычки, trailing commas.
 
 После клиентских изменений запускайте клиентскую сборку и целевой ESLint; после серверных — серверную сборку и тесты затронутого поведения. UI проверяйте в браузере на desktop и мобильной ширине, включая 320 px, важные состояния и клавиатуру. Не заявляйте о проверках, которые не запускали. Известное предупреждение Vite о крупном markdown-чанке не является ошибкой сборки.
 
@@ -63,7 +64,8 @@ PathwiseAI — персональная система обучения: соз�
 
 - По умолчанию сервер слушает порт 3000, Vite — 5173. Сначала проверяйте, не запущены ли они уже.
 - Клиент использует `VITE_API_BASE_URL`, по умолчанию `http://localhost:3000/api`.
-- Сервер читает `.env` и `.env.development`; для запуска обязателен `JWT_SECRET`.
+- Сервер читает `.env` и `.env.development` из корня проекта; для запуска обязателен `JWT_SECRET`.
+- Web читает Vite-переменные из `web/.env`; пример находится в `web/env.example`.
 - PGlite хранится в `pglite-data/`. В текущей конфигурации включён `synchronize: true`: изменение entity и запуск сервера могут изменить схему существующей базы.
 - Не удаляйте базу, не запускайте seed или миграционные скрипты ради UI-проверки. Для тестов используйте изолированные данные.
 - Не коммитьте секреты, .env, базы, логи и сборочные артефакты. Не выводите значения секретов в отчёт.

@@ -10,7 +10,7 @@
 
 #### 1. SM2SpacedRepetitionService (улучшенная версия)
 
-**Файл:** `src/modules/courses/services/sm2-spaced-repetition.service.ts`
+**Файл:** `server/src/modules/courses/services/sm2-spaced-repetition.service.ts`
 
 Сервис для расчета интервалов повторения по улучшенному алгоритму SM-2:
 
@@ -24,7 +24,7 @@
 
 #### 2. Обновленный ExamsService
 
-**Файл:** `src/modules/exams/services/exams.service.ts`
+**Файл:** `server/src/modules/exams/services/exams.service.ts`
 
 Интеграция с SM-2 алгоритмом:
 
@@ -34,7 +34,7 @@
 
 #### 3. API endpoint для уроков повторения
 
-**Файл:** `src/modules/courses/controllers/courses.controller.ts`
+**Файл:** `server/src/modules/courses/controllers/courses.controller.ts`
 
 Новый endpoint:
 
@@ -42,7 +42,7 @@
 
 #### 4. Метод в LessonsService
 
-**Файл:** `src/modules/courses/services/lessons.service.ts`
+**Файл:** `server/src/modules/courses/services/lessons.service.ts`
 
 Добавлен метод `findLessonsForReview`:
 
@@ -54,7 +54,7 @@
 
 #### 1. Типы API
 
-**Файл:** `frontend/src/shared/api/lessons/types.ts`
+**Файл:** `web/src/shared/api/lessons/types.ts`
 
 Добавлен интерфейс `LessonForReview` с полями:
 
@@ -65,13 +65,13 @@
 
 #### 2. API методы
 
-**Файл:** `frontend/src/shared/api/lessons/api.ts`
+**Файл:** `web/src/shared/api/lessons/api.ts`
 
 Добавлен метод `getLessonsForReview` для получения уроков повторения.
 
 #### 3. Компонент ReviewLessonsList
 
-**Файл:** `frontend/src/widgets/review-lessons/ui/ReviewLessonsList.tsx`
+**Файл:** `web/src/widgets/review-lessons/ui/ReviewLessonsList.tsx`
 
 Компонент для отображения уроков повторения:
 
@@ -83,7 +83,7 @@
 
 #### 4. Обновленная главная страница
 
-**Файл:** `frontend/src/pages/home/ui/HomePage.tsx`
+**Файл:** `web/src/pages/home/ui/HomePage.tsx`
 
 Главная страница использует данные SM-2, чтобы показывать пользователю приоритеты на день.
 
@@ -94,25 +94,25 @@
 
 #### 5. Страница повторения
 
-**Файл:** `frontend/src/pages/review/ui/ReviewPage.tsx`
+**Файл:** `web/src/pages/review/ui/ReviewPage.tsx`
 
 Новая страница для отображения всех уроков повторения с подробным описанием.
 
 #### 6. Навигация
 
-**Файл:** `frontend/src/app/ui/Layout.tsx`
+**Файл:** `web/src/app/ui/Layout.tsx`
 
 Добавлена ссылка "Повторение" в главное меню.
 
 #### 7. Маршруты
 
-**Файл:** `frontend/src/app/config/router.tsx`
+**Файл:** `web/src/app/config/router.tsx`
 
 Добавлен маршрут `/review` для страницы повторения.
 
 #### 8. Обновление TestModal
 
-**Файл:** `frontend/src/widgets/test/ui/TestModal.tsx`
+**Файл:** `web/src/widgets/test/ui/TestModal.tsx`
 
 Добавлено событие `lessonUpdated` для обновления данных урока после тестирования.
 

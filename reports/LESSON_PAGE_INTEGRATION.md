@@ -4,7 +4,7 @@
 
 ### 1. API для работы с уроками
 
-**Типы (`frontend/src/shared/api/lessons/types.ts`):**
+**Типы (`web/src/shared/api/lessons/types.ts`):**
 
 ```typescript
 export interface Lesson {
@@ -17,7 +17,7 @@ export interface Lesson {
 }
 ```
 
-**API методы (`frontend/src/shared/api/lessons/api.ts`):**
+**API методы (`web/src/shared/api/lessons/api.ts`):**
 
 ```typescript
 lessonsApi.getLessonById(id: string): Promise<Lesson>
@@ -98,7 +98,7 @@ const { lesson, loading, notFound } = useLesson(lessonId);
 ## Структура файлов
 
 ```
-frontend/src/
+web/src/
 ├── shared/
 │   ├── api/
 │   │   └── lessons/

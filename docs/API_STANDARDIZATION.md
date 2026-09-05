@@ -8,16 +8,16 @@
 
 ### Базовые компоненты
 
-- `frontend/src/shared/api/base/` - Базовые типы и клиент
-- `frontend/src/shared/api/config.ts` - Конфигурация API клиента
-- `frontend/src/shared/api/hooks/` - React хуки для работы с API
-- `frontend/src/shared/api/index.ts` - Главный экспорт
+- `web/src/shared/api/base/` - Базовые типы и клиент
+- `web/src/shared/api/config.ts` - Конфигурация API клиента
+- `web/src/shared/api/hooks/` - React хуки для работы с API
+- `web/src/shared/api/index.ts` - Главный экспорт
 
 ### API модули
 
-- `frontend/src/shared/api/users/` - API для работы с пользователями
-- `frontend/src/shared/api/tests/` - API для работы с тестами
-- `frontend/src/shared/api/lessons/` - API для работы с уроками
+- `web/src/shared/api/users/` - API для работы с пользователями
+- `web/src/shared/api/tests/` - API для работы с тестами
+- `web/src/shared/api/lessons/` - API для работы с уроками
 
 ## ApiClient
 
@@ -45,9 +45,9 @@ ApiClient автоматически управляет CSRF токенами д
 
 **Реализация:**
 
-- Файл: `frontend/src/shared/api/base/client.ts`
+- Файл: `web/src/shared/api/base/client.ts`
 - Методы: `getCsrfToken()`, `initCsrfToken()`, `getCsrfTokenFromCookie()`
-- Бэкенд эндпоинт: `GET /api/csrf-token` (`src/shared/controllers/csrf.controller.ts`)
+- Бэкенд эндпоинт: `GET /api/csrf-token` (`server/src/shared/controllers/csrf.controller.ts`)
 
 ### Обработка ошибок
 

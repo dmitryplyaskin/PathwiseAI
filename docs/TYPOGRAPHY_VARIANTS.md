@@ -9,9 +9,9 @@
 
 ## Файлы
 
-- `frontend/src/vite-env.d.ts` - расширение типов MUI для новых вариантов
-- `frontend/src/shared/config/theme.ts` - стили для вариантов h1 в теме
-- `frontend/src/shared/ui/Typography/Typography.tsx` - компонент Typography с поддержкой новых вариантов
+- `web/src/vite-env.d.ts` - расширение типов MUI для новых вариантов
+- `web/src/shared/config/theme.ts` - стили для вариантов h1 в теме
+- `web/src/shared/ui/Typography/Typography.tsx` - компонент Typography с поддержкой новых вариантов
 
 ## Использование
 

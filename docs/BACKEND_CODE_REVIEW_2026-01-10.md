@@ -1,6 +1,6 @@
 # Backend code review (src) — 2026-01-10
 
-Цель: оценить качество кода бэкенда в `src/`, выявить риски, потенциальные баги и зоны для улучшения.
+Цель: оценить качество кода бэкенда в `server/src/`, выявить риски, потенциальные баги и зоны для улучшения.
 
 Контекст (по коду/зависимостям):
 
@@ -21,9 +21,9 @@
 
 ## Что сделано хорошо
 
-- **Глобальный `ValidationPipe`** в `src/main.ts` (whitelist/forbidNonWhitelisted/transform) — хорошая базовая защита API.
+- **Глобальный `ValidationPipe`** в `server/src/main.ts` (whitelist/forbidNonWhitelisted/transform) — хорошая базовая защита API.
 - **UUID валидация на уровне роутинга**: многие контроллеры используют `ParseUUIDPipe`.
-- **CSRF-guard включён глобально** (`APP_GUARD`) + middleware, выставляющий `csrf-token` cookie и header (`src/shared/*`).
+- **CSRF-guard включён глобально** (`APP_GUARD`) + middleware, выставляющий `csrf-token` cookie и header (`server/src/shared/*`).
 - **Структура модулей** понятная: `auth`, `users`, `courses`, `lessons`, `units`, `exams`, `chat`, `shared`.
 - **Логирование через pino** присутствует (HTTP), а в AI местах есть структурные `logger.error(...)`.
 
@@ -33,7 +33,7 @@
 
 **Файлы:**
 
-- `src/modules/chat/controllers/chat.controller.ts` — нет `@UseGuards(JwtAuthGuard)` вообще ни на уровне класса, ни на методах.
+- `server/src/modules/chat/controllers/chat.controller.ts` — нет `@UseGuards(JwtAuthGuard)` вообще ни на уровне класса, ни на методах.
 
 **Последствия:**
 
@@ -48,16 +48,16 @@
 
 **Примеры:**
 
-- `src/modules/exams/controllers/exams.controller.ts`
+- `server/src/modules/exams/controllers/exams.controller.ts`
   - `GET /exams/user/:userId` — можно получить экзамены любого пользователя.
   - `GET /exams/lesson/:lessonId/user/:userId` — аналогично.
   - `POST /exams/generate-for-lesson` принимает `GenerateTestDto` с `userId` из body и передаёт его в сервис без перезаписи.
-- `src/modules/courses/controllers/lessons.controller.ts`
+- `server/src/modules/courses/controllers/lessons.controller.ts`
   - `GET /lessons/for-review/:userId` — запрос прогресса по произвольному `userId`.
   - `POST /lessons/modules` — `CreateModuleDto` требует `userId` в body и он используется в `LessonsService`.
-- `src/modules/questions/services/questions.service.ts`
+- `server/src/modules/questions/services/questions.service.ts`
   - `createUserAnswer` сохраняет `user: { id: createUserAnswerDto.userId }` (т.е. можно писать ответы “от имени” другого пользователя).
-- `src/modules/courses/controllers/courses.controller.ts`
+- `server/src/modules/courses/controllers/courses.controller.ts`
   - `POST /courses` принимает `CreateCourseDto` с `userId` из body и передаёт дальше без перезаписи.
 
 **Последствия:**
@@ -67,7 +67,7 @@
 
 ### 3) Users API позволяет любому авторизованному пользователю управлять любыми аккаунтами
 
-**Файл:** `src/modules/users/controllers/users.controller.ts`
+**Файл:** `server/src/modules/users/controllers/users.controller.ts`
 
 - `GET /users` — выдаёт список всех пользователей.
 - `PATCH /users/:id` — обновляет произвольного пользователя.
@@ -79,7 +79,7 @@
 
 ### 4) `synchronize: true` включён всегда
 
-**Файл:** `src/app.module.ts`
+**Файл:** `server/src/app.module.ts`
 
 **Риск:**
 
@@ -92,7 +92,7 @@
 
 ### 5) Bootstrapping поднимает приложение дважды (побочные эффекты + время старта)
 
-**Файл:** `src/main.ts`
+**Файл:** `server/src/main.ts`
 
 - Сначала `createApplicationContext(AppModule)` чтобы проверить `JWT_SECRET`, затем создаётся реальный HTTP app.
 
@@ -105,7 +105,7 @@
 
 ### 6) Неполные транзакции при генерации тестов (частично записанные данные)
 
-**Файл:** `src/modules/exams/services/exams.service.ts`
+**Файл:** `server/src/modules/exams/services/exams.service.ts`
 
 - Создание `Exam` → затем `Question` → затем `ExamResult` происходит последовательными `save`, без транзакции.
 
@@ -113,7 +113,7 @@
 
 ### 7) Связь экзамена с уроком через строковый title (ошибочный матч при одинаковых названиях)
 
-**Файл:** `src/modules/exams/services/exams.service.ts`
+**Файл:** `server/src/modules/exams/services/exams.service.ts`
 
 - `updateLessonProgress()` ищет `Lesson` по `title`, полученному из `exam.title.replace('Тест по уроку: ', '')`.
 - `findExamsByLesson()` ищет экзамены по `title: "Тест по уроку: ${lesson.title}"`.
@@ -153,19 +153,19 @@
 
 **Примеры:**
 
-- `src/shared/decorators/check-access.decorator.ts` и `src/shared/interceptors/access-control.interceptor.ts` есть, но не используются (по поиску `CheckAccess(`).
-- В `src/shared/shared.module.ts` закомментирован seed (`UserSeedService`) — стоит либо удалить, либо восстановить.
+- `server/src/shared/decorators/check-access.decorator.ts` и `server/src/shared/interceptors/access-control.interceptor.ts` есть, но не используются (по поиску `CheckAccess(`).
+- В `server/src/shared/shared.module.ts` закомментирован seed (`UserSeedService`) — стоит либо удалить, либо восстановить.
 
 ### 12) Потенциальные проблемы с cookie-конфигурацией
 
-**Файл:** `src/modules/auth/controllers/auth.controller.ts`
+**Файл:** `server/src/modules/auth/controllers/auth.controller.ts`
 
 - `cookieOptions.maxAge` всегда ставится в 24 часа, но фактическое `JWT_EXPIRES_IN` может не совпадать.
 - `logout` делает `clearCookie('access_token')` без тех же опций (`path`, `sameSite`, `secure`) — в некоторых условиях cookie может не очиститься.
 
 ### 13) CORS/Origin захардкожен
 
-**Файл:** `src/main.ts`, `src/shared/guards/csrf.guard.ts`
+**Файл:** `server/src/main.ts`, `server/src/shared/guards/csrf.guard.ts`
 
 - Есть hardcode `http://localhost:5173`, `http://localhost:3000`. Для деплоя нужно увести в env и синхронизировать с CSRF allowed origins.
 
@@ -193,8 +193,8 @@
 
 ## Приложение: ключевые места для ревью
 
-- Auth bootstrap: `src/main.ts`, `src/modules/auth/*`
-- DB config: `src/app.module.ts`
-- Access control: `src/shared/services/access-control.service.ts`
-- Проблемные контроллеры: `src/modules/chat/controllers/chat.controller.ts`, `src/modules/users/controllers/users.controller.ts`, `src/modules/exams/controllers/exams.controller.ts`, `src/modules/courses/controllers/courses.controller.ts`, `src/modules/courses/controllers/lessons.controller.ts`
-- Потенциально проблемная связка тестов/урока: `src/modules/exams/services/exams.service.ts`
+- Auth bootstrap: `server/src/main.ts`, `server/src/modules/auth/*`
+- DB config: `server/src/app.module.ts`
+- Access control: `server/src/shared/services/access-control.service.ts`
+- Проблемные контроллеры: `server/src/modules/chat/controllers/chat.controller.ts`, `server/src/modules/users/controllers/users.controller.ts`, `server/src/modules/exams/controllers/exams.controller.ts`, `server/src/modules/courses/controllers/courses.controller.ts`, `server/src/modules/courses/controllers/lessons.controller.ts`
+- Потенциально проблемная связка тестов/урока: `server/src/modules/exams/services/exams.service.ts`

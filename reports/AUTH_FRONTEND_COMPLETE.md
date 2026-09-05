@@ -9,7 +9,7 @@
 ### Структура модулей
 
 ```
-frontend/src/
+web/src/
 ├── shared/
 │   ├── api/
 │   │   └── users/

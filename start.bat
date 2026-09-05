@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 echo ========================================
 echo Starting PathwiseAI Project
 echo ========================================
@@ -16,12 +17,12 @@ if %errorlevel% equ 0 (
 
 echo.
 echo [1/7] Checking backend dependencies...
-if not exist "node_modules" (
+if not exist "server\node_modules" (
     echo Installing backend dependencies with %PACKAGE_MANAGER%...
     if "%PACKAGE_MANAGER%"=="yarn" (
-        call yarn install --prefer-offline --silent
+        call yarn --cwd server install --prefer-offline --silent
     ) else (
-        call npm install --prefer-offline --no-audit --no-fund
+        call npm --prefix server install --prefer-offline --no-audit --no-fund --package-lock=false
     )
     if %errorlevel% neq 0 (
         echo Error installing backend dependencies!
@@ -33,53 +34,49 @@ if not exist "node_modules" (
 )
 
 echo.
-echo [2/7] Checking frontend dependencies...
-cd frontend
-if not exist "node_modules" (
-    echo Installing frontend dependencies with %PACKAGE_MANAGER%...
+echo [2/7] Checking web dependencies...
+if not exist "web\node_modules" (
+    echo Installing web dependencies with %PACKAGE_MANAGER%...
     if "%PACKAGE_MANAGER%"=="yarn" (
-        call yarn install --prefer-offline --silent
+        call yarn --cwd web install --prefer-offline --silent
     ) else (
-        call npm install --prefer-offline --no-audit --no-fund
+        call npm --prefix web install --prefer-offline --no-audit --no-fund --package-lock=false
     )
     if %errorlevel% neq 0 (
-        echo Error installing frontend dependencies!
+        echo Error installing web dependencies!
         pause
         exit /b 1
     )
 ) else (
     echo Frontend dependencies already installed, skipping...
 )
-cd ..
 
 echo.
-echo [3/7] Checking frontend build...
-if not exist "frontend\dist\index.html" (
-    echo Building frontend with %PACKAGE_MANAGER%...
-    cd frontend
+echo [3/7] Checking web build...
+if not exist "web\dist\index.html" (
+    echo Building web with %PACKAGE_MANAGER%...
     if "%PACKAGE_MANAGER%"=="yarn" (
-        call yarn build
+        call yarn --cwd web build
     ) else (
-        call npm run build
+        call npm --prefix web run build
     )
     if %errorlevel% neq 0 (
-        echo Error building frontend!
+        echo Error building web!
         pause
         exit /b 1
     )
-    cd ..
 ) else (
     echo Frontend build already exists, skipping...
 )
 
 echo.
 echo [4/7] Checking backend build...
-if not exist "dist\main.js" (
+if not exist "server\dist\main.js" (
     echo Building backend with %PACKAGE_MANAGER%...
     if "%PACKAGE_MANAGER%"=="yarn" (
-        call yarn build
+        call yarn --cwd server build
     ) else (
-        call npm run build
+        call npm --prefix server run build
     )
     if %errorlevel% neq 0 (
         echo Error building backend!

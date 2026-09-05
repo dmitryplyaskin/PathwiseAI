@@ -188,6 +188,6 @@ const [regeneratingMessageId, setRegeneratingMessageId] = useState<
 
 ## Файлы, которые были изменены
 
-- ✅ `frontend/src/widgets/lesson/ui/LessonPage.tsx` - все исправления
+- ✅ `web/src/widgets/lesson/ui/LessonPage.tsx` - все исправления
 
 Никаких изменений в бэкенде не требуется!

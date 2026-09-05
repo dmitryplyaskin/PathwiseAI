@@ -2,6 +2,10 @@
 /dist
 /node_modules
 /build
+/server/dist
+/server/node_modules
+/web/dist
+/web/node_modules
 
 # PGlite database
 /pglite-data
@@ -64,5 +68,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Windows nul files from pre-commit hooks
 nul
-frontend/nul
+web/nul
 

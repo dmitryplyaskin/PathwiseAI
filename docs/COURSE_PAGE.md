@@ -64,15 +64,15 @@ interface CourseDetail {
 
 ### Бэкенд
 
-- `src/modules/courses/services/courses.service.ts` - метод findCourseWithLessons
-- `src/modules/courses/controllers/courses.controller.ts` - API endpoint
+- `server/src/modules/courses/services/courses.service.ts` - метод findCourseWithLessons
+- `server/src/modules/courses/controllers/courses.controller.ts` - API endpoint
 
 ### Фронтенд
 
-- `frontend/src/widgets/course/ui/CoursePage.tsx` - основной компонент
-- `frontend/src/shared/api/courses/api.ts` - API методы
-- `frontend/src/shared/api/courses/types.ts` - типы данных
-- `frontend/src/shared/model/courses/courses-model.ts` - модель состояния
+- `web/src/widgets/course/ui/CoursePage.tsx` - основной компонент
+- `web/src/shared/api/courses/api.ts` - API методы
+- `web/src/shared/api/courses/types.ts` - типы данных
+- `web/src/shared/model/courses/courses-model.ts` - модель состояния
 
 ## Навигация
 

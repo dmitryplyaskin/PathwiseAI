@@ -1,6 +1,6 @@
-# Frontend code review (frontend/src) — 2026-01-10
+# Frontend code review (web/src) — 2026-01-10
 
-Цель: оценить качество кода фронтенда в `frontend/src/`, выявить риски, потенциальные баги, проблемы доступности (a11y) и зоны для улучшения. Отдельно отметить “мертвые”/недоделанные фичи и заглушки.
+Цель: оценить качество кода фронтенда в `web/src/`, выявить риски, потенциальные баги, проблемы доступности (a11y) и зоны для улучшения. Отдельно отметить “мертвые”/недоделанные фичи и заглушки.
 
 Контекст (по коду/зависимостям):
 
@@ -23,9 +23,9 @@
 ## Что сделано хорошо
 
 - **Структура проекта**: `app/pages/widgets/features/shared` — в целом читаемо и масштабируемо.
-- **Code splitting**: роуты грузятся через `lazy()` (`frontend/src/app/config/router.tsx`), есть ручные чанки в `vite.config.ts`.
-- **API слой**: `ApiClient` централизует `baseUrl`, заголовки, CSRF, таймауты и единый формат ошибок (`frontend/src/shared/api/base/client.ts`).
-- **State management**: Effector-модели в `frontend/src/shared/model/*` в целом предсказуемые (events/effects/stores).
+- **Code splitting**: роуты грузятся через `lazy()` (`web/src/app/config/router.tsx`), есть ручные чанки в `vite.config.ts`.
+- **API слой**: `ApiClient` централизует `baseUrl`, заголовки, CSRF, таймауты и единый формат ошибок (`web/src/shared/api/base/client.ts`).
+- **State management**: Effector-модели в `web/src/shared/model/*` в целом предсказуемые (events/effects/stores).
 - **UI**: MUI даёт базовую семантику/фокус-стили, много компонентов уже выглядят аккуратно и консистентно.
 
 ## Критические проблемы (высокая вероятность ущерба/ломает корректность продукта)
@@ -34,9 +34,9 @@
 
 **Файлы:**
 
-- `frontend/src/shared/model/auth/auth-model.ts`
-- `frontend/src/pages/login/index.tsx`
-- `frontend/src/pages/register/index.tsx`
+- `web/src/shared/model/auth/auth-model.ts`
+- `web/src/pages/login/index.tsx`
+- `web/src/pages/register/index.tsx`
 
 **Проблемы:**
 
@@ -52,9 +52,9 @@
 
 **Файлы:**
 
-- `frontend/src/widgets/test/types/index.ts` — `TextQuestion.expectedAnswer?: string`, `QuizOption.isCorrect: boolean`
-- `frontend/src/widgets/test/ui/TextQuestion.tsx` — отправка `expectedAnswer` в API
-- `frontend/src/shared/api/tests/types.ts` — `CheckTextAnswerRequest.expectedAnswer`
+- `web/src/widgets/test/types/index.ts` — `TextQuestion.expectedAnswer?: string`, `QuizOption.isCorrect: boolean`
+- `web/src/widgets/test/ui/TextQuestion.tsx` — отправка `expectedAnswer` в API
+- `web/src/shared/api/tests/types.ts` — `CheckTextAnswerRequest.expectedAnswer`
 
 **Проблемы:**
 
@@ -69,9 +69,9 @@
 
 **Файлы:**
 
-- `frontend/src/app/ui/App.tsx` — вызывает `checkAuthRequested()` на mount
-- `frontend/src/app/providers/with-initialized.tsx` — вызывает `checkAuthFx()` при изменении `appInitialized`
-- `frontend/src/shared/model/auth/auth-model.ts` — `$appInitialized` становится `true` на `checkAuthFx.done/fail`
+- `web/src/app/ui/App.tsx` — вызывает `checkAuthRequested()` на mount
+- `web/src/app/providers/with-initialized.tsx` — вызывает `checkAuthFx()` при изменении `appInitialized`
+- `web/src/shared/model/auth/auth-model.ts` — `$appInitialized` становится `true` на `checkAuthFx.done/fail`
 
 **Проблема:**
 
@@ -88,7 +88,7 @@
 
 ### 4) Жёстко заданный URL API
 
-**Файл:** `frontend/src/shared/api/config.ts`
+**Файл:** `web/src/shared/api/config.ts`
 
 **Проблема:** `baseUrl: 'http://localhost:3000/api'` без env/окружений.
 
@@ -97,11 +97,11 @@
 **Исправлено (2026-01-10):**
 
 - `baseUrl` берётся из `import.meta.env.VITE_API_BASE_URL` (с fallback на `http://localhost:3000/api`).
-- Добавлен пример переменной: `frontend/env.example` (копировать в `frontend/.env`).
+- Добавлен пример переменной: `web/env.example` (копировать в `web/.env`).
 
 ### 5) Отключенная типизация в типах уроков
 
-**Файл:** `frontend/src/shared/api/lessons/types.ts`
+**Файл:** `web/src/shared/api/lessons/types.ts`
 
 **Проблема:** `// @ts-nocheck` отключает типизацию целого модуля.
 
@@ -113,11 +113,11 @@
 
 **Файлы:**
 
-- `frontend/src/widgets/units-list/ui/UnitsList.tsx` — всегда `mockUnits`
-- `frontend/src/widgets/unit/ui/UnitPage.tsx` — всегда `mockUnitDetail`
-- `frontend/src/pages/lessons/index.tsx` — возвращает пустой список (`lessons={[]}`)
-- `frontend/src/widgets/lesson/ui/LessonPage.tsx` — `mockLessonContent` как fallback-контент
-- `frontend/src/widgets/lesson/ui/LessonManagementMenu.tsx` — пункты меню “Поменять курс/Добавить/изменить юнит” только логируют действие
+- `web/src/widgets/units-list/ui/UnitsList.tsx` — всегда `mockUnits`
+- `web/src/widgets/unit/ui/UnitPage.tsx` — всегда `mockUnitDetail`
+- `web/src/pages/lessons/index.tsx` — возвращает пустой список (`lessons={[]}`)
+- `web/src/widgets/lesson/ui/LessonPage.tsx` — `mockLessonContent` как fallback-контент
+- `web/src/widgets/lesson/ui/LessonManagementMenu.tsx` — пункты меню “Поменять курс/Добавить/изменить юнит” только логируют действие
 
 **Последствия:**
 
@@ -128,9 +128,9 @@
 
 **Файлы (примеры):**
 
-- `frontend/src/shared/api/tests/types.ts` — большинство DTO содержит `userId`
-- `frontend/src/shared/api/courses/types.ts` — `CreateModuleRequest.userId`, `CreateCourseOutlineRequest.userId`
-- `frontend/src/shared/api/lessons/api.ts` — `getLessonsForReview(userId)` и т.п.
+- `web/src/shared/api/tests/types.ts` — большинство DTO содержит `userId`
+- `web/src/shared/api/courses/types.ts` — `CreateModuleRequest.userId`, `CreateCourseOutlineRequest.userId`
+- `web/src/shared/api/lessons/api.ts` — `getLessonsForReview(userId)` и т.п.
 
 **Риск:**
 
@@ -140,11 +140,11 @@
 
 **Файлы (примеры):**
 
-- `frontend/src/pages/home/ui/HomePage.tsx` — `Card onClick` + `IconButton` без `aria-label`
-- `frontend/src/features/course-card/ui/CourseCardWithLessons.tsx` — `Card onClick` вместо `CardActionArea`/`ButtonBase`
-- `frontend/src/widgets/test/ui/TestModal.tsx` — `IconButton` закрытия без `aria-label`
-- `frontend/src/pages/review/ui/ReviewPage.tsx` — `IconButton` back без `aria-label`
-- `frontend/src/widgets/lesson/ui/thread_panel.tsx`, `thread_menu.tsx`, `question_input.tsx`, `markdown-renderer.tsx` — `IconButton` в Tooltip без явного `aria-label`
+- `web/src/pages/home/ui/HomePage.tsx` — `Card onClick` + `IconButton` без `aria-label`
+- `web/src/features/course-card/ui/CourseCardWithLessons.tsx` — `Card onClick` вместо `CardActionArea`/`ButtonBase`
+- `web/src/widgets/test/ui/TestModal.tsx` — `IconButton` закрытия без `aria-label`
+- `web/src/pages/review/ui/ReviewPage.tsx` — `IconButton` back без `aria-label`
+- `web/src/widgets/lesson/ui/thread_panel.tsx`, `thread_menu.tsx`, `question_input.tsx`, `markdown-renderer.tsx` — `IconButton` в Tooltip без явного `aria-label`
 
 **Последствия:**
 
@@ -154,10 +154,10 @@
 
 **Файлы (примеры):**
 
-- `frontend/src/shared/api/hooks/use-api.ts` — `T = any`, `(...args: any[])`, `onSuccess(data: any)`
-- `frontend/src/shared/ui/Typography/Typography.tsx` — `variant as any`
-- `frontend/src/shared/config/theme.ts` — `@ts-ignore` (в т.ч. из-за кастомных palette keys/теней)
-- `frontend/src/shared/ui/markdown-renderer/markdown-renderer.tsx`, `frontend/src/widgets/test/ui/TextQuestion.tsx` — `@ts-ignore`
+- `web/src/shared/api/hooks/use-api.ts` — `T = any`, `(...args: any[])`, `onSuccess(data: any)`
+- `web/src/shared/ui/Typography/Typography.tsx` — `variant as any`
+- `web/src/shared/config/theme.ts` — `@ts-ignore` (в т.ч. из-за кастомных palette keys/теней)
+- `web/src/shared/ui/markdown-renderer/markdown-renderer.tsx`, `web/src/widgets/test/ui/TextQuestion.tsx` — `@ts-ignore`
 
 **Последствия:**
 
@@ -165,7 +165,7 @@
 
 ### 10) Глобальные CSS/темизация потенциально бьют по производительности и a11y
 
-**Файл:** `frontend/src/shared/config/theme.ts`
+**Файл:** `web/src/shared/config/theme.ts`
 
 - `MuiCssBaseline.styleOverrides['*'] = { transition: 'all ...' }` — риск лишних перерисовок/дорогих анимаций.
 - Нет учёта `prefers-reduced-motion`.
@@ -178,7 +178,7 @@
 
 ### 11) `index.html` не соответствует фактическому языку/брендингу приложения
 
-**Файл:** `frontend/index.html`
+**Файл:** `web/index.html`
 
 - `lang="en"` при русскоязычном UI.
 - Title: `Vite + React + TS`.
@@ -187,13 +187,13 @@
 
 ### 12) `ApiClient` предполагает JSON в любом ответе
 
-**Файл:** `frontend/src/shared/api/base/client.ts`
+**Файл:** `web/src/shared/api/base/client.ts`
 
 - Всегда делается `response.json()` на успешном ответе; для 204/пустого тела это потенциальный runtime error (зависит от поведения backend).
 
 ### 13) Breadcrumbs делают дополнительные запросы и имеют “дырки” по юнитам
 
-**Файл:** `frontend/src/shared/ui/breadcrumbs/use-breadcrumbs.ts`
+**Файл:** `web/src/shared/ui/breadcrumbs/use-breadcrumbs.ts`
 
 - При навигации загружает названия сущностей, но:
   - для unit нет API → крошки могут показывать `Раздел <id>`;
@@ -204,15 +204,15 @@
 
 **Файлы (примеры):**
 
-- `frontend/src/widgets/test/ui/TestModal.tsx`
-- `frontend/src/widgets/lesson/ui/LessonManagementMenu.tsx`
-- `frontend/src/widgets/lesson/model/use_lesson_page.ts`, `lesson_api.ts`
+- `web/src/widgets/test/ui/TestModal.tsx`
+- `web/src/widgets/lesson/ui/LessonManagementMenu.tsx`
+- `web/src/widgets/lesson/model/use_lesson_page.ts`, `lesson_api.ts`
 
 Рекомендация: оставить только структурное логирование в dev (или убрать полностью).
 
 ### 15) Нет тестов/контрактов
 
-В `frontend/` отсутствуют unit/integration тесты и контрактные проверки ответов API (runtime schema validation).
+В `web/` отсутствуют unit/integration тесты и контрактные проверки ответов API (runtime schema validation).
 
 ---
 
@@ -224,7 +224,7 @@
 - Убрать передачу `expectedAnswer`/`isCorrect` на клиент (правильные ответы не должны уходить в браузер).
 - Починить инициализацию auth: выбрать один механизм (`checkAuthRequested` _или_ `InitializedProvider`) и убрать зависимость `useEffect` от `appInitialized`.
 - Вынести `apiConfig.baseUrl` в env (`import.meta.env.*`).
-- Убрать `@ts-nocheck` из `frontend/src/shared/api/lessons/types.ts`.
+- Убрать `@ts-nocheck` из `web/src/shared/api/lessons/types.ts`.
 
 ### P1 (качество UX/a11y + поддержка)
 
@@ -243,10 +243,10 @@
 
 ## Приложение: ключевые места для ревью
 
-- Entry/Providers: `frontend/src/main.tsx`, `frontend/src/app/providers/*`, `frontend/src/app/ui/Layout.tsx`
-- Router: `frontend/src/app/config/router.tsx`
-- API client: `frontend/src/shared/api/base/client.ts`, `frontend/src/shared/api/config.ts`
-- Auth model: `frontend/src/shared/model/auth/auth-model.ts`
-- Lessons: `frontend/src/shared/api/lessons/*`, `frontend/src/shared/model/lessons/*`, `frontend/src/widgets/lesson/*`
-- Tests: `frontend/src/shared/api/tests/*`, `frontend/src/widgets/test/*`
-- Mocks/stubs: `frontend/src/widgets/*/model/mock.ts`, `frontend/src/pages/lessons/index.tsx`, `frontend/src/widgets/units-list/ui/UnitsList.tsx`, `frontend/src/widgets/unit/ui/UnitPage.tsx`
+- Entry/Providers: `web/src/main.tsx`, `web/src/app/providers/*`, `web/src/app/ui/Layout.tsx`
+- Router: `web/src/app/config/router.tsx`
+- API client: `web/src/shared/api/base/client.ts`, `web/src/shared/api/config.ts`
+- Auth model: `web/src/shared/model/auth/auth-model.ts`
+- Lessons: `web/src/shared/api/lessons/*`, `web/src/shared/model/lessons/*`, `web/src/widgets/lesson/*`
+- Tests: `web/src/shared/api/tests/*`, `web/src/widgets/test/*`
+- Mocks/stubs: `web/src/widgets/*/model/mock.ts`, `web/src/pages/lessons/index.tsx`, `web/src/widgets/units-list/ui/UnitsList.tsx`, `web/src/widgets/unit/ui/UnitPage.tsx`
