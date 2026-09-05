@@ -18,7 +18,7 @@
     "start:dev": "yarn --cwd server start:dev",
     "start:debug": "yarn --cwd server start:debug",
     "start:prod": "node server/dist/main.js",
-    "dev:web": "yarn --cwd web dev",
+    "start:web": "yarn --cwd web dev",
     "preview:web": "yarn --cwd web preview",
     "lint": "yarn lint:server && yarn lint:web",
     "lint:server": "yarn --cwd server lint",
