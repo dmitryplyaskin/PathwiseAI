@@ -5,7 +5,7 @@ export const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#3b82f6',
+      main: '#2563eb',
       light: '#60a5fa',
       dark: '#1d4ed8',
       contrastText: '#ffffff',
@@ -35,11 +35,11 @@ export const theme = createTheme({
       dark: '#dc2626',
     },
     background: {
-      default: '#f8fbff',
+      default: '#f6f8fb',
       paper: '#ffffff',
     },
     text: {
-      primary: '#1e3a8a',
+      primary: '#202c40',
       secondary: '#64748b',
       disabled: '#94a3b8',
     },
@@ -76,10 +76,8 @@ export const theme = createTheme({
       fontSize: '2.1rem',
       fontWeight: 700,
       lineHeight: 1.2,
-      background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text',
+      letterSpacing: '-0.035em',
+      color: '#202c40',
     },
     h1Gradient: {
       fontSize: '2.1rem',
@@ -94,25 +92,25 @@ export const theme = createTheme({
       fontSize: '2.1rem',
       fontWeight: 700,
       lineHeight: 1.2,
-      color: '#1e3a8a',
+      color: '#202c40',
     },
     h2: {
       fontSize: '1.25rem',
       fontWeight: 600,
       lineHeight: 1.3,
-      color: '#1e3a8a',
+      color: '#202c40',
     },
     h3: {
       fontSize: '1.1rem',
       fontWeight: 600,
       lineHeight: 1.4,
-      color: '#1e3a8a',
+      color: '#202c40',
     },
     h4: {
       fontSize: '1rem',
       fontWeight: 600,
       lineHeight: 1.4,
-      color: '#1e3a8a',
+      color: '#202c40',
     },
     body1: {
       fontSize: '0.95rem',
@@ -184,8 +182,13 @@ export const theme = createTheme({
     // Глобальные стили (без глобальных transition, чтобы не анимировать layout)
     MuiCssBaseline: {
       styleOverrides: {
+        ':focus-visible': { outline: '2px solid #2563eb', outlineOffset: 3 },
+        '.MuiButtonBase-root.Mui-focusVisible': {
+          outline: '2px solid #2563eb',
+          outlineOffset: 3,
+        },
         body: {
-          background: 'linear-gradient(135deg, #f8fbff 0%, #e8f4fd 100%)',
+          background: '#f6f8fb',
           minHeight: '100vh',
         },
         '@media (prefers-reduced-motion: reduce)': {
@@ -226,10 +229,10 @@ export const theme = createTheme({
           fontSize: '0.85rem',
         },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+          background: '#2563eb',
           boxShadow: '0 1px 2px rgba(15, 23, 42, 0.12)',
           '&:hover': {
-            background: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)',
+            background: '#1d4ed8',
           },
           '&:disabled': {
             color: '#94a3b8 ',
@@ -298,7 +301,7 @@ export const theme = createTheme({
         },
         bar: {
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+          background: '#2563eb',
         },
       },
     },
@@ -357,7 +360,7 @@ export const theme = createTheme({
         root: {
           backgroundColor: 'transparent',
           boxShadow: 'none',
-          color: '#1e3a8a',
+          color: '#202c40',
         },
       },
     },

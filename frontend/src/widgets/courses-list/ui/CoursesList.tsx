@@ -5,8 +5,6 @@ import {
   Grid,
   Stack,
   Typography,
-  AppBar,
-  Toolbar,
   Chip,
   ButtonGroup,
   TextField,
@@ -26,7 +24,6 @@ import {
   GridView,
   ViewList,
   Search,
-  Star,
 } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { CourseCardWithLessons } from '@features/course-card/ui/CourseCardWithLessons';
@@ -124,55 +121,42 @@ export const CoursesList = () => {
     (course) => course.status === 'completed',
   );
 
-  const totalProgress = Math.round(
-    courses.reduce((acc, course) => acc + course.progress, 0) / courses.length,
-  );
+  const totalProgress = courses.length
+    ? Math.round(
+        courses.reduce((acc, course) => acc + course.progress, 0) /
+          courses.length,
+      )
+    : 0;
 
   return (
-    <Box sx={{ minHeight: '100vh' }}>
-      {/* Заголовок */}
-      <AppBar position="static" elevation={0}>
-        <Toolbar sx={{ flexDirection: 'column', py: 6 }}>
-          <Typography variant="h1" component="h1" gutterBottom>
-            Каталог курсов PathwiseAI
-          </Typography>
+    <Box>
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 4 } }}>
+        <Box sx={{ mb: 4 }}>
           <Typography
-            variant="body1"
-            color="text.secondary"
-            textAlign="center"
-            maxWidth="800px"
-            sx={{ mb: 3 }}
+            variant="h1"
+            sx={{ mb: 1, fontSize: { xs: '1.8rem', md: '2.2rem' } }}
           >
-            Изучайте машинное обучение, анализ данных и программирование с
-            персонализированным ИИ-помощником. Выберите курс по своему уровню и
-            интересам.
+            Мои курсы
           </Typography>
-
-          {/* Статистика */}
-          <Box display="flex" gap={4} flexWrap="wrap" justifyContent="center">
-            <Box display="flex" alignItems="center" gap={1}>
-              <School color="primary" />
-              <Typography variant="body2" color="text.secondary">
-                {courses.length} курсов
+          <Typography variant="body2">
+            Выберите тему и продолжайте свой учебный маршрут.
+          </Typography>
+          {!coursesListLoading && !coursesListError && (
+            <Stack
+              direction="row"
+              useFlexGap
+              spacing={2}
+              sx={{ mt: 2, flexWrap: 'wrap' }}
+            >
+              <Typography variant="body2">
+                Всего курсов: {courses.length}
               </Typography>
-            </Box>
-            <Box display="flex" alignItems="center" gap={1}>
-              <TrendingUp color="primary" />
-              <Typography variant="body2" color="text.secondary">
-                {totalProgress}% средний прогресс
+              <Typography variant="body2">
+                Средний прогресс: {totalProgress}%
               </Typography>
-            </Box>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Star color="primary" />
-              <Typography variant="body2" color="text.secondary">
-                4.7 средняя оценка
-              </Typography>
-            </Box>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+            </Stack>
+          )}
+        </Box>
         <Stack spacing={4}>
           {/* Индикатор загрузки */}
           {coursesListLoading && (
@@ -193,7 +177,8 @@ export const CoursesList = () => {
             <TextField
               fullWidth
               variant="outlined"
-              placeholder="Поиск по названию, описанию или тегам..."
+              label="Поиск курсов"
+              placeholder="Название, описание или тег"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
@@ -215,6 +200,7 @@ export const CoursesList = () => {
             <Box
               display="flex"
               justifyContent="space-between"
+              sx={{ flexWrap: 'wrap', gap: 2 }}
               alignItems="center"
               flexWrap="wrap"
               gap={2}
@@ -227,7 +213,16 @@ export const CoursesList = () => {
                   </Typography>
                 </Box>
 
-                <ButtonGroup size="small" variant="outlined">
+                <Box
+                  role="group"
+                  aria-label="Статус курса"
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                    '& .MuiButton-root': { minHeight: 40 },
+                  }}
+                >
                   <Button
                     variant={filter === 'all' ? 'contained' : 'outlined'}
                     onClick={() => setFilter('all')}
@@ -256,7 +251,7 @@ export const CoursesList = () => {
                   >
                     Новые
                   </Button>
-                </ButtonGroup>
+                </Box>
 
                 <FormControl size="small" sx={{ minWidth: 120 }}>
                   <InputLabel>Категория</InputLabel>
@@ -292,7 +287,7 @@ export const CoursesList = () => {
                 </FormControl>
               </Box>
 
-              <Box display="flex" alignItems="center" gap={2}>
+              <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
                 <FormControl size="small" sx={{ minWidth: 120 }}>
                   <InputLabel>Сортировка</InputLabel>
                   <Select
@@ -344,7 +339,11 @@ export const CoursesList = () => {
                 {inProgressCourses.map((course) => (
                   <Grid
                     key={course.id}
-                    size={{ xs: 12, sm: 6, lg: viewMode === 'grid' ? 4 : 6 }}
+                    size={{
+                      xs: 12,
+                      sm: viewMode === 'grid' ? 6 : 12,
+                      lg: viewMode === 'grid' ? 4 : 12,
+                    }}
                   >
                     <CourseCardWithLessons
                       course={course}
@@ -363,6 +362,7 @@ export const CoursesList = () => {
               alignItems="center"
               gap={1}
               justifyContent="space-between"
+              sx={{ flexWrap: 'wrap', gap: 2 }}
             >
               <Box display="flex" alignItems="center" gap={1}>
                 <School color="primary" />
@@ -393,7 +393,11 @@ export const CoursesList = () => {
               {filteredCourses.map((course) => (
                 <Grid
                   key={course.id}
-                  size={{ xs: 12, sm: 6, lg: viewMode === 'grid' ? 4 : 6 }}
+                  size={{
+                    xs: 12,
+                    sm: viewMode === 'grid' ? 6 : 12,
+                    lg: viewMode === 'grid' ? 4 : 12,
+                  }}
                 >
                   <CourseCardWithLessons
                     course={course}
@@ -403,42 +407,45 @@ export const CoursesList = () => {
               ))}
             </Grid>
 
-            {filteredCourses.length === 0 && (
-              <Box
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                py={8}
-                gap={2}
-              >
-                <School sx={{ fontSize: 64, color: 'text.disabled' }} />
-                <Typography variant="h3" color="text.secondary">
-                  Курсы не найдены
-                </Typography>
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  textAlign="center"
+            {!coursesListLoading &&
+              !coursesListError &&
+              filteredCourses.length === 0 && (
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  alignItems="center"
+                  py={8}
+                  gap={2}
                 >
-                  Попробуйте изменить фильтры или поисковый запрос
-                </Typography>
-                {(searchQuery ||
-                  categoryFilter !== 'all' ||
-                  difficultyFilter !== 'all') && (
-                  <Button
-                    variant="outlined"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setCategoryFilter('all');
-                      setDifficultyFilter('all');
-                      setFilter('all');
-                    }}
+                  <School sx={{ fontSize: 64, color: 'text.disabled' }} />
+                  <Typography variant="h3" color="text.secondary">
+                    Курсы не найдены
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    textAlign="center"
                   >
-                    Сбросить фильтры
-                  </Button>
-                )}
-              </Box>
-            )}
+                    Попробуйте изменить фильтры или поисковый запрос
+                  </Typography>
+                  {(filter !== 'all' ||
+                    searchQuery ||
+                    categoryFilter !== 'all' ||
+                    difficultyFilter !== 'all') && (
+                    <Button
+                      variant="outlined"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setCategoryFilter('all');
+                        setDifficultyFilter('all');
+                        setFilter('all');
+                      }}
+                    >
+                      Сбросить фильтры
+                    </Button>
+                  )}
+                </Box>
+              )}
           </Stack>
         </Stack>
       </Container>

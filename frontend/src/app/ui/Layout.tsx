@@ -1,28 +1,20 @@
-import React, { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { useUnit } from 'effector-react';
-import {
-  Container,
-  Box,
-  IconButton,
-  useMediaQuery,
-} from '@mui/material';
-import { Menu as MenuIcon } from '@mui/icons-material';
-import { alpha, useTheme } from '@mui/material/styles';
+import { Container, Box, IconButton, useMediaQuery } from '@mui/material';
+import { MenuOutlined } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
 import { Breadcrumbs, useBreadcrumbs, AppLoader } from '@shared/ui';
 import { $isAuthenticated } from '@shared/model/auth';
-import { SideNav, DRAWER_COLLAPSED_WIDTH, DRAWER_WIDTH } from '@widgets/side-nav';
+import { SideNav } from '@widgets/side-nav';
+import { SIDEBAR_COLLAPSED_STORAGE_KEY } from '@widgets/side-nav/navigation';
 
-const SIDEBAR_COLLAPSED_STORAGE_KEY = 'pathwise.sidebar.collapsed.v1';
-
-export const Layout: React.FC = () => {
+export const Layout = () => {
   const location = useLocation();
   const breadcrumbs = useBreadcrumbs();
   const isAuthenticated = useUnit($isAuthenticated);
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [navOpenAt, setNavOpenAt] = useState<string | null>(null);
   const [isNavCollapsed, setIsNavCollapsed] = useState(() => {
-    if (typeof window === 'undefined') return false;
-
     try {
       return window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === '1';
     } catch {
@@ -34,93 +26,90 @@ export const Layout: React.FC = () => {
 
   useEffect(() => {
     if (!isDesktop) return;
-
     try {
       window.localStorage.setItem(
         SIDEBAR_COLLAPSED_STORAGE_KEY,
         isNavCollapsed ? '1' : '0',
       );
     } catch {
-      // В приватных режимах/при блокировке storage просто пропускаем персист.
+      /* Navigation remains usable when storage is unavailable. */
     }
   }, [isDesktop, isNavCollapsed]);
 
-  // Не показываем хлебные крошки на главной странице и страницах авторизации
-  const hideBreadcrumbsRoutes = ['/', '/login', '/register'];
-  const shouldShowBreadcrumbs = !hideBreadcrumbsRoutes.includes(
+  useEffect(() => {
+    if (isDesktop) setNavOpenAt(null);
+  }, [isDesktop]);
+
+  const showBreadcrumbs = !['/', '/login', '/register'].includes(
     location.pathname,
   );
 
-  const sideNavVariant = isDesktop ? 'permanent' : 'temporary';
-  const sideNavOpen = isDesktop ? true : isNavOpen;
-  const desktopNavWidth = isNavCollapsed ? DRAWER_COLLAPSED_WIDTH : DRAWER_WIDTH;
-
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {isAuthenticated && (
-        <SideNav
-          variant={sideNavVariant}
-          open={sideNavOpen}
-          onClose={() => setIsNavOpen(false)}
-          collapsed={isDesktop ? isNavCollapsed : false}
-          onToggleCollapsed={
-            isDesktop ? () => setIsNavCollapsed((v) => !v) : undefined
-          }
-        />
-      )}
-
+    <Box sx={{ display: 'flex', minHeight: '100dvh' }}>
       <Box
+        component="a"
+        href="#main-content"
         sx={{
-          flexGrow: 1,
-          minWidth: 0,
-          transition: (t) =>
-            t.transitions.create('width', {
-              duration: t.transitions.duration.shorter,
-              easing: t.transitions.easing.easeOut,
-            }),
-          ...(isAuthenticated && isDesktop ? { width: `calc(100% - ${desktopNavWidth}px)` } : null),
+          position: 'fixed',
+          top: 8,
+          left: 8,
+          transform: 'translateY(-160%)',
+          zIndex: theme.zIndex.modal + 1,
+          bgcolor: 'background.paper',
+          p: 1.5,
+          borderRadius: 1,
+          '&:focus': { transform: 'none' },
         }}
       >
-        {isAuthenticated && !isDesktop && (
-          <IconButton
-            onClick={() => setIsNavOpen(true)}
-            aria-label="Открыть меню навигации"
-            sx={{
-              position: 'fixed',
-              top: 12,
-              left: 12,
-              zIndex: (t) => t.zIndex.drawer + 1,
-              bgcolor: alpha(theme.palette.background.paper, 0.96),
-              border: '1px solid',
-              borderColor: 'divider',
-              boxShadow: '0 10px 28px rgba(15, 23, 42, 0.14)',
-              backdropFilter: 'blur(6px)',
-              transition: (t) =>
-                t.transitions.create(['background-color', 'box-shadow'], {
-                  duration: t.transitions.duration.shorter,
-                }),
-              '&:hover': {
-                bgcolor: 'background.paper',
-                boxShadow: '0 14px 30px rgba(15, 23, 42, 0.16)',
-              },
-              '&:focus-visible': {
-                outline: `2px solid ${theme.palette.primary.main}`,
-                outlineOffset: 2,
-              },
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-        )}
-
-        {shouldShowBreadcrumbs && (
-          <Container maxWidth="lg" sx={{ pt: 3 }}>
-            <Breadcrumbs items={breadcrumbs} />
-          </Container>
-        )}
-        <Suspense fallback={<AppLoader />}>
-          <Outlet />
-        </Suspense>
+        Перейти к содержимому
+      </Box>
+      {isAuthenticated && (
+        <SideNav
+          variant={isDesktop ? 'permanent' : 'temporary'}
+          open={isDesktop || navOpenAt === location.key}
+          onClose={() => setNavOpenAt(null)}
+          collapsed={isNavCollapsed}
+          onToggleCollapsed={() => setIsNavCollapsed((value) => !value)}
+        />
+      )}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box
+          component="main"
+          id="main-content"
+          tabIndex={-1}
+          sx={{ pb: isAuthenticated ? 4 : 0 }}
+        >
+          {(showBreadcrumbs || (isAuthenticated && !isDesktop)) && (
+            <Container
+              maxWidth="lg"
+              sx={{
+                pt: { xs: 1.5, md: 3 },
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+              }}
+            >
+              {isAuthenticated && !isDesktop && (
+                <IconButton
+                  aria-label="Открыть меню навигации"
+                  aria-expanded={navOpenAt === location.key}
+                  onClick={() => setNavOpenAt(location.key)}
+                  sx={{ width: 44, height: 44, flexShrink: 0 }}
+                >
+                  <MenuOutlined />
+                </IconButton>
+              )}
+              {showBreadcrumbs && (
+                <Box sx={{ minWidth: 0 }}>
+                  <Breadcrumbs items={breadcrumbs} />
+                </Box>
+              )}
+            </Container>
+          )}
+          <Suspense fallback={<AppLoader />}>
+            <Outlet />
+          </Suspense>
+        </Box>
       </Box>
     </Box>
   );

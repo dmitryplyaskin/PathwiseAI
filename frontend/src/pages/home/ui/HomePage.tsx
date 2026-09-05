@@ -5,15 +5,11 @@ import {
   Typography,
   Box,
   Stack,
-  AppBar,
-  Toolbar,
   Grid,
   Chip,
   Alert,
   CircularProgress,
   Paper,
-  Fab,
-  Tooltip,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import {
@@ -21,6 +17,7 @@ import {
   MenuBook,
   AccessTime,
   TrendingDown,
+  FactCheckOutlined,
   AutoAwesome,
   PlayCircleOutline,
   KeyboardArrowRight,
@@ -272,26 +269,124 @@ export const HomePage = () => {
   const handleOpenReview = () => void navigate('/review');
 
   return (
-    <Box sx={{ minHeight: '100vh' }}>
-      {/* Заголовок */}
-      <AppBar position="static" elevation={0}>
-        <Toolbar sx={{ flexDirection: 'column', py: 4 }}>
-          <Typography variant="h1" component="h1" gutterBottom>
-            PathwiseAI
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Персональная система обучения с искусственным интеллектом
-          </Typography>
-        </Toolbar>
-      </AppBar>
-
-      <Container maxWidth="lg" sx={{ py: 3 }}>
+    <Box>
+      <Container maxWidth="lg" sx={{ py: { xs: 3, md: 5 } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 3,
+            flexWrap: 'wrap',
+            mb: 4,
+          }}
+        >
+          <Box>
+            <Typography
+              variant="overline"
+              sx={{
+                color: 'primary.main',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                fontSize: '0.65rem',
+              }}
+            >
+              Шаг за шагом к знаниям
+            </Typography>
+            <Typography
+              variant="h1"
+              sx={{ mt: 0.75, mb: 1, fontSize: { xs: '1.8rem', md: '2.2rem' } }}
+            >
+              Ваше обучение
+            </Typography>
+            <Typography variant="body2">
+              Продолжайте изучать новое, закрепляйте пройденное.
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => openCreation('lesson')}
+          >
+            Создать урок
+          </Button>
+        </Box>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+            gap: 2,
+            mb: 4,
+          }}
+        >
+          {[
+            {
+              label: 'Повторить сегодня',
+              value: reviewCounters.today + reviewCounters.overdue,
+              loading: reviewLoading,
+              error: reviewError,
+              icon: <AccessTime />,
+            },
+            {
+              label: 'Новые уроки',
+              value: lessons.filter(
+                (lesson) => lesson.status === LessonStatus.NOT_STARTED,
+              ).length,
+              loading: lessonsLoading,
+              error: lessonsError,
+              icon: <MenuBook />,
+            },
+            {
+              label: 'Тестов пройдено',
+              value: exams.filter((exam) => exam.status === 'completed').length,
+              loading: examsLoading,
+              error: examsError,
+              icon: <FactCheckOutlined />,
+            },
+          ].map((stat) => (
+            <Paper
+              key={stat.label}
+              variant="outlined"
+              sx={{ p: 2.5, borderRadius: '16px' }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box
+                  sx={{
+                    p: 1.25,
+                    display: 'flex',
+                    color: 'primary.main',
+                    bgcolor: 'primary.50',
+                    borderRadius: '12px',
+                  }}
+                >
+                  {stat.icon}
+                </Box>
+                <Box>
+                  <Typography
+                    sx={{
+                      color: 'text.primary',
+                      fontSize: '1.65rem',
+                      fontWeight: 650,
+                      fontVariantNumeric: 'tabular-nums',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {stat.loading || stat.error ? '—' : stat.value}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    {stat.label}
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+          ))}
+        </Box>
         <Stack spacing={4}>
           {/* 1) Повторить */}
           <Stack spacing={1.75}>
             <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
               <AccessTime color="primary" />
-              <Typography variant="h2">Повторить</Typography>
+              <Typography variant="h2">Время повторить</Typography>
               <Box sx={{ flexGrow: 1 }} />
               <Stack direction="row" spacing={0.5} alignItems="center">
                 <Button
@@ -310,7 +405,7 @@ export const HomePage = () => {
                   onClick={handleOpenReview}
                   sx={{ color: 'text.secondary' }}
                 >
-                  Все
+                  Все повторения
                 </Button>
               </Stack>
             </Box>
@@ -385,9 +480,9 @@ export const HomePage = () => {
 
           {/* 2) Слабые места */}
           <Stack spacing={1.75}>
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
               <TrendingDown color="primary" />
-              <Typography variant="h2">Слабые места</Typography>
+              <Typography variant="h2">Стоит закрепить</Typography>
               <Box sx={{ flexGrow: 1 }} />
               <Button
                 variant="text"
@@ -461,7 +556,7 @@ export const HomePage = () => {
           <Stack spacing={1.75}>
             <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
               <MenuBook color="primary" />
-              <Typography variant="h2">Не изучал</Typography>
+              <Typography variant="h2">Впереди новое</Typography>
               <Box sx={{ flexGrow: 1 }} />
               <Button
                 variant="text"
@@ -510,7 +605,7 @@ export const HomePage = () => {
 
           {/* 4) Открыть новое */}
           <Stack spacing={1.75}>
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
               <AutoAwesome color="primary" />
               <Typography variant="h2">Открыть новое</Typography>
             </Box>
@@ -568,23 +663,6 @@ export const HomePage = () => {
           </Stack>
         </Stack>
       </Container>
-
-      {/* Всегда видимая кнопка создания */}
-      <Tooltip title="Создать" placement="left">
-        <Fab
-          color="primary"
-          onClick={() => openCreation('lesson')}
-          sx={{
-            position: 'fixed',
-            right: 20,
-            bottom: 20,
-            zIndex: (t) => t.zIndex.drawer + 2,
-          }}
-          aria-label="Создать урок или курс"
-        >
-          <Add />
-        </Fab>
-      </Tooltip>
 
       <ContentCreationModal
         open={isCreationModalOpen}
